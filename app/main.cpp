@@ -1,35 +1,69 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
-
-#define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#include <glm/vec4.hpp>
-#include <glm/mat4x4.hpp>
-
+#include <cstdlib>
+#include <exception>
 #include <iostream>
 
-int main() {
-    glfwInit();
+class App
+{
+	public:
+	void run()
+	{
+		initWindow();
+		initVulkan();
+		mainLoop();
+		cleanup();
+	}
 
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    GLFWwindow* window = glfwCreateWindow(800, 600, "Vulkan window", nullptr, nullptr);
+	private:
+	int width = 1280;
+	int height = 720;
+	GLFWwindow* window = nullptr;
 
-    uint32_t extensionCount = 0;
-    vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
+	void initWindow()
+	{
+		glfwInit();
 
-    std::cout << extensionCount << " extensions supported\n";
+		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-    glm::mat4 matrix;
-    glm::vec4 vec;
-    auto test = matrix * vec;
+		window = glfwCreateWindow(width, height, "Vulkan", nullptr, nullptr);
+	}
 
-    while (!glfwWindowShouldClose(window)) {
-        glfwPollEvents();
-    }
+	void initVulkan()
+	{
 
-    glfwDestroyWindow(window);
+	}
 
-    glfwTerminate();
+	void mainLoop()
+	{
+		while (!glfwWindowShouldClose(window))
+		{
+			glfwPollEvents();
+		}
+	}
 
-    return 0;
+	void cleanup()
+	{
+		glfwDestroyWindow(window);
+
+		glfwTerminate();
+	}
+};
+
+int main()
+{
+	App app{};
+
+	try
+	{
+		app.run();
+	}
+	catch (const std::exception& e)
+	{
+		std::cerr << e.what() << std::endl;
+		return EXIT_FAILURE;
+	}
+
+	return EXIT_SUCCESS;
 }
