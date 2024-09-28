@@ -6,7 +6,6 @@
 #include <vulkan/vk_platform.h>
 #include <vulkan/vulkan_core.h>
 
-
 const std::vector<const char*> validationLayers = {
 	"VK_LAYER_KHRONOS_validation"
 };
@@ -17,7 +16,6 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 	const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
 	void* pUserData)
 {
-
 	std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
 
 	return VK_FALSE;
@@ -30,8 +28,6 @@ class ValidatorUtils
 	{
 		this->enableValidationLayers = enableValidationLayers;
 	}
-
-
 
 	void addMessenger(VkInstanceCreateInfo* createInfo)
 	{
@@ -107,7 +103,6 @@ class ValidatorUtils
 	VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
 	VkInstance* instance = nullptr;
 	bool enableValidationLayers = false;
-
 
 	VkResult CreateDebugUtilsMessengerEXT(VkInstance& instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger)
 	{

@@ -55,7 +55,7 @@ class GraphicEngine
 	private:
 	uint32_t width = 1280;
 	uint32_t height = 720;
-	GLFWwindow* window = nullptr;
+	GLFWwindow* window;
 
 	VkInstance instance;
 	ValidatorUtils validationUtils;
@@ -228,7 +228,6 @@ class GraphicEngine
 				vkCreateSemaphore(device, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS ||
 				vkCreateFence(device, &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS)
 			{
-
 				throw std::runtime_error("failed to create synchronization objects for a frame!");
 			}
 		}
