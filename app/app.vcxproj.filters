@@ -29,8 +29,17 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="main.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
+    <None Include="shader.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shader.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="vert.spv">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="frag.spv">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

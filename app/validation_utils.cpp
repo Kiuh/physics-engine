@@ -50,7 +50,7 @@ class ValidatorUtils
 		}
 	}
 
-	void linkToInstance(VkInstance* instance)
+	void setupDebugMessenger(VkInstance* instance)
 	{
 		this->instance = instance;
 		if (!enableValidationLayers)
@@ -72,20 +72,6 @@ class ValidatorUtils
 		if (enableValidationLayers)
 		{
 			DestroyDebugUtilsMessengerEXT(*instance, debugMessenger, nullptr);
-		}
-	}
-
-	void showSupportedExtensions()
-	{
-		uint32_t extensionCount = 0;
-		vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
-		std::vector<VkExtensionProperties> extensions(extensionCount);
-		vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensions.data());
-		std::cout << "total amount of extensions available: " << extensionCount << "\n";
-		std::cout << "available extensions:\n";
-		for (const auto& extension : extensions)
-		{
-			std::cout << '\t' << extension.extensionName << '\n';
 		}
 	}
 
