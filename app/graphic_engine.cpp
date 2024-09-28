@@ -604,9 +604,12 @@ class GraphicEngine
 
 	void createInstance()
 	{
-		if (enableValidationLayers && !validationUtils.checkValidationLayerSupport())
+		if (enableValidationLayers)
 		{
-			throw std::runtime_error("validation layers requested, but not available!");
+			if (!validationUtils.checkValidationLayerSupport())
+			{
+				throw std::runtime_error("validation layers requested, but not available!");
+			}
 		}
 
 		VkApplicationInfo appInfo{};
