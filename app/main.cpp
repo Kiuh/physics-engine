@@ -1,47 +1,119 @@
 #pragma once
 
-#include "draw_data_provider.cpp"
+#include "data_provider.cpp"
+#include "fps_counter.cpp"
 #include "graphic_engine.cpp"
+#include "physics_engine.cpp"
+#include "vertex_transformer.cpp"
 #include "window_provider.cpp"
-#include <cstdlib>
+#include <cstdint>
 #include <exception>
-#include <glm/ext/vector_uint2.hpp>
+#include <glm/ext/vector_int2.hpp>
 #include <iostream>
 #include <ostream>
+#include <stdlib.h>
 #include <string>
+#include <thread>
+
+using namespace std;
+using namespace glm;
 
 class App
 {
 	private:
-	glm::uvec2 size{ 1000, 1000 };
-	std::string title = "Physics Simulation";
+	ivec2 size{ 1200, 1000 };
+	string title = "Physics Simulation";
+	uint32_t targetPhysicsFps = 60;
+	bool isRunning = false;
 
-	WindowProvider* wp;
-	GraphicEngine* ge;
-	DrawDataProvider* dp;
+	WindowProvider* windowProvider;
+	GraphicEngine* graphicsEngine;
+	DataProvider* dataProvider;
+	VertexTransformer* vertexTransformer;
+	PhysicsEngine* physicsEngine;
+
+	FpsCounter* graphicFrameCounter;
+	FpsCounter* physicFrameCounter;
+
+	thread* graphicThread;
+	thread* physicsThread;
 
 	public:
 	App()
 	{
-		this->dp = new DrawDataProvider();
-		this->wp = new WindowProvider(size, title);
-		this->ge = new GraphicEngine(wp, dp);
+		this->windowProvider = new WindowProvider(size, title);
+		this->vertexTransformer = new VertexTransformer(windowProvider);
+		this->dataProvider = new DataProvider(vertexTransformer);
+		this->graphicsEngine = new GraphicEngine(windowProvider, dataProvider);
+		this->physicsEngine = new PhysicsEngine(dataProvider);
+
+		this->graphicFrameCounter = new FpsCounter("Graphic FPS");
+		this->physicFrameCounter = new FpsCounter("Physics FPS");
+
+		graphicThread = nullptr;
+		physicsThread = nullptr;
 	}
 
 	void run()
 	{
-		while (!wp->isShouldClose())
+		isRunning = true;
+
+		graphicFrameCounter->run();
+		physicFrameCounter->run();
+
+		graphicThread = new thread(&App::graphicThreadFunc, this);
+		graphicThread->detach();
+
+		physicsThread = new thread(&App::physicsThreadFunc, this);
+		physicsThread->detach();
+
+		while (!windowProvider->isShouldClose())
 		{
-			wp->poolEvents();
-			ge->draw();
+			windowProvider->poolEvents();
+		}
+		isRunning = false;
+
+		physicsThread->join();
+		graphicThread->join();
+	}
+
+	void graphicThreadFunc()
+	{
+		while (isRunning)
+		{
+			graphicsEngine->draw();
+			graphicFrameCounter->tick();
+		}
+	}
+
+	void physicsThreadFunc()
+	{
+		const auto target_delta_time = milliseconds{ 1000 / targetPhysicsFps };
+
+		while (isRunning)
+		{
+			auto timer = high_resolution_clock::now();
+			physicsEngine->update();
+			physicFrameCounter->tick();
+
+			auto time_passed = duration_cast<milliseconds>(high_resolution_clock::now() - timer);
+			auto time_left = target_delta_time - time_passed;
+
+			if (time_left >= microseconds{ 0 })
+			{
+				this_thread::sleep_for(time_left);
+			}
 		}
 	}
 
 	~App()
 	{
-		delete this->dp;
-		delete this->ge;
-		delete this->wp;
+		delete this->vertexTransformer;
+		delete this->dataProvider;
+		delete this->graphicsEngine;
+		delete this->windowProvider;
+		delete this->physicsEngine;
+		delete this->graphicFrameCounter;
 	}
 };
 
@@ -55,7 +127,7 @@ int main()
 	}
 	catch (const std::exception& e)
 	{
-		std::cerr << e.what() << std::endl;
+		cerr << e.what() << endl;
 		return EXIT_FAILURE;
 	}
 

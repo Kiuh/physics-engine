@@ -2,27 +2,32 @@
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
+#include <boost/signals2.hpp>
 #include <cstdint>
-#include <glm/ext/vector_uint2.hpp>
+#include <glm/ext/vector_int2.hpp>
 #include <stdexcept>
 #include <string>
 #include <vector>
 #include <vulkan/vulkan_core.h>
 
+using namespace std;
+using namespace glm;
+using namespace boost::signals2;
+
 class WindowProvider
 {
 	private:
-	glm::uvec2 size;
-	std::string title;
+	ivec2 size;
+	string title;
 	GLFWwindow* window;
-	bool windowResized;
 
 	public:
-	WindowProvider(glm::uvec2 size, std::string title)
+	signal<void()> windowResized;
+
+	WindowProvider(ivec2 size, string title)
 	{
 		this->size = size;
 		this->title = title;
-		windowResized = false;
 
 		glfwInit();
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -31,19 +36,9 @@ class WindowProvider
 		glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
 	}
 
-	glm::uvec2 getSize() const
+	ivec2 getSize() const
 	{
 		return size;
-	}
-
-	bool isWindowResized() const
-	{
-		return windowResized;
-	}
-
-	void setWindowResizedDone()
-	{
-		windowResized = false;
 	}
 
 	void poolEvents()
@@ -53,12 +48,10 @@ class WindowProvider
 
 	void waitForNoZero()
 	{
-		int width = 0, height = 0;
-		glfwGetFramebufferSize(window, &width, &height);
-		while (width == 0 || height == 0)
+		glfwGetFramebufferSize(window, &size.x, &size.y);
+		while (size.x == 0 || size.y == 0)
 		{
-			glfwGetFramebufferSize(window, &width, &height);
-			glfwWaitEvents();
+			glfwGetFramebufferSize(window, &size.x, &size.y);
 		}
 	}
 
@@ -70,15 +63,15 @@ class WindowProvider
 	static void framebufferResizeCallback(GLFWwindow* window, int width, int height)
 	{
 		auto window_provider = reinterpret_cast<WindowProvider*>(glfwGetWindowUserPointer(window));
-		window_provider->windowResized = true;
+		window_provider->windowResized();
 	}
 
-	std::vector<const char*> getVulkanExtensions()
+	vector<const char*> getVulkanExtensions()
 	{
 		uint32_t glfwExtensionCount = 0;
 		const char** glfwExtensions;
 		glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
-		return std::vector<const char*>(glfwExtensions, glfwExtensions + glfwExtensionCount);
+		return vector<const char*>(glfwExtensions, glfwExtensions + glfwExtensionCount);
 	}
 
 	VkSurfaceKHR createVkSurface(VkInstance* instance)
@@ -86,7 +79,7 @@ class WindowProvider
 		VkSurfaceKHR surface;
 		if (glfwCreateWindowSurface(*instance, window, nullptr, &surface) != VK_SUCCESS)
 		{
-			throw std::runtime_error("failed to create window surface!");
+			throw runtime_error("failed to create window surface!");
 		}
 		return surface;
 	}

@@ -19,6 +19,9 @@
     <Filter Include="Source Files\data_helpers">
       <UniqueIdentifier>{12e0c025-99ff-46aa-8fce-ae860425fded}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\physics_engine">
+      <UniqueIdentifier>{c2bd0ffb-a400-4e32-9848-cb9c49158980}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -33,11 +36,23 @@
     <ClCompile Include="window_provider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="draw_data_provider.cpp">
+    <ClCompile Include="data_provider.cpp">
       <Filter>Source Files\data_helpers</Filter>
     </ClCompile>
     <ClCompile Include="vertex.cpp">
       <Filter>Source Files\data_helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="box.cpp">
+      <Filter>Source Files\data_helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="vertex_transformer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="physics_engine.cpp">
+      <Filter>Source Files\physics_engine</Filter>
+    </ClCompile>
+    <ClCompile Include="fps_counter.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -6,10 +6,13 @@
 #include <glm/ext/vector_float3.hpp>
 #include <vulkan/vulkan_core.h>
 
+using namespace std;
+using namespace glm;
+
 struct Vertex
 {
-	glm::vec2 pos;
-	glm::vec3 color;
+	vec2 pos;
+	vec3 color;
 
 	static VkVertexInputBindingDescription getBindingDescription()
 	{
@@ -20,9 +23,9 @@ struct Vertex
 		return bindingDescription;
 	}
 
-	static std::array<VkVertexInputAttributeDescription, 2> getAttributeDescriptions()
+	static array<VkVertexInputAttributeDescription, 2> getAttributeDescriptions()
 	{
-		std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions{};
+		array<VkVertexInputAttributeDescription, 2> attributeDescriptions{};
 
 		attributeDescriptions[0].binding = 0;
 		attributeDescriptions[0].location = 0;
