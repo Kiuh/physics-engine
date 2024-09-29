@@ -18,6 +18,9 @@ class DataProvider
 	private:
 	VertexTransformer* vertexTransformer;
 
+	vector<Vertex> vertices = {};
+
+	public:
 	vector<Box> boxes = {
 		{
 			{
@@ -30,9 +33,6 @@ class DataProvider
 		},
 	};
 
-	vector<Vertex> vertices = {};
-
-	public:
 	DataProvider(VertexTransformer* t)
 	{
 		this->vertexTransformer = t;

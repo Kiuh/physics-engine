@@ -21,9 +21,9 @@ using namespace glm;
 class App
 {
 	private:
-	ivec2 size{ 1200, 1000 };
+	ivec2 size{ 1000, 1000 };
 	string title = "Physics Simulation";
-	uint32_t targetPhysicsFps = 60;
+	uint32_t targetPhysicsFps = 120;
 	bool isRunning = false;
 
 	WindowProvider* windowProvider;
@@ -89,11 +89,12 @@ class App
 	void physicsThreadFunc()
 	{
 		const auto target_delta_time = duration_cast<microseconds>(seconds{ 1 }) / targetPhysicsFps;
+		auto deltaTime = duration<float>{ 0.0f };
 
 		while (isRunning)
 		{
 			auto timer = high_resolution_clock::now();
-			physicsEngine->update();
+			physicsEngine->update(deltaTime.count());
 			physicFrameCounter->tick();
 
 			auto time_passed = duration_cast<microseconds>(high_resolution_clock::now() - timer);
@@ -103,6 +104,8 @@ class App
 			{
 				this_thread::sleep_for(time_left);
 			}
+
+			deltaTime = (high_resolution_clock::now() - timer);
 		}
 	}
 
@@ -114,6 +117,7 @@ class App
 		delete this->windowProvider;
 		delete this->physicsEngine;
 		delete this->graphicFrameCounter;
+		delete this->physicFrameCounter;
 	}
 };
 
