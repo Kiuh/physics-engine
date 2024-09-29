@@ -88,7 +88,7 @@ class App
 
 	void physicsThreadFunc()
 	{
-		const auto target_delta_time = milliseconds{ 1000 / targetPhysicsFps };
+		const auto target_delta_time = duration_cast<microseconds>(seconds{ 1 }) / targetPhysicsFps;
 
 		while (isRunning)
 		{
@@ -96,7 +96,7 @@ class App
 			physicsEngine->update();
 			physicFrameCounter->tick();
 
-			auto time_passed = duration_cast<milliseconds>(high_resolution_clock::now() - timer);
+			auto time_passed = duration_cast<microseconds>(high_resolution_clock::now() - timer);
 			auto time_left = target_delta_time - time_passed;
 
 			if (time_left >= microseconds{ 0 })
