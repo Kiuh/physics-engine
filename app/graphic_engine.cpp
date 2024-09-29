@@ -1,15 +1,13 @@
 #pragma once
 
+#include "draw_data_provider.cpp"
 #include "validation_utils.cpp"
+#include "vertex.cpp"
 #include "window_provider.cpp"
 #include <algorithm>
-#include <array>
-#include <cstddef>
 #include <cstdint>
 #include <cstring>
 #include <fstream>
-#include <glm/ext/vector_float2.hpp>
-#include <glm/ext/vector_float3.hpp>
 #include <iosfwd>
 #include <limits>
 #include <optional>
@@ -47,44 +45,13 @@ struct SwapChainSupportDetails
 	std::vector<VkPresentModeKHR> presentModes;
 };
 
-struct Vertex
-{
-	glm::vec2 pos;
-	glm::vec3 color;
-
-	static VkVertexInputBindingDescription getBindingDescription()
-	{
-		VkVertexInputBindingDescription bindingDescription{};
-		bindingDescription.binding = 0;
-		bindingDescription.stride = sizeof(Vertex);
-		bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-		return bindingDescription;
-	}
-
-	static std::array<VkVertexInputAttributeDescription, 2> getAttributeDescriptions()
-	{
-		std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions{};
-
-		attributeDescriptions[0].binding = 0;
-		attributeDescriptions[0].location = 0;
-		attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
-		attributeDescriptions[0].offset = offsetof(Vertex, pos);
-
-		attributeDescriptions[1].binding = 0;
-		attributeDescriptions[1].location = 1;
-		attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-		attributeDescriptions[1].offset = offsetof(Vertex, color);
-
-		return attributeDescriptions;
-	}
-};
-
 class GraphicEngine
 {
 	public:
-	GraphicEngine(WindowProvider* wp)
+	GraphicEngine(WindowProvider* wp, DrawDataProvider* dp)
 	{
 		bindWindowProvider(wp);
+		bindDataProvider(dp);
 		initVulkan();
 	}
 
@@ -101,6 +68,7 @@ class GraphicEngine
 
 	private:
 	WindowProvider* windowProvider;
+	DrawDataProvider* dataProvider;
 
 	VkInstance instance;
 	ValidatorUtils validationUtils;
@@ -135,38 +103,15 @@ class GraphicEngine
 
 	std::vector<VkBuffer> vertexBuffers;
 	std::vector<VkDeviceMemory> vertexBufferMemories;
-	std::vector<VkDeviceSize> vertexBufferSizes;
-
-	std::vector<Vertex> vertices = {
-		{
-			{0.0f, -0.5f},
-			{1.0f, 0.0f, 0.0f},
-		},
-		{
-			{0.5f, 0.5f},
-			{0.0f, 1.0f, 0.0f},
-		},
-		{
-			{-0.5f, 0.5f},
-			{0.0f, 0.0f, 1.0f},
-		},
-		{
-			{-0.8f, 0.8f},
-			{0.0f, 0.0f, 1.0f},
-		},
-		{
-			{-0.1f, 0.1f},
-			{0.0f, 1.0f, 1.0f},
-		},
-		{
-			{0.1f, 0.1f},
-			{1.0f, 1.0f, 1.0f},
-		},
-	};
 
 	void bindWindowProvider(WindowProvider* window_provider)
 	{
 		this->windowProvider = window_provider;
+	}
+
+	void bindDataProvider(DrawDataProvider* data_provider)
+	{
+		this->dataProvider = data_provider;
 	}
 
 	void initVulkan()
@@ -386,8 +331,7 @@ class GraphicEngine
 		VkDeviceSize offsets[] = { 0 };
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 
-		uint32_t vertices_size = static_cast<uint32_t>(vertices.size());
-		vkCmdDraw(commandBuffer, vertices_size, vertices_size / 3, 0, 0);
+		vkCmdDraw(commandBuffer, dataProvider->verticesSize(), dataProvider->triangleCount(), 0, 0);
 
 		vkCmdEndRenderPass(commandBuffer);
 
@@ -401,13 +345,12 @@ class GraphicEngine
 	{
 		vertexBuffers.resize(MAX_FRAMES_IN_FLIGHT);
 		vertexBufferMemories.resize(MAX_FRAMES_IN_FLIGHT);
-		vertexBufferSizes.resize(MAX_FRAMES_IN_FLIGHT);
 
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 		{
 			VkBufferCreateInfo bufferInfo{};
 			bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-			bufferInfo.size = sizeof(vertices[0]) * vertices.size();
+			bufferInfo.size = dataProvider->getVkSize();
 			bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
 			bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
@@ -430,18 +373,15 @@ class GraphicEngine
 			}
 
 			vkBindBufferMemory(device, vertexBuffers[i], vertexBufferMemories[i], 0);
-			vertexBufferSizes[i] = bufferInfo.size;
 			copyBufferMemory((uint32_t)i);
 		}
 	}
 
 	void copyBufferMemory(uint32_t idx)
 	{
-		auto deviceSize = vertexBufferSizes[idx];
-
 		void* data;
-		vkMapMemory(device, vertexBufferMemories[idx], 0, deviceSize, 0, &data);
-		memcpy(data, vertices.data(), (size_t)deviceSize);
+		vkMapMemory(device, vertexBufferMemories[idx], 0, dataProvider->getVkSize(), 0, &data);
+		memcpy(data, dataProvider->getDataPointer(), (size_t)dataProvider->getVkSize());
 		vkUnmapMemory(device, vertexBufferMemories[idx]);
 	}
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "draw_data_provider.cpp"
 #include "graphic_engine.cpp"
 #include "window_provider.cpp"
 #include <cstdlib>
@@ -15,14 +16,16 @@ class App
 	glm::uvec2 size{ 1000, 1000 };
 	std::string title = "Physics Simulation";
 
-	WindowProvider* wp = nullptr;
-	GraphicEngine* ge = nullptr;
+	WindowProvider* wp;
+	GraphicEngine* ge;
+	DrawDataProvider* dp;
 
 	public:
 	App()
 	{
+		this->dp = new DrawDataProvider();
 		this->wp = new WindowProvider(size, title);
-		this->ge = new GraphicEngine(wp);
+		this->ge = new GraphicEngine(wp, dp);
 	}
 
 	void run()
@@ -36,8 +39,9 @@ class App
 
 	~App()
 	{
-		delete this->wp;
+		delete this->dp;
 		delete this->ge;
+		delete this->wp;
 	}
 };
 

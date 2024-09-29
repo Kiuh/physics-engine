@@ -156,7 +156,9 @@
     <ClCompile Include="validation_utils.cpp" />
     <ClCompile Include="graphic_engine.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="vertex.cpp" />
     <ClCompile Include="window_provider.cpp" />
+    <ClCompile Include="draw_data_provider.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="frag.spv" />
