@@ -1,6 +1,7 @@
-#define GLFW_INCLUDE_VULKAN
+#pragma once
+
 #include "validation_utils.cpp"
-#include <GLFW/glfw3.h>
+#include "window_provider.cpp"
 #include <algorithm>
 #include <array>
 #include <cstddef>
@@ -81,18 +82,25 @@ struct Vertex
 class GraphicEngine
 {
 	public:
-	void run()
+	GraphicEngine(WindowProvider* wp)
 	{
-		initWindow();
+		bindWindowProvider(wp);
 		initVulkan();
-		mainLoop();
+	}
+
+	void draw()
+	{
+		drawFrame();
+	}
+
+	~GraphicEngine()
+	{
+		vkDeviceWaitIdle(device);
 		cleanup();
 	}
 
 	private:
-	uint32_t width = 1000;
-	uint32_t height = 1000;
-	GLFWwindow* window;
+	WindowProvider* windowProvider;
 
 	VkInstance instance;
 	ValidatorUtils validationUtils;
@@ -122,46 +130,43 @@ class GraphicEngine
 	std::vector<VkSemaphore> renderFinishedSemaphores;
 	std::vector<VkFence> inFlightFences;
 
-	bool framebufferResized = false;
-
 	const int MAX_FRAMES_IN_FLIGHT = 2;
 	uint32_t currentFrame = 0;
 
-	std::vector < VkBuffer> vertexBuffers;
-	std::vector < VkDeviceMemory> vertexBufferMemories;
-	std::vector < VkDeviceSize> vertexBufferSizes;
+	std::vector<VkBuffer> vertexBuffers;
+	std::vector<VkDeviceMemory> vertexBufferMemories;
+	std::vector<VkDeviceSize> vertexBufferSizes;
 
 	std::vector<Vertex> vertices = {
 		{
 			{0.0f, -0.5f},
-			{1.0f, 0.0f, 0.0f}
+			{1.0f, 0.0f, 0.0f},
 		},
 		{
 			{0.5f, 0.5f},
-			{0.0f, 1.0f, 0.0f}
+			{0.0f, 1.0f, 0.0f},
 		},
 		{
 			{-0.5f, 0.5f},
-			{0.0f, 0.0f, 1.0f}
-		}
+			{0.0f, 0.0f, 1.0f},
+		},
+		{
+			{-0.8f, 0.8f},
+			{0.0f, 0.0f, 1.0f},
+		},
+		{
+			{-0.1f, 0.1f},
+			{0.0f, 1.0f, 1.0f},
+		},
+		{
+			{0.1f, 0.1f},
+			{1.0f, 1.0f, 1.0f},
+		},
 	};
 
-	void initWindow()
+	void bindWindowProvider(WindowProvider* window_provider)
 	{
-		glfwInit();
-
-		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-
-		window = glfwCreateWindow(width, height, "Graphics Engine", nullptr, nullptr);
-		glfwSetWindowUserPointer(window, this);
-		glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
-	}
-
-	static void framebufferResizeCallback(GLFWwindow* window, int width, int height)
-	{
-		auto app = reinterpret_cast<GraphicEngine*>(glfwGetWindowUserPointer(window));
-		app->framebufferResized = true;
-		app->drawFrame();
+		this->windowProvider = window_provider;
 	}
 
 	void initVulkan()
@@ -183,26 +188,9 @@ class GraphicEngine
 		createSyncObjects();
 	}
 
-	void mainLoop()
-	{
-		while (!glfwWindowShouldClose(window))
-		{
-			glfwPollEvents();
-			drawFrame();
-		}
-
-		vkDeviceWaitIdle(device);
-	}
-
 	void recreateSwapChain()
 	{
-		int width = 0, height = 0;
-		glfwGetFramebufferSize(window, &width, &height);
-		while (width == 0 || height == 0)
-		{
-			glfwGetFramebufferSize(window, &width, &height);
-			glfwWaitEvents();
-		}
+		windowProvider->waitForNoZero();
 
 		vkDeviceWaitIdle(device);
 
@@ -258,9 +246,6 @@ class GraphicEngine
 
 		vkDestroySurfaceKHR(instance, surface, nullptr);
 		vkDestroyInstance(instance, nullptr);
-
-		glfwDestroyWindow(window);
-		glfwTerminate();
 	}
 
 	void drawFrame()
@@ -280,7 +265,6 @@ class GraphicEngine
 			throw std::runtime_error("failed to acquire swap chain image!");
 		}
 
-		//vertices[0].pos.x += 0.001f;
 		copyBufferMemory(currentFrame);
 
 		vkResetFences(device, 1, &inFlightFences[currentFrame]);
@@ -320,9 +304,9 @@ class GraphicEngine
 
 		result = vkQueuePresentKHR(presentQueue, &presentInfo);
 
-		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || framebufferResized)
+		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || windowProvider->isWindowResized())
 		{
-			framebufferResized = false;
+			windowProvider->setWindowResizedDone();
 			recreateSwapChain();
 		}
 		else if (result != VK_SUCCESS)
@@ -402,7 +386,8 @@ class GraphicEngine
 		VkDeviceSize offsets[] = { 0 };
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 
-		vkCmdDraw(commandBuffer, static_cast<uint32_t>(vertices.size()), 1, 0, 0);
+		uint32_t vertices_size = static_cast<uint32_t>(vertices.size());
+		vkCmdDraw(commandBuffer, vertices_size, vertices_size / 3, 0, 0);
 
 		vkCmdEndRenderPass(commandBuffer);
 
@@ -777,10 +762,7 @@ class GraphicEngine
 
 	void createSurface()
 	{
-		if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS)
-		{
-			throw std::runtime_error("failed to create window surface!");
-		}
+		surface = windowProvider->createVkSurface(&instance);
 	}
 
 	void pickPhysicalDevice()
@@ -947,12 +929,11 @@ class GraphicEngine
 		}
 		else
 		{
-			int width, height;
-			glfwGetFramebufferSize(window, &width, &height);
+			auto extendSize = windowProvider->getSize();
 
 			VkExtent2D actualExtent = {
-				static_cast<uint32_t>(width),
-				static_cast<uint32_t>(height)
+				static_cast<uint32_t>(extendSize.x),
+				static_cast<uint32_t>(extendSize.y)
 			};
 
 			actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
@@ -1066,11 +1047,7 @@ class GraphicEngine
 
 	std::vector<const char*> getRequiredExtensions()
 	{
-		uint32_t glfwExtensionCount = 0;
-		const char** glfwExtensions;
-		glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
-
-		std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
+		auto extensions = windowProvider->getVulkanExtensions();
 
 		if (enableValidationLayers)
 		{

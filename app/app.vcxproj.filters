@@ -27,6 +27,9 @@
     <ClCompile Include="validation_utils.cpp">
       <Filter>Source Files\graphic_engine</Filter>
     </ClCompile>
+    <ClCompile Include="window_provider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="shader.vert">

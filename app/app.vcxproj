@@ -156,6 +156,7 @@
     <ClCompile Include="validation_utils.cpp" />
     <ClCompile Include="graphic_engine.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="window_provider.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="frag.spv" />
