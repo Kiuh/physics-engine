@@ -21,17 +21,7 @@ class DataProvider
 	vector<Vertex> vertices = {};
 
 	public:
-	vector<Box> boxes = {
-		{
-			{
-				{ 0, 2 },
-				{ 2, 2 },
-				{ 2, 0 },
-				{ 0, 0 },
-			},
-			{ 1.0f, 0.0f, 0.0f }
-		},
-	};
+	vector<Box> boxes = {};
 
 	DataProvider(VertexTransformer* t)
 	{
@@ -45,10 +35,10 @@ class DataProvider
 
 		auto prev_size = vertices.size();
 		vertices.resize(boxes.size() * BOX_VERTEX_COUNT);
-		for (size_t i = 0; i < boxes.size(); i++)
+		for (uint32_t i = 0; i < boxes.size(); i++)
 		{
 			boxes[i].calculateVertices();
-			for (size_t j = 0; j < boxes[i].vertices.size(); j++)
+			for (uint32_t j = 0; j < BOX_VERTEX_COUNT; j++)
 			{
 				auto ind = i * BOX_VERTEX_COUNT + j;
 				vertices[ind] = boxes[i].vertices[j];

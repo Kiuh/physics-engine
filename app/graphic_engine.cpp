@@ -124,6 +124,7 @@ class GraphicEngine
 	void bindDataProvider(DataProvider* data_provider)
 	{
 		this->dataProvider = data_provider;
+		dataProvider->prepareDataToDraw();
 	}
 
 	void initVulkan()

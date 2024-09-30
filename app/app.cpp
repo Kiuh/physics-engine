@@ -45,8 +45,8 @@ class App
 		this->windowProvider = new WindowProvider(size, title);
 		this->vertexTransformer = new VertexTransformer(windowProvider);
 		this->dataProvider = new DataProvider(vertexTransformer);
-		this->graphicsEngine = new GraphicEngine(windowProvider, dataProvider);
 		this->physicsEngine = new PhysicsEngine(dataProvider);
+		this->graphicsEngine = new GraphicEngine(windowProvider, dataProvider);
 
 		this->graphicFrameCounter = new FpsCounter("Graphic FPS");
 		this->physicFrameCounter = new FpsCounter("Physics FPS");
