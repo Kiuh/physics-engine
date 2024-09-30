@@ -25,7 +25,6 @@ class VertexTransformer
 		vert->pos /= screen;
 
 		vert->pos.y -= 1;
-		vert->pos.x -= 1;
 		vert->pos.y *= -1;
 	}
 };

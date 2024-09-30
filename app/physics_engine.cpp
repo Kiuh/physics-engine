@@ -16,7 +16,7 @@ class PhysicsEngine
 	{
 		this->dp = dp;
 		timer = 0.0f;
-		shift = 20.0f;
+		shift = 18.0f;
 		interval = 4.0f;
 	}
 
