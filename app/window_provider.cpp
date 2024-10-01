@@ -1,10 +1,13 @@
 #pragma once
 
 #define GLFW_INCLUDE_VULKAN
+#include "lodepng.h"
 #include <GLFW/glfw3.h>
 #include <boost/signals2.hpp>
 #include <cstdint>
+#include <filesystem>
 #include <glm/ext/vector_int2.hpp>
+#include <iostream>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -34,6 +37,32 @@ class WindowProvider
 		window = glfwCreateWindow(size.x, size.y, title.data(), nullptr, nullptr);
 		glfwSetWindowUserPointer(window, this);
 		glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
+
+		std::string filename = "icon.png";
+		std::vector<unsigned char> buffer;
+		std::vector<unsigned char> image;
+		unsigned w, h;
+
+		lodepng::load_file(buffer, filename);
+
+		lodepng::State state;
+		state.decoder.ignore_crc = 1;
+		state.decoder.zlibsettings.ignore_adler32 = 1;
+
+		unsigned error = lodepng::decode(image, w, h, state, buffer);
+
+		if (error)
+		{
+			throw runtime_error("Decoder error : " + string(lodepng_error_text(error)));
+		}
+
+		GLFWimage images[1]{};
+
+		images[0].width = w;
+		images[0].height = h;
+		images[0].pixels = image.data();
+
+		glfwSetWindowIcon(window, 1, images);
 	}
 
 	ivec2 getSize() const

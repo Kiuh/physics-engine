@@ -24,6 +24,8 @@ const bool enableValidationLayers = false;
 const bool enableValidationLayers = true;
 #endif
 
+constexpr auto MAX_FRAMES_IN_FLIGHT = 2;
+
 using namespace std;
 using namespace glm;
 using namespace boost;
@@ -103,7 +105,6 @@ class GraphicEngine
 	vector<VkSemaphore> renderFinishedSemaphores;
 	vector<VkFence> inFlightFences;
 
-	const int MAX_FRAMES_IN_FLIGHT = 2;
 	uint32_t currentFrame = 0;
 	bool swapChainRecreationPending = false;
 
