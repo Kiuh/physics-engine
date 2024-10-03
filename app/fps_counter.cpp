@@ -7,19 +7,16 @@
 #include <string>
 #include <thread>
 
-using namespace std;
-using namespace chrono;
-
 class FpsCounter
 {
 	private:
 	uint32_t fps;
-	string prefix;
-	thread* fpsThread;
+	std::string prefix;
+	std::thread* fpsThread;
 	bool isRunning;
 
 	public:
-	FpsCounter(string prefix)
+	FpsCounter(std::string prefix)
 	{
 		this->prefix = prefix;
 		fps = 0;
@@ -35,7 +32,7 @@ class FpsCounter
 	void run()
 	{
 		isRunning = true;
-		fpsThread = new thread(&FpsCounter::printInInterval, this);
+		fpsThread = new std::thread(&FpsCounter::printInInterval, this);
 		fpsThread->detach();
 	}
 
@@ -43,11 +40,11 @@ class FpsCounter
 	{
 		while (isRunning)
 		{
-			this_thread::sleep_for(seconds(1));
+			std::this_thread::sleep_for(std::chrono::seconds(1));
 
-			stringstream msg;
-			msg << prefix << ": " << fps << endl;
-			cout << msg.str();
+			std::stringstream msg;
+			msg << prefix << ": " << fps << std::endl;
+			std::cout << msg.str();
 			fps = 0;
 		}
 	}

@@ -72,6 +72,9 @@
     <ClCompile Include="vulkan_device.cpp">
       <Filter>Source Files\graphic_engine</Filter>
     </ClCompile>
+    <ClCompile Include="random_helper.cpp">
+      <Filter>Source Files\physics_engine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="shader.vert">

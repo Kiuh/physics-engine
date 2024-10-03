@@ -315,12 +315,6 @@ namespace vks
 
 		void exitFatal(const std::string& message, int32_t exitCode)
 		{
-#if defined(_WIN32)
-			if (!errorModeSilent)
-			{
-				MessageBox(NULL, (LPCWSTR)message.c_str(), NULL, MB_OK | MB_ICONERROR);
-			}
-#endif
 			std::cerr << message << "\n";
 		}
 

@@ -13,21 +13,17 @@
 #include <vector>
 #include <vulkan/vulkan_core.h>
 
-using namespace std;
-using namespace glm;
-using namespace boost::signals2;
-
 class WindowProvider
 {
 	private:
-	ivec2 size;
-	string title;
+	glm::ivec2 size;
+	std::string title;
 	GLFWwindow* window;
 
 	public:
-	signal<void()> windowResized;
+	boost::signals2::signal<void()> windowResized;
 
-	WindowProvider(ivec2 size, string title)
+	WindowProvider(glm::ivec2 size, std::string title)
 	{
 		this->size = size;
 		this->title = title;
@@ -53,7 +49,7 @@ class WindowProvider
 
 		if (error)
 		{
-			throw runtime_error("Decoder error : " + string(lodepng_error_text(error)));
+			throw std::runtime_error("Decoder error : " + std::string(lodepng_error_text(error)));
 		}
 
 		GLFWimage images[1]{};
@@ -65,7 +61,7 @@ class WindowProvider
 		glfwSetWindowIcon(window, 1, images);
 	}
 
-	ivec2 getSize() const
+	glm::ivec2 getSize() const
 	{
 		return size;
 	}
@@ -95,12 +91,12 @@ class WindowProvider
 		window_provider->windowResized();
 	}
 
-	vector<const char*> getVulkanExtensions()
+	std::vector<const char*> getVulkanExtensions()
 	{
 		uint32_t glfwExtensionCount = 0;
 		const char** glfwExtensions;
 		glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
-		return vector<const char*>(glfwExtensions, glfwExtensions + glfwExtensionCount);
+		return std::vector<const char*>(glfwExtensions, glfwExtensions + glfwExtensionCount);
 	}
 
 	VkSurfaceKHR createVkSurface(VkInstance* instance)
@@ -108,7 +104,7 @@ class WindowProvider
 		VkSurfaceKHR surface;
 		if (glfwCreateWindowSurface(*instance, window, nullptr, &surface) != VK_SUCCESS)
 		{
-			throw runtime_error("failed to create window surface!");
+			throw std::runtime_error("failed to create window surface!");
 		}
 		return surface;
 	}

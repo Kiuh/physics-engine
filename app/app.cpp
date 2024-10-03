@@ -16,14 +16,11 @@
 #include <string>
 #include <thread>
 
-using namespace std;
-using namespace glm;
-
 class App
 {
 	private:
-	ivec2 size{ 2000, 1000 };
-	string title = "Physics Simulation";
+	glm::ivec2 size{ 2000, 1000 };
+	std::string title = "Physics Simulation";
 	uint32_t targetPhysicsFps = 120;
 	bool isRunning = false;
 
@@ -36,20 +33,20 @@ class App
 	std::unique_ptr<FpsCounter> graphicFrameCounter;
 	std::unique_ptr<FpsCounter> physicFrameCounter;
 
-	std::unique_ptr<thread> graphicThread;
-	std::unique_ptr<thread> physicsThread;
+	std::unique_ptr<std::thread> graphicThread;
+	std::unique_ptr<std::thread> physicsThread;
 
 	public:
 	App()
 	{
-		this->windowProvider = make_unique<WindowProvider>(size, title);
-		this->vertexTransformer = make_unique<VertexTransformer>(windowProvider.get());
-		this->dataProvider = make_unique<DataProvider>(vertexTransformer.get());
-		this->physicsEngine = make_unique<PhysicsEngine>(dataProvider.get());
-		this->graphicsEngine = make_unique<GraphicEngine>(windowProvider.get(), dataProvider.get());
+		this->windowProvider = std::make_unique<WindowProvider>(size, title);
+		this->vertexTransformer = std::make_unique<VertexTransformer>(windowProvider.get());
+		this->dataProvider = std::make_unique<DataProvider>(vertexTransformer.get());
+		this->physicsEngine = std::make_unique<PhysicsEngine>(dataProvider.get());
+		this->graphicsEngine = std::make_unique<GraphicEngine>(windowProvider.get(), dataProvider.get());
 
-		this->graphicFrameCounter = make_unique<FpsCounter>("Graphic FPS");
-		this->physicFrameCounter = make_unique<FpsCounter>("Physics FPS");
+		this->graphicFrameCounter = std::make_unique<FpsCounter>("Graphic FPS");
+		this->physicFrameCounter = std::make_unique<FpsCounter>("Physics FPS");
 	}
 
 	void run()
@@ -59,8 +56,8 @@ class App
 		graphicFrameCounter->run();
 		physicFrameCounter->run();
 
-		graphicThread = make_unique<thread>(&App::graphicThreadFunc, this);
-		physicsThread = make_unique<thread>(&App::physicsThreadFunc, this);
+		graphicThread = std::make_unique<std::thread>(&App::graphicThreadFunc, this);
+		physicsThread = std::make_unique<std::thread>(&App::physicsThreadFunc, this);
 
 		while (!windowProvider->isShouldClose())
 		{
@@ -84,24 +81,24 @@ class App
 
 	void physicsThreadFunc()
 	{
-		const auto target_delta_time = duration_cast<microseconds>(seconds{ 1 }) / targetPhysicsFps;
-		auto deltaTime = duration<float>{ 0.0f };
+		const auto target_delta_time = duration_cast<std::chrono::microseconds>(std::chrono::seconds{ 1 }) / targetPhysicsFps;
+		auto deltaTime = std::chrono::duration<float>{ 0.0f };
 
 		while (isRunning)
 		{
-			auto timer = high_resolution_clock::now();
+			auto timer = std::chrono::high_resolution_clock::now();
 			physicsEngine->update(deltaTime.count());
 			physicFrameCounter->tick();
 
-			auto time_passed = duration_cast<microseconds>(high_resolution_clock::now() - timer);
+			auto time_passed = duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - timer);
 			auto time_left = target_delta_time - time_passed;
 
-			if (time_left >= microseconds{ 0 })
+			if (time_left >= std::chrono::microseconds{ 0 })
 			{
-				this_thread::sleep_for(time_left);
+				std::this_thread::sleep_for(time_left);
 			}
 
-			deltaTime = (high_resolution_clock::now() - timer);
+			deltaTime = (std::chrono::high_resolution_clock::now() - timer);
 		}
 	}
 };

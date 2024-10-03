@@ -20,10 +20,10 @@ class DataProvider
 	VertexTransformer* vertexTransformer;
 	std::mutex vertices_mutex;
 
-	vector<Vertex> vertices = {};
+	std::vector<Vertex> vertices = {};
 
 	public:
-	vector<Box> boxes = {};
+	std::vector<Box> boxes = {};
 
 	DataProvider(VertexTransformer* t)
 	{

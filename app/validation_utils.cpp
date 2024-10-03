@@ -8,9 +8,7 @@
 #include <vulkan/vk_platform.h>
 #include <vulkan/vulkan_core.h>
 
-using namespace std;
-
-const vector<const char*> validationLayers = {
+const std::vector<const char*> validationLayers = {
 	"VK_LAYER_KHRONOS_validation"
 };
 
@@ -20,7 +18,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 	const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
 	void* pUserData)
 {
-	cerr << "validation layer: " << pCallbackData->pMessage << endl;
+	std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
 
 	return VK_FALSE;
 }
@@ -63,7 +61,7 @@ class ValidatorUtils
 
 		if (CreateDebugUtilsMessengerEXT(*instance, &createInfo, nullptr, &debugMessenger) != VK_SUCCESS)
 		{
-			throw runtime_error("failed to set up debug messenger!");
+			throw std::runtime_error("failed to set up debug messenger!");
 		}
 	}
 
@@ -79,7 +77,7 @@ class ValidatorUtils
 	{
 		uint32_t layerCount;
 		vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
-		vector<VkLayerProperties> availableLayers(layerCount);
+		std::vector<VkLayerProperties> availableLayers(layerCount);
 		vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
 		for (const char* layerName : validationLayers)
 		{

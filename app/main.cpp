@@ -1,7 +1,5 @@
 #pragma once
 
-#pragma once
-
 #include "app.cpp"
 
 int main()
@@ -14,7 +12,7 @@ int main()
 	}
 	catch (const std::exception& e)
 	{
-		cerr << e.what() << endl;
+		std::cerr << e.what() << std::endl;
 		return EXIT_FAILURE;
 	}
 
