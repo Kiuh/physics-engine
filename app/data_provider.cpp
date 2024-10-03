@@ -8,12 +8,6 @@
 #include <vector>
 #include <vulkan/vulkan_core.h>
 
-struct PrepareDrawDataResult
-{
-	bool IsContentChanged = false;
-	bool IsCountChanged = false;
-};
-
 class DataProvider
 {
 	private:
@@ -31,10 +25,9 @@ class DataProvider
 		prepareDataToDraw();
 	}
 
-	PrepareDrawDataResult prepareDataToDraw()
+	bool prepareDataToDraw()
 	{
 		vertices_mutex.lock();
-		auto result = PrepareDrawDataResult{};
 
 		auto prev_size = vertices.size();
 		vertices.resize(boxes.size() * BOX_VERTEX_COUNT);
@@ -49,14 +42,14 @@ class DataProvider
 			}
 		}
 
+		vertices_mutex.unlock();
+
 		if (prev_size != vertices.size())
 		{
-			result.IsCountChanged = true;
+			return true;
 		}
 
-		result.IsContentChanged = true;
-		vertices_mutex.unlock();
-		return result;
+		return false;
 	}
 
 	uint32_t verticesSize() const

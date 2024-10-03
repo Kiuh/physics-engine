@@ -105,6 +105,7 @@ class GraphicEngine
 	uint32_t currentFrame = 0;
 	bool swapChainRecreationPending = false;
 
+	std::vector<bool> vertexBuffersRecreationPending;
 	std::vector<VkBuffer> vertexBuffers;
 	std::vector<VkDeviceMemory> vertexBufferMemories;
 
@@ -172,14 +173,19 @@ class GraphicEngine
 		vkDestroySwapchainKHR(device, swapChain, nullptr);
 	}
 
+	void cleanupVertexBuffer(size_t i)
+	{
+		vkDestroyBuffer(device, vertexBuffers[i], nullptr);
+		vkFreeMemory(device, vertexBufferMemories[i], nullptr);
+	}
+
 	void cleanup()
 	{
 		cleanupSwapChain();
 
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 		{
-			vkDestroyBuffer(device, vertexBuffers[i], nullptr);
-			vkFreeMemory(device, vertexBufferMemories[i], nullptr);
+			cleanupVertexBuffer(i);
 		}
 
 		vkDestroyPipeline(device, graphicsPipeline, nullptr);
@@ -221,13 +227,17 @@ class GraphicEngine
 			throw std::runtime_error("failed to acquire swap chain image!");
 		}
 
-		auto pdd = dataProvider->prepareDataToDraw();
-		if (pdd.IsCountChanged)
+		if (dataProvider->prepareDataToDraw())
 		{
-			createVertexBuffers();
+			for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+			{
+				vertexBuffersRecreationPending[i] = true;
+			}
 		}
-		else if (pdd.IsContentChanged)
+
+		if (vertexBuffersRecreationPending[currentFrame])
 		{
+			recreateVertexBuffer(currentFrame);
 			copyBufferMemory(currentFrame);
 		}
 
@@ -309,10 +319,7 @@ class GraphicEngine
 		beginInfo.flags = 0;
 		beginInfo.pInheritanceInfo = nullptr;
 
-		if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS)
-		{
-			throw std::runtime_error("failed to begin recording command buffer!");
-		}
+		VK_CHECK_RESULT(vkBeginCommandBuffer(commandBuffer, &beginInfo));
 
 		VkClearValue clearColor = { {{0.0f, 0.0f, 0.0f, 1.0f}} };
 
@@ -351,49 +358,54 @@ class GraphicEngine
 
 		vkCmdEndRenderPass(commandBuffer);
 
-		if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
-		{
-			throw std::runtime_error("failed to record command buffer!");
-		}
+		VK_CHECK_RESULT(vkEndCommandBuffer(commandBuffer));
 	}
 
 	void createVertexBuffers()
 	{
+		vertexBuffersRecreationPending.resize(MAX_FRAMES_IN_FLIGHT);
 		vertexBuffers.resize(MAX_FRAMES_IN_FLIGHT);
 		vertexBufferMemories.resize(MAX_FRAMES_IN_FLIGHT);
 
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 		{
-			VkBufferCreateInfo bufferInfo{};
-			bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-			bufferInfo.size = dataProvider->getVkSize();
-			bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-			bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-
-			if (vkCreateBuffer(device, &bufferInfo, nullptr, &vertexBuffers[i]) != VK_SUCCESS)
-			{
-				throw std::runtime_error("failed to create vertex buffer!");
-			}
-
-			VkMemoryRequirements memRequirements;
-			vkGetBufferMemoryRequirements(device, vertexBuffers[i], &memRequirements);
-
-			VkMemoryAllocateInfo allocInfo{};
-			allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-			allocInfo.allocationSize = memRequirements.size;
-			allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-
-			if (vkAllocateMemory(device, &allocInfo, nullptr, &vertexBufferMemories[i]) != VK_SUCCESS)
-			{
-				throw std::runtime_error("failed to allocate vertex buffer memory!");
-			}
-
-			vkBindBufferMemory(device, vertexBuffers[i], vertexBufferMemories[i], 0);
-			copyBufferMemory((uint32_t)i);
+			createVertexBuffer(i);
+			copyBufferMemory(i);
+			vertexBuffersRecreationPending[i] = false;
 		}
 	}
 
-	void copyBufferMemory(uint32_t idx)
+	void recreateVertexBuffer(size_t i)
+	{
+		cleanupVertexBuffer(i);
+		createVertexBuffer(i);
+		vertexBuffersRecreationPending[i] = false;
+	}
+
+	void createVertexBuffer(size_t i)
+	{
+		VkBufferCreateInfo bufferInfo{};
+		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+		bufferInfo.size = dataProvider->getVkSize();
+		bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+		VK_CHECK_RESULT(vkCreateBuffer(device, &bufferInfo, nullptr, &vertexBuffers[i]));
+
+		VkMemoryRequirements memRequirements;
+		vkGetBufferMemoryRequirements(device, vertexBuffers[i], &memRequirements);
+
+		VkMemoryAllocateInfo allocInfo{};
+		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+		allocInfo.allocationSize = memRequirements.size;
+		allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+		VK_CHECK_RESULT(vkAllocateMemory(device, &allocInfo, nullptr, &vertexBufferMemories[i]));
+
+		vkBindBufferMemory(device, vertexBuffers[i], vertexBufferMemories[i], 0);
+	}
+
+	void copyBufferMemory(size_t idx)
 	{
 		void* data;
 		vkMapMemory(device, vertexBufferMemories[idx], 0, dataProvider->getVkSize(), 0, &data);
