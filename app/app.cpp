@@ -27,32 +27,29 @@ class App
 	uint32_t targetPhysicsFps = 120;
 	bool isRunning = false;
 
-	WindowProvider* windowProvider;
-	GraphicEngine* graphicsEngine;
-	DataProvider* dataProvider;
-	VertexTransformer* vertexTransformer;
-	PhysicsEngine* physicsEngine;
+	std::unique_ptr<WindowProvider> windowProvider;
+	std::unique_ptr<GraphicEngine> graphicsEngine;
+	std::unique_ptr<DataProvider> dataProvider;
+	std::unique_ptr<VertexTransformer> vertexTransformer;
+	std::unique_ptr<PhysicsEngine> physicsEngine;
 
-	FpsCounter* graphicFrameCounter;
-	FpsCounter* physicFrameCounter;
+	std::unique_ptr<FpsCounter> graphicFrameCounter;
+	std::unique_ptr<FpsCounter> physicFrameCounter;
 
-	thread* graphicThread;
-	thread* physicsThread;
+	std::unique_ptr<thread> graphicThread;
+	std::unique_ptr<thread> physicsThread;
 
 	public:
 	App()
 	{
-		this->windowProvider = new WindowProvider(size, title);
-		this->vertexTransformer = new VertexTransformer(windowProvider);
-		this->dataProvider = new DataProvider(vertexTransformer);
-		this->physicsEngine = new PhysicsEngine(dataProvider);
-		this->graphicsEngine = new GraphicEngine(windowProvider, dataProvider);
+		this->windowProvider = make_unique<WindowProvider>(size, title);
+		this->vertexTransformer = make_unique<VertexTransformer>(windowProvider.get());
+		this->dataProvider = make_unique<DataProvider>(vertexTransformer.get());
+		this->physicsEngine = make_unique<PhysicsEngine>(dataProvider.get());
+		this->graphicsEngine = make_unique<GraphicEngine>(windowProvider.get(), dataProvider.get());
 
-		this->graphicFrameCounter = new FpsCounter("Graphic FPS");
-		this->physicFrameCounter = new FpsCounter("Physics FPS");
-
-		graphicThread = nullptr;
-		physicsThread = nullptr;
+		this->graphicFrameCounter = make_unique<FpsCounter>("Graphic FPS");
+		this->physicFrameCounter = make_unique<FpsCounter>("Physics FPS");
 	}
 
 	void run()
@@ -62,11 +59,8 @@ class App
 		graphicFrameCounter->run();
 		physicFrameCounter->run();
 
-		graphicThread = new thread(&App::graphicThreadFunc, this);
-		graphicThread->detach();
-
-		physicsThread = new thread(&App::physicsThreadFunc, this);
-		physicsThread->detach();
+		graphicThread = make_unique<thread>(&App::graphicThreadFunc, this);
+		physicsThread = make_unique<thread>(&App::physicsThreadFunc, this);
 
 		while (!windowProvider->isShouldClose())
 		{
@@ -76,17 +70,6 @@ class App
 
 		physicsThread->join();
 		graphicThread->join();
-	}
-
-	~App()
-	{
-		delete this->vertexTransformer;
-		delete this->dataProvider;
-		delete this->graphicsEngine;
-		delete this->windowProvider;
-		delete this->physicsEngine;
-		delete this->graphicFrameCounter;
-		delete this->physicFrameCounter;
 	}
 
 	private:

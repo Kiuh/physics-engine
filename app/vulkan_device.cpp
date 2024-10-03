@@ -8,11 +8,6 @@
  * This code is licensed under the MIT license (MIT) (http://opensource.org/licenses/MIT)
  */
 
-#if (defined(VK_USE_PLATFORM_IOS_MVK) || defined(VK_USE_PLATFORM_MACOS_MVK) || defined(VK_USE_PLATFORM_METAL_EXT))
-// SRS - Enable beta extensions and make VK_KHR_portability_subset visible
-#define VK_ENABLE_BETA_EXTENSIONS
-#endif
-
 #include "vulkan_device.h"
 #include <unordered_set>
 
@@ -270,14 +265,6 @@ namespace vks
 			deviceCreateInfo.pEnabledFeatures = nullptr;
 			deviceCreateInfo.pNext = &physicalDeviceFeatures2;
 		}
-
-#if (defined(VK_USE_PLATFORM_IOS_MVK) || defined(VK_USE_PLATFORM_MACOS_MVK) || defined(VK_USE_PLATFORM_METAL_EXT)) && defined(VK_KHR_portability_subset)
-		// SRS - When running on iOS/macOS with MoltenVK and VK_KHR_portability_subset is defined and supported by the device, enable the extension
-		if (extensionSupported(VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME))
-		{
-			deviceExtensions.push_back(VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME);
-		}
-#endif
 
 		if (deviceExtensions.size() > 0)
 		{

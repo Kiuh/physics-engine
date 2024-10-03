@@ -3,8 +3,7 @@
 #include "box.cpp"
 #include "data_provider.cpp"
 #include <boost/random.hpp>
-#include <boost/random/uniform_01.hpp>
-#include <boost/random/uniform_real.hpp>
+#include <iostream>
 
 using namespace boost;
 using namespace boost::random;
@@ -40,8 +39,7 @@ class PhysicsEngine
 		box.pos[2] = vec2(center.x + shift.x, center.y - shift.y);
 		box.pos[3] = center - shift;
 
-		//box.color = getRandomColor();
-		box.color = { 0,1,0 };
+		box.color = getRandomColor();
 
 		dp->boxes.push_back(box);
 	}
@@ -57,18 +55,15 @@ class PhysicsEngine
 
 	float randomFloat(float a, float b)
 	{
-		minstd_rand rng{};
-		uniform_real<float> unit(a, b);
-		variate_generator<minstd_rand&, uniform_real<float>> generator(rng, unit);
-		return generator();
+		mt19937 rng;
+		uniform_real_distribution<> gen(a, b);
+		auto result = gen(rng);
+		return static_cast<float>(result);
 	}
 
 	float random01Float()
 	{
-		minstd_rand rng{};
-		uniform_01 unit{};
-		variate_generator<minstd_rand&, uniform_01<>> generator(rng, unit);
-		return generator();
+		return randomFloat(0, 1);
 	}
 
 	void update(float deltaTime)

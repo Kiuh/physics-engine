@@ -4,6 +4,7 @@
 #include "vertex.cpp"
 #include "vertex_transformer.cpp"
 #include <cstdint>
+#include <mutex>
 #include <vector>
 #include <vulkan/vulkan_core.h>
 
@@ -17,6 +18,7 @@ class DataProvider
 {
 	private:
 	VertexTransformer* vertexTransformer;
+	std::mutex vertices_mutex;
 
 	vector<Vertex> vertices = {};
 
@@ -31,6 +33,7 @@ class DataProvider
 
 	PrepareDrawDataResult prepareDataToDraw()
 	{
+		vertices_mutex.lock();
 		auto result = PrepareDrawDataResult{};
 
 		auto prev_size = vertices.size();
@@ -52,6 +55,7 @@ class DataProvider
 		}
 
 		result.IsContentChanged = true;
+		vertices_mutex.unlock();
 		return result;
 	}
 
