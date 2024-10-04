@@ -9,13 +9,13 @@
 #include <iostream>
 #include <vector>
 
-static const float gravity_scale = 1.0f;
+static const float gravity_scale = 3.0f;
 
 class PhysicsEngine
 {
 	private:
 	DataProvider* data;
-	size_t initialBoxCount = 5;
+	size_t initialBoxCount = 10;
 
 	public:
 	PhysicsEngine(WindowProvider* win, DataProvider* data)
@@ -32,7 +32,8 @@ class PhysicsEngine
 		{
 			createBox();
 		}
-		auto plate = AABB::make(glm::vec2{ -7, -6 }, glm::vec2{ 7, -5 }, Color{});
+		auto plate = AABB::make(glm::vec2{ -10, -8 }, glm::vec2{ 10, -5 }, Color{});
+		plate.mass = 100.0f;
 		data->addBox(plate);
 	}
 
@@ -41,6 +42,7 @@ class PhysicsEngine
 		const static glm::vec2 leftDown(-7, 0);
 		const static glm::vec2 rightUp(7, 5);
 		const static glm::vec2 shift(1.0f, 1.0f);
+		const static float mass = 7.0f;
 
 		glm::vec2 center(randomFloat(leftDown.x, rightUp.x), randomFloat(leftDown.y, rightUp.y));
 
@@ -48,6 +50,7 @@ class PhysicsEngine
 		box.setMinMax(center - shift, center + shift);
 		box.setColor(Color::randomColor());
 		box.isStatic = false;
+		box.mass = mass;
 		data->addBox(box);
 	}
 
@@ -61,39 +64,36 @@ class PhysicsEngine
 
 	void update(float deltaTime)
 	{
-		addGravity();
-		resolveCollisions();
+		calculateVelocity();
 		applyVelocity(deltaTime);
 	}
 
-	void addGravity()
-	{
-		for (auto& box : data->boxes)
-		{
-			box.velocity = glm::vec2{};
-			if (!box.isStatic)
-			{
-				box.velocity += glm::vec2{ 0,-1 } *gravity_scale;
-			}
-		}
-	}
-
-	void resolveCollisions()
+	void calculateVelocity()
 	{
 		for (size_t i = 0; i < data->boxes.size(); i++)
 		{
 			auto& box1 = data->boxes[i];
-			if (box1.isStatic) continue;
 
-			for (size_t j = 0; j < data->boxes.size(); j++)
+			// Refresh
+			box1.velocity = glm::vec2{};
+
+			// Add gravity
+			box1.velocity += glm::vec2{ 0,-1 } *gravity_scale * box1.mass;
+		}
+
+		for (size_t i = 0; i < data->boxes.size(); i++)
+		{
+			auto& box1 = data->boxes[i];
+			for (size_t j = i + 1; j < data->boxes.size(); j++)
 			{
-				if (i == j) continue;
-
 				auto& box2 = data->boxes[j];
 
 				if (AABB::isOverlaps(box1, box2))
 				{
-					box1.velocity += box1.center() - box2.center();
+					auto force = AABB::getShortestOverlap(box1, box2);
+
+					box1.velocity += force * box2.mass;
+					box2.velocity -= force * box1.mass;
 				}
 			}
 		}

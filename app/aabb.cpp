@@ -26,9 +26,15 @@ struct AABB
 		return max - min;
 	}
 
+	glm::vec2 extends() const
+	{
+		return size() / 2.0f;
+	}
+
 	// Physics properties
 	bool isStatic = true;
 	glm::vec2 velocity{ 0,0 };
+	float mass = 1.0f;
 
 	static AABB make(glm::vec2 min, glm::vec2 max, Color color)
 	{
@@ -42,7 +48,7 @@ struct AABB
 	{
 		if (min.x >= max.x || min.y >= max.y)
 		{
-			throw new std::runtime_error("invalid min and max values");
+			throw new std::runtime_error("try set invalid min and max values in AABB");
 		}
 
 		this->min = min;
@@ -80,18 +86,65 @@ struct AABB
 
 	static bool isOverlaps(AABB& box1, AABB& box2)
 	{
-		if (
-			box1.center().x < box2.center().x + box2.size().x &&
-			box1.center().x + box1.size().x > box2.center().x &&
-			box1.center().y < box2.center().y + box2.size().y &&
-			box1.center().y + box1.size().y > box2.center().y
-			)
+		if (box2.min.x >= box1.max.x || box2.max.x <= box1.min.x) return false;
+		if (box2.min.y >= box1.max.y || box2.max.y <= box1.min.y) return false;
+		return true;
+	}
+
+	// Resulting vector moves box1
+	static glm::vec2 getShortestOverlap(AABB& box1, AABB& box2)
+	{
+		float x_overlap = getSegmentOverlap(box1.min.x, box1.max.x, box2.min.x, box2.max.x);
+		float y_overlap = getSegmentOverlap(box1.min.y, box1.max.y, box2.min.y, box2.max.y);
+
+		if (glm::abs(x_overlap) < glm::abs(y_overlap))
 		{
-			return true;
+			return glm::vec2(x_overlap, 0);
 		}
 		else
 		{
-			return false;
+			return glm::vec2(0, y_overlap);
+		}
+	}
+
+	static float getSegmentOverlap(float a1, float b1, float a2, float b2)
+	{
+		float len1 = b1 - a1;
+		float len2 = b2 - a2;
+
+		float m1 = a1 + len1 / 2.0f; // middle of 1 seg
+		float m2 = a2 + len2 / 2.0f; // middle of 2 seg
+
+		if (a1 >= a2 && b1 <= b2) // fully inside
+		{
+			if (m1 > m2)
+			{
+				return len1;
+			}
+			else
+			{
+				return -len1;
+			}
+		}
+
+		if (a1 <= a2 && b1 >= a1 && b1 <= b2) // overlaps only left point
+		{
+			return -(b1 - a2);
+		}
+
+		if (a1 >= a2 && a1 <= b2 && b1 >= b2) // overlaps only right point
+		{
+			return b2 - a1;
+		}
+
+		// fully overlaps
+		if (m1 > m2)
+		{
+			return len2;
+		}
+		else
+		{
+			return -len2;
 		}
 	}
 };
