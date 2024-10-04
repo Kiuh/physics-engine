@@ -16,14 +16,14 @@
     <Filter Include="Source Files\graphic_engine">
       <UniqueIdentifier>{d57aba3d-c3fc-4780-959d-6edb2c681c48}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\data_helpers">
-      <UniqueIdentifier>{12e0c025-99ff-46aa-8fce-ae860425fded}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\physics_engine">
       <UniqueIdentifier>{c2bd0ffb-a400-4e32-9848-cb9c49158980}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\external">
       <UniqueIdentifier>{361bf5ac-7a54-418e-a2ac-4b9bdc15f694}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\data_tools">
+      <UniqueIdentifier>{12e0c025-99ff-46aa-8fce-ae860425fded}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -40,13 +40,13 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="data_provider.cpp">
-      <Filter>Source Files\data_helpers</Filter>
+      <Filter>Source Files\data_tools</Filter>
     </ClCompile>
     <ClCompile Include="vertex.cpp">
-      <Filter>Source Files\data_helpers</Filter>
+      <Filter>Source Files\data_tools</Filter>
     </ClCompile>
-    <ClCompile Include="box.cpp">
-      <Filter>Source Files\data_helpers</Filter>
+    <ClCompile Include="aabb.cpp">
+      <Filter>Source Files\data_tools</Filter>
     </ClCompile>
     <ClCompile Include="vertex_transformer.cpp">
       <Filter>Source Files</Filter>
@@ -74,6 +74,9 @@
     </ClCompile>
     <ClCompile Include="random_helper.cpp">
       <Filter>Source Files\physics_engine</Filter>
+    </ClCompile>
+    <ClCompile Include="color.cpp">
+      <Filter>Source Files\data_tools</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

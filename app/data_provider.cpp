@@ -1,12 +1,11 @@
 #pragma once
 
-#include "box.cpp"
+#include "aabb.cpp"
 #include "vertex.cpp"
 #include "vertex_transformer.cpp"
 #include <cstdint>
 #include <mutex>
 #include <vector>
-#include <vulkan/vulkan_core.h>
 
 class DataProvider
 {
@@ -17,7 +16,7 @@ class DataProvider
 	std::vector<Vertex> vertices = {};
 
 	public:
-	std::vector<Box> boxes = {};
+	std::vector<AABB> boxes = {};
 
 	DataProvider(VertexTransformer* t)
 	{
@@ -33,11 +32,11 @@ class DataProvider
 		vertices.resize(boxes.size() * BOX_VERTEX_COUNT);
 		for (uint32_t i = 0; i < boxes.size(); i++)
 		{
-			boxes[i].calculateVertices();
+			auto box_vertices = boxes[i].calculateVertices();
 			for (uint32_t j = 0; j < BOX_VERTEX_COUNT; j++)
 			{
 				auto ind = i * BOX_VERTEX_COUNT + j;
-				vertices[ind] = boxes[i].vertices[j];
+				vertices[ind] = box_vertices[j];
 				vertexTransformer->worldToScreen(&vertices[ind]);
 			}
 		}

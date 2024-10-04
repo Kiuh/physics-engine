@@ -161,7 +161,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="app.cpp" />
-    <ClCompile Include="box.cpp" />
+    <ClCompile Include="aabb.cpp" />
+    <ClCompile Include="color.cpp" />
     <ClCompile Include="lodepng.cpp" />
     <ClCompile Include="physics_engine.cpp" />
     <ClCompile Include="fps_counter.cpp" />

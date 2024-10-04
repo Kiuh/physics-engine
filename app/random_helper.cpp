@@ -3,26 +3,15 @@
 #include <iostream>
 #include <random>
 
-class RandomHelper
+static float randomFloat(float a, float b)
 {
-	private:
 	std::random_device rd;
-	std::mt19937 gen;
+	std::mt19937 gen = std::mt19937(rd());
+	std::uniform_real_distribution<> dis(a, b);
+	return static_cast<float>(dis(gen));
+}
 
-	public:
-	RandomHelper()
-	{
-		gen = std::mt19937(rd());
-	}
-
-	float randomFloat(float a, float b)
-	{
-		std::uniform_real_distribution<> dis(a, b);
-		return static_cast<float>(dis(gen));
-	}
-
-	float randomFloat01()
-	{
-		return randomFloat(0, 1);
-	}
-};
+static float randomFloat01()
+{
+	return randomFloat(0, 1);
+}

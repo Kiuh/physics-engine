@@ -1,6 +1,6 @@
 #pragma once
 
-#include "box.cpp"
+#include "aabb.cpp"
 #include "data_provider.cpp"
 #include "random_helper.cpp"
 #include <boost/random.hpp>
@@ -10,20 +10,20 @@ class PhysicsEngine
 {
 	private:
 	DataProvider* dataProvider;
-	std::unique_ptr<RandomHelper> randomHelper;
 	float timer;
 	float interval;
 
 	public:
-	PhysicsEngine(DataProvider* dp)
+	PhysicsEngine(DataProvider* dataProvider)
 	{
-		this->dataProvider = dp;
+		this->dataProvider = dataProvider;
 		timer = 0.0f;
 		interval = 0.5f;
 
-		randomHelper = std::make_unique<RandomHelper>();
-
-		addBox();
+		for (size_t i = 0; i < 5; i++)
+		{
+			addBox();
+		}
 	}
 	float f = 0.0f;
 
@@ -31,17 +31,13 @@ class PhysicsEngine
 	{
 		const glm::vec2 leftDown(-5, -5);
 		const glm::vec2 rightUp(5, 5);
-		const glm::vec2 center(randomHelper->randomFloat(leftDown.x, rightUp.x), randomHelper->randomFloat(leftDown.y, rightUp.y));
+		const glm::vec2 center(randomFloat(leftDown.x, rightUp.x), randomFloat(leftDown.y, rightUp.y));
 		const glm::vec2 shift(1.0f, 1.0f);
 
-		Box box{};
+		AABB box{};
+		box.setMinMax(center - shift, center + shift);
 
-		box.pos[0] = glm::vec2(center.x - shift.x, center.y + shift.y);
-		box.pos[1] = center + shift;
-		box.pos[2] = glm::vec2(center.x + shift.x, center.y - shift.y);
-		box.pos[3] = center - shift;
-
-		box.color = getRandomColor();
+		box.setColor(getRandomColor());
 
 		dataProvider->boxes.push_back(box);
 	}
@@ -49,15 +45,15 @@ class PhysicsEngine
 	glm::vec3 getRandomColor()
 	{
 		return glm::vec3{
-			randomHelper->randomFloat01(),
-			randomHelper->randomFloat01(),
-			randomHelper->randomFloat01(),
+			randomFloat01(),
+			randomFloat01(),
+			randomFloat01(),
 		};
 	}
 
 	void update(float deltaTime)
 	{
-		timer += deltaTime;
+		//timer += deltaTime;
 
 		if (timer >= interval)
 		{

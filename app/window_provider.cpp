@@ -6,7 +6,7 @@
 #include <boost/signals2.hpp>
 #include <cstdint>
 #include <filesystem>
-#include <glm/ext/vector_int2.hpp>
+#include <glm.hpp>
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -88,6 +88,7 @@ class WindowProvider
 	static void framebufferResizeCallback(GLFWwindow* window, int width, int height)
 	{
 		auto window_provider = reinterpret_cast<WindowProvider*>(glfwGetWindowUserPointer(window));
+		glfwGetFramebufferSize(window, &window_provider->size.x, &window_provider->size.y);
 		window_provider->windowResized();
 	}
 

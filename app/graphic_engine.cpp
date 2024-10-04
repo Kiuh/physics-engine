@@ -238,8 +238,8 @@ class GraphicEngine
 		if (vertexBuffersRecreationPending[currentFrame])
 		{
 			recreateVertexBuffer(currentFrame);
-			copyBufferMemory(currentFrame);
 		}
+		copyBufferMemory(currentFrame);
 
 		vkResetFences(device, 1, &inFlightFences[currentFrame]);
 
@@ -279,6 +279,8 @@ class GraphicEngine
 		{
 			swapChainRecreationPending = false;
 			recreateSwapChain();
+			recreateVertexBuffer(currentFrame);
+			copyBufferMemory(currentFrame);
 		}
 		else if (result != VK_SUCCESS)
 		{

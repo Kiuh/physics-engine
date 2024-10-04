@@ -9,7 +9,7 @@
 
 #include <cstdint>
 #include <exception>
-#include <glm/ext/vector_int2.hpp>
+#include <glm.hpp>
 #include <iostream>
 #include <ostream>
 #include <stdlib.h>
