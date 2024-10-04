@@ -2,7 +2,7 @@
 
 #include "aabb.cpp"
 #include "vertex.cpp"
-#include "vertex_transformer.cpp"
+#include "window_provider.cpp"
 #include <cstdint>
 #include <mutex>
 #include <vector>
@@ -10,24 +10,30 @@
 class DataProvider
 {
 	private:
-	VertexTransformer* vertexTransformer;
-	std::mutex vertices_mutex;
-
+	WindowProvider* window;
 	std::vector<Vertex> vertices = {};
+	uint32_t pixelsPerUnit = 50;
 
 	public:
 	std::vector<AABB> boxes = {};
+	std::mutex data_mutex{};
 
-	DataProvider(VertexTransformer* t)
+	DataProvider(WindowProvider* window)
 	{
-		this->vertexTransformer = t;
+		this->window = window;
 		prepareDataToDraw();
+	}
+
+	void addBox(AABB& box)
+	{
+		data_mutex.lock();
+		boxes.push_back(box);
+		data_mutex.unlock();
 	}
 
 	bool prepareDataToDraw()
 	{
-		vertices_mutex.lock();
-
+		data_mutex.lock();
 		auto prev_size = vertices.size();
 		vertices.resize(boxes.size() * BOX_VERTEX_COUNT);
 		for (uint32_t i = 0; i < boxes.size(); i++)
@@ -37,11 +43,10 @@ class DataProvider
 			{
 				auto ind = i * BOX_VERTEX_COUNT + j;
 				vertices[ind] = box_vertices[j];
-				vertexTransformer->worldToScreen(&vertices[ind]);
+				worldToScreen(vertices[ind], window, pixelsPerUnit);
 			}
 		}
-
-		vertices_mutex.unlock();
+		data_mutex.unlock();
 
 		if (prev_size != vertices.size())
 		{
@@ -69,5 +74,15 @@ class DataProvider
 	void* getDataPointer()
 	{
 		return vertices.data();
+	}
+
+	void worldToScreen(Vertex& vert, WindowProvider* wp, uint32_t pixelsPerUnit)
+	{
+		auto screen = wp->getSize();
+		screen /= 2.0f;
+		vert.pos *= pixelsPerUnit;
+		vert.pos /= screen;
+
+		vert.pos.y *= -1;
 	}
 };

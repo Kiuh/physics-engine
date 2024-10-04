@@ -176,7 +176,6 @@
     <ClCompile Include="vulkan_tools.cpp" />
     <ClCompile Include="window_provider.cpp" />
     <ClCompile Include="data_provider.cpp" />
-    <ClCompile Include="vertex_transformer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="frag.spv" />

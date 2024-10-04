@@ -4,18 +4,47 @@
 #include "vertex.cpp"
 #include <glm.hpp>
 #include <mutex>
+#include <stdexcept>
 #include <vector>
 
 static constexpr const size_t BOX_VERTEX_COUNT = 6;
 
 struct AABB
 {
+	// View properties
 	glm::vec2 min{ 0,0 };
 	glm::vec2 max{ 1,1 };
-	Color color{};
+	Color color{ glm::vec3{ 1.0f, 1.0f, 1.0f } };
+
+	glm::vec2 center() const
+	{
+		return min + ((max - min) / 2.0f);
+	}
+
+	glm::vec2 size() const
+	{
+		return max - min;
+	}
+
+	// Physics properties
+	bool isStatic = true;
+	glm::vec2 velocity{ 0,0 };
+
+	static AABB make(glm::vec2 min, glm::vec2 max, Color color)
+	{
+		auto box = AABB{};
+		box.setMinMax(min, max);
+		box.setColor(color);
+		return box;
+	}
 
 	void setMinMax(glm::vec2 min, glm::vec2 max)
 	{
+		if (min.x >= max.x || min.y >= max.y)
+		{
+			throw new std::runtime_error("invalid min and max values");
+		}
+
 		this->min = min;
 		this->max = max;
 	}
@@ -49,10 +78,20 @@ struct AABB
 		max += delta;
 	}
 
-	static bool isCollide(AABB a, AABB b)
+	static bool isOverlaps(AABB& box1, AABB& box2)
 	{
-		if (a.max.x < b.min.x || a.min.x > b.max.x) return false;
-		if (a.max.y < b.min.y || a.min.y > b.max.y) return false;
-		return true;
+		if (
+			box1.center().x < box2.center().x + box2.size().x &&
+			box1.center().x + box1.size().x > box2.center().x &&
+			box1.center().y < box2.center().y + box2.size().y &&
+			box1.center().y + box1.size().y > box2.center().y
+			)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 };

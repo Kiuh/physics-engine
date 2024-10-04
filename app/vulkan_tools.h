@@ -19,8 +19,10 @@
 #include <iostream>
 #include <math.h>
 #include <stdexcept>
+#include <stdexcept>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string>
 #include <string>
 #include <vector>
 
@@ -36,10 +38,10 @@
 	VkResult res = (f);																					                                  \
 	if (res != VK_SUCCESS)																				                                  \
 	{																									                                  \
-		std::cout << "Fatal : VkResult is \"" << vks::tools::errorString(res) << "\" in " << __FILE__ << " at line " << __LINE__ << "\n"; \
-		assert(res == VK_SUCCESS);																		                                  \
+		std::string msg = "Fatal: VkResult is \"" + vks::tools::errorString(res) + "\"";												  \
+		throw std::runtime_error(msg);                                                                                                    \
 	}																									                                  \
-}
+}                                                                                                                                         \
 
 const std::string getAssetPath();
 const std::string getShaderBasePath();

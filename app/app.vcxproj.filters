@@ -25,6 +25,15 @@
     <Filter Include="Source Files\data_tools">
       <UniqueIdentifier>{12e0c025-99ff-46aa-8fce-ae860425fded}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\core">
+      <UniqueIdentifier>{07ca5de9-7e5c-4412-aec7-f401beac6d51}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\window">
+      <UniqueIdentifier>{85bc2ad7-7f22-42d2-bdaf-6858d2ef4164}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\common">
+      <UniqueIdentifier>{f86dbedd-ec94-47b0-820a-f90e2ae5fa78}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -36,29 +45,14 @@
     <ClCompile Include="validation_utils.cpp">
       <Filter>Source Files\graphic_engine</Filter>
     </ClCompile>
-    <ClCompile Include="window_provider.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="data_provider.cpp">
       <Filter>Source Files\data_tools</Filter>
     </ClCompile>
     <ClCompile Include="vertex.cpp">
       <Filter>Source Files\data_tools</Filter>
     </ClCompile>
-    <ClCompile Include="aabb.cpp">
-      <Filter>Source Files\data_tools</Filter>
-    </ClCompile>
-    <ClCompile Include="vertex_transformer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="physics_engine.cpp">
       <Filter>Source Files\physics_engine</Filter>
-    </ClCompile>
-    <ClCompile Include="fps_counter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="app.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="lodepng.cpp">
       <Filter>Source Files\external</Filter>
@@ -72,11 +66,23 @@
     <ClCompile Include="vulkan_device.cpp">
       <Filter>Source Files\graphic_engine</Filter>
     </ClCompile>
-    <ClCompile Include="random_helper.cpp">
-      <Filter>Source Files\physics_engine</Filter>
-    </ClCompile>
     <ClCompile Include="color.cpp">
       <Filter>Source Files\data_tools</Filter>
+    </ClCompile>
+    <ClCompile Include="app.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="fps_counter.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="window_provider.cpp">
+      <Filter>Source Files\window</Filter>
+    </ClCompile>
+    <ClCompile Include="aabb.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="random_helper.cpp">
+      <Filter>Source Files\common</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

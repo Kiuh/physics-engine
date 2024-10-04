@@ -4,7 +4,6 @@
 #include "fps_counter.cpp"
 #include "graphic_engine.cpp"
 #include "physics_engine.cpp"
-#include "vertex_transformer.cpp"
 #include "window_provider.cpp"
 
 #include <cstdint>
@@ -25,9 +24,8 @@ class App
 	bool isRunning = false;
 
 	std::unique_ptr<WindowProvider> windowProvider;
-	std::unique_ptr<GraphicEngine> graphicsEngine;
 	std::unique_ptr<DataProvider> dataProvider;
-	std::unique_ptr<VertexTransformer> vertexTransformer;
+	std::unique_ptr<GraphicEngine> graphicsEngine;
 	std::unique_ptr<PhysicsEngine> physicsEngine;
 
 	std::unique_ptr<FpsCounter> graphicFrameCounter;
@@ -40,9 +38,8 @@ class App
 	App()
 	{
 		this->windowProvider = std::make_unique<WindowProvider>(size, title);
-		this->vertexTransformer = std::make_unique<VertexTransformer>(windowProvider.get());
-		this->dataProvider = std::make_unique<DataProvider>(vertexTransformer.get());
-		this->physicsEngine = std::make_unique<PhysicsEngine>(dataProvider.get());
+		this->dataProvider = std::make_unique<DataProvider>(windowProvider.get());
+		this->physicsEngine = std::make_unique<PhysicsEngine>(windowProvider.get(), dataProvider.get());
 		this->graphicsEngine = std::make_unique<GraphicEngine>(windowProvider.get(), dataProvider.get());
 
 		this->graphicFrameCounter = std::make_unique<FpsCounter>("Graphic FPS");
