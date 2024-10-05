@@ -19,14 +19,6 @@
 #include <vector>
 #include <vulkan/vulkan_core.h>
 
-#ifdef NDEBUG
-const bool enableValidationLayers = false;
-#else
-const bool enableValidationLayers = true;
-#endif
-
-constexpr auto MAX_FRAMES_IN_FLIGHT = 2;
-
 const std::vector<const char*> deviceExtensions = {
 	VK_KHR_SWAPCHAIN_EXTENSION_NAME
 };
@@ -49,11 +41,18 @@ struct SwapChainSupportDetails
 	std::vector<VkPresentModeKHR> presentModes;
 };
 
+struct EngineConfig
+{
+	bool isDebug = false;
+	int maxFramesInFlight = 2;
+};
+
 class GraphicEngine
 {
 	public:
-	GraphicEngine(WindowProvider* wp, DataProvider* dp)
+	GraphicEngine(WindowProvider* wp, DataProvider* dp, EngineConfig config)
 	{
+		this->config = config;
 		bindWindowProvider(wp);
 		bindDataProvider(dp);
 		initVulkan();
@@ -71,6 +70,8 @@ class GraphicEngine
 	}
 
 	private:
+	EngineConfig config;
+
 	WindowProvider* windowProvider;
 	DataProvider* dataProvider;
 
@@ -128,7 +129,7 @@ class GraphicEngine
 
 	void initVulkan()
 	{
-		validationUtils.setValidationLayers(enableValidationLayers);
+		validationUtils.setValidationLayers(config.isDebug);
 		createInstance();
 		validationUtils.setupDebugMessenger(&instance);
 		createSurface();
@@ -183,7 +184,7 @@ class GraphicEngine
 	{
 		cleanupSwapChain();
 
-		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+		for (size_t i = 0; i < config.maxFramesInFlight; i++)
 		{
 			cleanupVertexBuffer(i);
 		}
@@ -193,7 +194,7 @@ class GraphicEngine
 
 		vkDestroyRenderPass(device, renderPass, nullptr);
 
-		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+		for (size_t i = 0; i < config.maxFramesInFlight; i++)
 		{
 			vkDestroySemaphore(device, renderFinishedSemaphores[i], nullptr);
 			vkDestroySemaphore(device, imageAvailableSemaphores[i], nullptr);
@@ -229,7 +230,7 @@ class GraphicEngine
 
 		if (dataProvider->prepareDataToDraw())
 		{
-			for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+			for (size_t i = 0; i < config.maxFramesInFlight; i++)
 			{
 				vertexBuffersRecreationPending[i] = true;
 			}
@@ -287,14 +288,14 @@ class GraphicEngine
 			throw std::runtime_error("failed to present swap chain image!");
 		}
 
-		currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+		currentFrame = (currentFrame + 1) % config.maxFramesInFlight;
 	}
 
 	void createSyncObjects()
 	{
-		imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-		renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-		inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
+		imageAvailableSemaphores.resize(config.maxFramesInFlight);
+		renderFinishedSemaphores.resize(config.maxFramesInFlight);
+		inFlightFences.resize(config.maxFramesInFlight);
 
 		VkSemaphoreCreateInfo semaphoreInfo{};
 		semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -303,7 +304,7 @@ class GraphicEngine
 		fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 		fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+		for (size_t i = 0; i < config.maxFramesInFlight; i++)
 		{
 			if (vkCreateSemaphore(device, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS ||
 				vkCreateSemaphore(device, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS ||
@@ -365,11 +366,11 @@ class GraphicEngine
 
 	void createVertexBuffers()
 	{
-		vertexBuffersRecreationPending.resize(MAX_FRAMES_IN_FLIGHT);
-		vertexBuffers.resize(MAX_FRAMES_IN_FLIGHT);
-		vertexBufferMemories.resize(MAX_FRAMES_IN_FLIGHT);
+		vertexBuffersRecreationPending.resize(config.maxFramesInFlight);
+		vertexBuffers.resize(config.maxFramesInFlight);
+		vertexBufferMemories.resize(config.maxFramesInFlight);
 
-		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+		for (size_t i = 0; i < config.maxFramesInFlight; i++)
 		{
 			createVertexBuffer(i);
 			copyBufferMemory(i);
@@ -433,7 +434,7 @@ class GraphicEngine
 
 	void createCommandBuffer()
 	{
-		commandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+		commandBuffers.resize(config.maxFramesInFlight);
 
 		VkCommandBufferAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -673,7 +674,7 @@ class GraphicEngine
 
 	void createInstance()
 	{
-		if (enableValidationLayers)
+		if (config.isDebug)
 		{
 			if (!validationUtils.checkValidationLayerSupport())
 			{
@@ -689,7 +690,11 @@ class GraphicEngine
 		appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
 		appInfo.apiVersion = VK_API_VERSION_1_0;
 
-		auto extensions = getRequiredExtensions();
+		auto extensions = windowProvider->getVulkanExtensions();
+		if (config.isDebug)
+		{
+			extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+		}
 
 		VkInstanceCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -928,7 +933,7 @@ class GraphicEngine
 		createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
 		createInfo.ppEnabledExtensionNames = deviceExtensions.data();
 
-		if (enableValidationLayers)
+		if (config.isDebug)
 		{
 			createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
 			createInfo.ppEnabledLayerNames = validationLayers.data();
@@ -979,18 +984,6 @@ class GraphicEngine
 		}
 
 		return indices;
-	}
-
-	std::vector<const char*> getRequiredExtensions()
-	{
-		auto extensions = windowProvider->getVulkanExtensions();
-
-		if (enableValidationLayers)
-		{
-			extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-		}
-
-		return extensions;
 	}
 
 	static std::vector<char> readFile(const std::string& filename)

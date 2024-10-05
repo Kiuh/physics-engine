@@ -34,6 +34,9 @@
     <Filter Include="Source Files\common">
       <UniqueIdentifier>{f86dbedd-ec94-47b0-820a-f90e2ae5fa78}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\shaders">
+      <UniqueIdentifier>{a91c2471-148b-4717-abd3-4e5845e239cd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -86,17 +89,17 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shader.vert">
-      <Filter>Resource Files</Filter>
+    <None Include="frag.spv">
+      <Filter>Resource Files\shaders</Filter>
     </None>
     <None Include="shader.frag">
-      <Filter>Resource Files</Filter>
+      <Filter>Resource Files\shaders</Filter>
+    </None>
+    <None Include="shader.vert">
+      <Filter>Resource Files\shaders</Filter>
     </None>
     <None Include="vert.spv">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="frag.spv">
-      <Filter>Resource Files</Filter>
+      <Filter>Resource Files\shaders</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

@@ -23,6 +23,8 @@ class App
 	uint32_t targetPhysicsFps = 120;
 	bool isRunning = false;
 
+	EngineConfig graphicsEngineConfig;
+
 	std::unique_ptr<WindowProvider> windowProvider;
 	std::unique_ptr<DataProvider> dataProvider;
 	std::unique_ptr<GraphicEngine> graphicsEngine;
@@ -37,10 +39,18 @@ class App
 	public:
 	App()
 	{
+		graphicsEngineConfig = EngineConfig{};
+#ifdef NDEBUG
+		graphicsEngineConfig.isDebug = false;
+#else
+		graphicsEngineConfig.isDebug = true;
+#endif
+		graphicsEngineConfig.maxFramesInFlight = 2;
+
 		this->windowProvider = std::make_unique<WindowProvider>(size, title);
 		this->dataProvider = std::make_unique<DataProvider>(windowProvider.get());
 		this->physicsEngine = std::make_unique<PhysicsEngine>(windowProvider.get(), dataProvider.get());
-		this->graphicsEngine = std::make_unique<GraphicEngine>(windowProvider.get(), dataProvider.get());
+		this->graphicsEngine = std::make_unique<GraphicEngine>(windowProvider.get(), dataProvider.get(), graphicsEngineConfig);
 
 		this->graphicFrameCounter = std::make_unique<FpsCounter>("Graphic FPS");
 		this->physicFrameCounter = std::make_unique<FpsCounter>("Physics FPS");

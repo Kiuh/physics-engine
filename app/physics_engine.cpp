@@ -42,7 +42,7 @@ class PhysicsEngine
 		const static glm::vec2 leftDown(-7, 0);
 		const static glm::vec2 rightUp(7, 5);
 		const static glm::vec2 shift(1.0f, 1.0f);
-		const static float mass = 7.0f;
+		const static float mass = 3.0f;
 
 		glm::vec2 center(randomFloat(leftDown.x, rightUp.x), randomFloat(leftDown.y, rightUp.y));
 
@@ -64,11 +64,11 @@ class PhysicsEngine
 
 	void update(float deltaTime)
 	{
-		calculateVelocity();
+		calculateVelocity(deltaTime);
 		applyVelocity(deltaTime);
 	}
 
-	void calculateVelocity()
+	void calculateVelocity(float deltaTime)
 	{
 		for (size_t i = 0; i < data->boxes.size(); i++)
 		{
@@ -91,9 +91,10 @@ class PhysicsEngine
 				if (AABB::isOverlaps(box1, box2))
 				{
 					auto force = AABB::getShortestOverlap(box1, box2);
-
-					box1.velocity += force * box2.mass;
-					box2.velocity -= force * box1.mass;
+					if (!box1.isStatic)
+						box1.move(force * box2.mass * deltaTime);
+					if (!box2.isStatic)
+						box2.move(-(force * box1.mass * deltaTime));
 				}
 			}
 		}
