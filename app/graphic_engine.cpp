@@ -2,9 +2,11 @@
 
 #include "data_provider.cpp"
 #include "graphic_engine_builders.cpp"
+#include "shader_manager.cpp"
 #include "validation_manager.cpp"
 #include "vertex.cpp"
 #include "vulkan_device.cpp"
+#include "vulkan_swapchain.cpp"
 #include "vulkan_tools.cpp"
 #include "window_provider.cpp"
 #include <algorithm>
@@ -32,18 +34,14 @@ class GraphicEngine
 	ValidationManager validationManager;
 	VkSurfaceKHR surface;
 
-	VulkanDevice vulkanDevice;
+	VulkanDevice device;
+	VulkanSwapchain swapchain;
 
-	VkSwapchainKHR swapChain;
-	std::vector<VkImage> swapChainImages;
-	VkFormat swapChainImageFormat;
-	VkExtent2D swapChainExtent;
+	ShaderManager shaderManager;
 
-	std::vector<VkImageView> swapChainImageViews;
 	VkRenderPass renderPass;
 	VkPipelineLayout pipelineLayout;
 	VkPipeline graphicsPipeline;
-	std::vector<VkFramebuffer> swapChainFramebuffers;
 
 	VkCommandPool commandPool;
 	std::vector<VkCommandBuffer> commandBuffers;
@@ -76,7 +74,7 @@ class GraphicEngine
 
 	~GraphicEngine()
 	{
-		vulkanDevice.waitIdle();
+		device.waitIdle();
 		cleanup();
 	}
 
@@ -99,79 +97,67 @@ class GraphicEngine
 		surface = windowProvider->createVkSurface(instance);
 
 		// VkPhysical device and VkDevice
-		vulkanDevice.instance = instance;
-		vulkanDevice.surface = surface;
-		vulkanDevice.validationManager = &validationManager;
-		vulkanDevice.init();
+		device.instance = instance;
+		device.surface = surface;
+		device.validationManager = &validationManager;
+		device.init();
 
-		createSwapChain(); // recreating
-		createImageViews(); // recreating
+		// VkSwapchainKHR
+		swapchain.surface = surface;
+		swapchain.vulkanDevice = &device;
+		swapchain.windowProvider = windowProvider;
+		swapchain.create();
+
+		shaderManager.vulkanDevice = &device;
 		createRenderPass();
 		createGraphicsPipeline();
-		createFramebuffers(); // recreating
+
+		// Frame buffers
+		swapchain.addFrameBuffers(&renderPass);
+
 		createCommandPool();
 		createVertexBuffers(); // recreating
 		createCommandBuffer();
 		createSyncObjects();
 	}
 
-	void recreateSwapChain()
+	void waitAndRecreateSwapChain()
 	{
 		windowProvider->waitForNoZero();
-		vulkanDevice.waitIdle();
-
-		cleanupSwapChain();
-
-		createSwapChain();
-		createImageViews();
-		createFramebuffers();
-	}
-
-	void cleanupSwapChain()
-	{
-		for (size_t i = 0; i < swapChainFramebuffers.size(); i++)
-		{
-			vkDestroyFramebuffer(vulkanDevice.logicalDevice, swapChainFramebuffers[i], nullptr);
-		}
-
-		for (size_t i = 0; i < swapChainImageViews.size(); i++)
-		{
-			vkDestroyImageView(vulkanDevice.logicalDevice, swapChainImageViews[i], nullptr);
-		}
-
-		vkDestroySwapchainKHR(vulkanDevice.logicalDevice, swapChain, nullptr);
+		device.waitIdle();
+		swapchain.recreate();
 	}
 
 	void cleanupVertexBuffer(size_t i)
 	{
-		vkDestroyBuffer(vulkanDevice.logicalDevice, vertexBuffers[i], nullptr);
-		vkFreeMemory(vulkanDevice.logicalDevice, vertexBufferMemories[i], nullptr);
+		vkDestroyBuffer(device.logicalDevice, vertexBuffers[i], nullptr);
+		vkFreeMemory(device.logicalDevice, vertexBufferMemories[i], nullptr);
 	}
 
 	void cleanup()
 	{
-		cleanupSwapChain();
+		swapchain.cleanup();
 
 		for (size_t i = 0; i < config.maxFramesInFlight; i++)
 		{
 			cleanupVertexBuffer(i);
 		}
 
-		vkDestroyPipeline(vulkanDevice.logicalDevice, graphicsPipeline, nullptr);
-		vkDestroyPipelineLayout(vulkanDevice.logicalDevice, pipelineLayout, nullptr);
+		vkDestroyPipeline(device.logicalDevice, graphicsPipeline, nullptr);
+		vkDestroyPipelineLayout(device.logicalDevice, pipelineLayout, nullptr);
 
-		vkDestroyRenderPass(vulkanDevice.logicalDevice, renderPass, nullptr);
+		vkDestroyRenderPass(device.logicalDevice, renderPass, nullptr);
 
 		for (size_t i = 0; i < config.maxFramesInFlight; i++)
 		{
-			vkDestroySemaphore(vulkanDevice.logicalDevice, renderFinishedSemaphores[i], nullptr);
-			vkDestroySemaphore(vulkanDevice.logicalDevice, imageAvailableSemaphores[i], nullptr);
-			vkDestroyFence(vulkanDevice.logicalDevice, inFlightFences[i], nullptr);
+			vkDestroySemaphore(device.logicalDevice, renderFinishedSemaphores[i], nullptr);
+			vkDestroySemaphore(device.logicalDevice, imageAvailableSemaphores[i], nullptr);
+			vkDestroyFence(device.logicalDevice, inFlightFences[i], nullptr);
 		}
 
-		vkDestroyCommandPool(vulkanDevice.logicalDevice, commandPool, nullptr);
+		vkDestroyCommandPool(device.logicalDevice, commandPool, nullptr);
 
-		vulkanDevice.cleanup();
+		device.cleanup();
 		validationManager.cleanup(instance);
 
 		vkDestroySurfaceKHR(instance, surface, nullptr);
@@ -180,14 +166,14 @@ class GraphicEngine
 
 	void drawFrame()
 	{
-		vkWaitForFences(vulkanDevice.logicalDevice, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
+		vkWaitForFences(device.logicalDevice, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
 		uint32_t imageIndex;
-		VkResult result = vkAcquireNextImageKHR(vulkanDevice.logicalDevice, swapChain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
+		VkResult result = vkAcquireNextImageKHR(device.logicalDevice, swapchain.instance, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
 
 		if (result == VK_ERROR_OUT_OF_DATE_KHR)
 		{
-			recreateSwapChain();
+			waitAndRecreateSwapChain();
 			return;
 		}
 		else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
@@ -209,7 +195,7 @@ class GraphicEngine
 		}
 		copyBufferMemory(currentFrame);
 
-		vkResetFences(vulkanDevice.logicalDevice, 1, &inFlightFences[currentFrame]);
+		vkResetFences(device.logicalDevice, 1, &inFlightFences[currentFrame]);
 
 		vkResetCommandBuffer(commandBuffers[currentFrame], 0);
 		recordCommandBuffer(commandBuffers[currentFrame], imageIndex);
@@ -228,9 +214,9 @@ class GraphicEngine
 		submitInfo.signalSemaphoreCount = 1;
 		submitInfo.pSignalSemaphores = signalSemaphores;
 
-		VK_CHECK(vkQueueSubmit(vulkanDevice.graphicsQueue, 1, &submitInfo, inFlightFences[currentFrame]));
+		VK_CHECK(vkQueueSubmit(device.graphicsQueue, 1, &submitInfo, inFlightFences[currentFrame]));
 
-		VkSwapchainKHR swapChains[] = { swapChain };
+		VkSwapchainKHR swapChains[] = { swapchain.instance };
 
 		VkPresentInfoKHR presentInfo{};
 		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -241,12 +227,12 @@ class GraphicEngine
 		presentInfo.pImageIndices = &imageIndex;
 		presentInfo.pResults = nullptr;
 
-		result = vkQueuePresentKHR(vulkanDevice.presentQueue, &presentInfo);
+		result = vkQueuePresentKHR(device.presentQueue, &presentInfo);
 
 		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || swapChainRecreationPending)
 		{
 			swapChainRecreationPending = false;
-			recreateSwapChain();
+			waitAndRecreateSwapChain();
 			recreateVertexBuffer(currentFrame);
 			copyBufferMemory(currentFrame);
 		}
@@ -273,9 +259,9 @@ class GraphicEngine
 
 		for (size_t i = 0; i < config.maxFramesInFlight; i++)
 		{
-			VK_CHECK(vkCreateSemaphore(vulkanDevice.logicalDevice, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]));
-			VK_CHECK(vkCreateSemaphore(vulkanDevice.logicalDevice, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]));
-			VK_CHECK(vkCreateFence(vulkanDevice.logicalDevice, &fenceInfo, nullptr, &inFlightFences[i]));
+			VK_CHECK(vkCreateSemaphore(device.logicalDevice, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]));
+			VK_CHECK(vkCreateSemaphore(device.logicalDevice, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]));
+			VK_CHECK(vkCreateFence(device.logicalDevice, &fenceInfo, nullptr, &inFlightFences[i]));
 		}
 	}
 
@@ -293,9 +279,9 @@ class GraphicEngine
 		VkRenderPassBeginInfo renderPassInfo{};
 		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 		renderPassInfo.renderPass = renderPass;
-		renderPassInfo.framebuffer = swapChainFramebuffers[imageIndex];
+		renderPassInfo.framebuffer = swapchain.framebuffers[imageIndex];
 		renderPassInfo.renderArea.offset = { 0, 0 };
-		renderPassInfo.renderArea.extent = swapChainExtent;
+		renderPassInfo.renderArea.extent = swapchain.extent;
 		renderPassInfo.clearValueCount = 1;
 		renderPassInfo.pClearValues = &clearColor;
 
@@ -304,15 +290,15 @@ class GraphicEngine
 		VkViewport viewport{};
 		viewport.x = 0.0f;
 		viewport.y = 0.0f;
-		viewport.width = static_cast<float>(swapChainExtent.width);
-		viewport.height = static_cast<float>(swapChainExtent.height);
+		viewport.width = static_cast<float>(swapchain.extent.width);
+		viewport.height = static_cast<float>(swapchain.extent.height);
 		viewport.minDepth = 0.0f;
 		viewport.maxDepth = 1.0f;
 		vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 
 		VkRect2D scissor{};
 		scissor.offset = { 0, 0 };
-		scissor.extent = swapChainExtent;
+		scissor.extent = swapchain.extent;
 		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
 		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
@@ -357,33 +343,33 @@ class GraphicEngine
 		bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
 		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-		VK_CHECK(vkCreateBuffer(vulkanDevice.logicalDevice, &bufferInfo, nullptr, &vertexBuffers[i]));
+		VK_CHECK(vkCreateBuffer(device.logicalDevice, &bufferInfo, nullptr, &vertexBuffers[i]));
 
 		VkMemoryRequirements memRequirements;
-		vkGetBufferMemoryRequirements(vulkanDevice.logicalDevice, vertexBuffers[i], &memRequirements);
+		vkGetBufferMemoryRequirements(device.logicalDevice, vertexBuffers[i], &memRequirements);
 
 		VkMemoryAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 		allocInfo.allocationSize = memRequirements.size;
 		allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
-		VK_CHECK(vkAllocateMemory(vulkanDevice.logicalDevice, &allocInfo, nullptr, &vertexBufferMemories[i]));
+		VK_CHECK(vkAllocateMemory(device.logicalDevice, &allocInfo, nullptr, &vertexBufferMemories[i]));
 
-		vkBindBufferMemory(vulkanDevice.logicalDevice, vertexBuffers[i], vertexBufferMemories[i], 0);
+		vkBindBufferMemory(device.logicalDevice, vertexBuffers[i], vertexBufferMemories[i], 0);
 	}
 
 	void copyBufferMemory(size_t idx)
 	{
 		void* data;
-		vkMapMemory(vulkanDevice.logicalDevice, vertexBufferMemories[idx], 0, dataProvider->getVkSize(), 0, &data);
+		vkMapMemory(device.logicalDevice, vertexBufferMemories[idx], 0, dataProvider->getVkSize(), 0, &data);
 		memcpy(data, dataProvider->getDataPointer(), (size_t)dataProvider->getVkSize());
-		vkUnmapMemory(vulkanDevice.logicalDevice, vertexBufferMemories[idx]);
+		vkUnmapMemory(device.logicalDevice, vertexBufferMemories[idx]);
 	}
 
 	uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) const
 	{
 		VkPhysicalDeviceMemoryProperties memProperties;
-		vkGetPhysicalDeviceMemoryProperties(vulkanDevice.physicalDevice, &memProperties);
+		vkGetPhysicalDeviceMemoryProperties(device.physicalDevice, &memProperties);
 
 		for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
 		{
@@ -406,7 +392,7 @@ class GraphicEngine
 		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 		allocInfo.commandBufferCount = (uint32_t)commandBuffers.size();
 
-		VK_CHECK(vkAllocateCommandBuffers(vulkanDevice.logicalDevice, &allocInfo, commandBuffers.data()));
+		VK_CHECK(vkAllocateCommandBuffers(device.logicalDevice, &allocInfo, commandBuffers.data()));
 	}
 
 	void createCommandPool()
@@ -414,38 +400,15 @@ class GraphicEngine
 		VkCommandPoolCreateInfo poolInfo{};
 		poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 		poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-		poolInfo.queueFamilyIndex = vulkanDevice.queueFamilyIndices.graphicsFamily.value();
+		poolInfo.queueFamilyIndex = device.queueFamilyIndices.graphicsFamily.value();
 
-		VK_CHECK(vkCreateCommandPool(vulkanDevice.logicalDevice, &poolInfo, nullptr, &commandPool));
-	}
-
-	void createFramebuffers()
-	{
-		swapChainFramebuffers.resize(swapChainImageViews.size());
-
-		for (size_t i = 0; i < swapChainImageViews.size(); i++)
-		{
-			VkImageView attachments[] = {
-				swapChainImageViews[i]
-			};
-
-			VkFramebufferCreateInfo framebufferInfo{};
-			framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-			framebufferInfo.renderPass = renderPass;
-			framebufferInfo.attachmentCount = 1;
-			framebufferInfo.pAttachments = attachments;
-			framebufferInfo.width = swapChainExtent.width;
-			framebufferInfo.height = swapChainExtent.height;
-			framebufferInfo.layers = 1;
-
-			VK_CHECK(vkCreateFramebuffer(vulkanDevice.logicalDevice, &framebufferInfo, nullptr, &swapChainFramebuffers[i]))
-		}
+		VK_CHECK(vkCreateCommandPool(device.logicalDevice, &poolInfo, nullptr, &commandPool));
 	}
 
 	void createRenderPass()
 	{
 		VkAttachmentDescription colorAttachment{};
-		colorAttachment.format = swapChainImageFormat;
+		colorAttachment.format = swapchain.imageFormat;
 		colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
 		colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 		colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -480,16 +443,13 @@ class GraphicEngine
 		renderPassInfo.dependencyCount = 1;
 		renderPassInfo.pDependencies = &dependency;
 
-		VK_CHECK(vkCreateRenderPass(vulkanDevice.logicalDevice, &renderPassInfo, nullptr, &renderPass));
+		VK_CHECK(vkCreateRenderPass(device.logicalDevice, &renderPassInfo, nullptr, &renderPass));
 	}
 
 	void createGraphicsPipeline()
 	{
-		auto vertShaderCode = readFile("vert.spv");
-		auto fragShaderCode = readFile("frag.spv");
-
-		VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
-		VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
+		VkShaderModule vertShaderModule = shaderManager.createShaderModule("vert.spv");
+		VkShaderModule fragShaderModule = shaderManager.createShaderModule("frag.spv");
 
 		VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
 		vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -529,7 +489,7 @@ class GraphicEngine
 		rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
 		rasterizer.depthClampEnable = VK_FALSE;
 		rasterizer.rasterizerDiscardEnable = VK_FALSE;
-		rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
+		rasterizer.polygonMode = VK_POLYGON_MODE_LINE;
 		rasterizer.lineWidth = 1.0f;
 		rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
 		rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
@@ -569,7 +529,7 @@ class GraphicEngine
 		pipelineLayoutInfo.setLayoutCount = 0;
 		pipelineLayoutInfo.pushConstantRangeCount = 0;
 
-		VK_CHECK(vkCreatePipelineLayout(vulkanDevice.logicalDevice, &pipelineLayoutInfo, nullptr, &pipelineLayout));
+		VK_CHECK(vkCreatePipelineLayout(device.logicalDevice, &pipelineLayoutInfo, nullptr, &pipelineLayout));
 
 		VkGraphicsPipelineCreateInfo pipelineInfo{};
 		pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -589,173 +549,9 @@ class GraphicEngine
 		pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 		pipelineInfo.basePipelineIndex = -1;
 
-		VK_CHECK(vkCreateGraphicsPipelines(vulkanDevice.logicalDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline));
+		VK_CHECK(vkCreateGraphicsPipelines(device.logicalDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline));
 
-		vkDestroyShaderModule(vulkanDevice.logicalDevice, fragShaderModule, nullptr);
-		vkDestroyShaderModule(vulkanDevice.logicalDevice, vertShaderModule, nullptr);
-	}
-
-	VkShaderModule createShaderModule(const std::vector<char>& code) const
-	{
-		VkShaderModuleCreateInfo createInfo{};
-		createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-		createInfo.codeSize = code.size();
-		createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
-
-		VkShaderModule shaderModule;
-		VK_CHECK(vkCreateShaderModule(vulkanDevice.logicalDevice, &createInfo, nullptr, &shaderModule));
-		return shaderModule;
-	}
-
-	void createImageViews()
-	{
-		swapChainImageViews.resize(swapChainImages.size());
-
-		for (size_t i = 0; i < swapChainImages.size(); i++)
-		{
-			VkImageViewCreateInfo createInfo{};
-			createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-			createInfo.image = swapChainImages[i];
-			createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-			createInfo.format = swapChainImageFormat;
-
-			createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-			createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-			createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-			createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-
-			createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-			createInfo.subresourceRange.baseMipLevel = 0;
-			createInfo.subresourceRange.levelCount = 1;
-			createInfo.subresourceRange.baseArrayLayer = 0;
-			createInfo.subresourceRange.layerCount = 1;
-
-			VK_CHECK(vkCreateImageView(vulkanDevice.logicalDevice, &createInfo, nullptr, &swapChainImageViews[i]));
-		}
-	}
-
-	void createSwapChain()
-	{
-		SwapChainSupportDetails swapChainSupport = vulkanDevice.swapChainSupport;
-
-		VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
-		VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
-		VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
-
-		uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
-
-		if (swapChainSupport.capabilities.maxImageCount > 0 && imageCount > swapChainSupport.capabilities.maxImageCount)
-		{
-			imageCount = swapChainSupport.capabilities.maxImageCount;
-		}
-
-		VkSwapchainCreateInfoKHR createInfo{};
-		createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-		createInfo.surface = surface;
-		createInfo.minImageCount = imageCount;
-		createInfo.imageFormat = surfaceFormat.format;
-		createInfo.imageColorSpace = surfaceFormat.colorSpace;
-		createInfo.imageExtent = extent;
-		createInfo.imageArrayLayers = 1;
-		createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-
-		QueueFamilyIndices indices = vulkanDevice.queueFamilyIndices;
-		uint32_t queueFamilyIndices[] = { indices.graphicsFamily.value(), indices.presentFamily.value() };
-
-		if (indices.graphicsFamily != indices.presentFamily)
-		{
-			createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
-			createInfo.queueFamilyIndexCount = 2;
-			createInfo.pQueueFamilyIndices = queueFamilyIndices;
-		}
-		else
-		{
-			createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-			createInfo.queueFamilyIndexCount = 0;
-			createInfo.pQueueFamilyIndices = nullptr;
-		}
-
-		createInfo.preTransform = swapChainSupport.capabilities.currentTransform;
-		createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-		createInfo.presentMode = presentMode;
-		createInfo.clipped = VK_TRUE;
-		createInfo.oldSwapchain = VK_NULL_HANDLE;
-
-		VK_CHECK(vkCreateSwapchainKHR(vulkanDevice.logicalDevice, &createInfo, nullptr, &swapChain));
-
-		vkGetSwapchainImagesKHR(vulkanDevice.logicalDevice, swapChain, &imageCount, nullptr);
-		swapChainImages.resize(imageCount);
-		vkGetSwapchainImagesKHR(vulkanDevice.logicalDevice, swapChain, &imageCount, swapChainImages.data());
-
-		swapChainImageFormat = surfaceFormat.format;
-		swapChainExtent = extent;
-	}
-
-	VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats)
-	{
-		for (const auto& availableFormat : availableFormats)
-		{
-			if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
-			{
-				return availableFormat;
-			}
-		}
-
-		return availableFormats[0];
-	}
-
-	VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes)
-	{
-		for (const auto& availablePresentMode : availablePresentModes)
-		{
-			if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR)
-			{
-				return availablePresentMode;
-			}
-		}
-
-		return VK_PRESENT_MODE_FIFO_KHR;
-	}
-
-	VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) const
-	{
-		if (capabilities.currentExtent.width != (std::numeric_limits<uint32_t>::max)())
-		{
-			return capabilities.currentExtent;
-		}
-		else
-		{
-			auto extendSize = windowProvider->getSize();
-
-			VkExtent2D actualExtent = {
-				static_cast<uint32_t>(extendSize.x),
-				static_cast<uint32_t>(extendSize.y)
-			};
-
-			actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
-			actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
-
-			return actualExtent;
-		}
-	}
-
-	static std::vector<char> readFile(const std::string& filename)
-	{
-		std::ifstream file(filename, std::ios::ate | std::ios::binary);
-
-		if (!file.is_open())
-		{
-			throw std::runtime_error("failed to open file!");
-		}
-
-		size_t fileSize = (size_t)file.tellg();
-		std::vector<char> buffer(fileSize);
-
-		file.seekg(0);
-		file.read(buffer.data(), fileSize);
-
-		file.close();
-
-		return buffer;
+		vkDestroyShaderModule(device.logicalDevice, fragShaderModule, nullptr);
+		vkDestroyShaderModule(device.logicalDevice, vertShaderModule, nullptr);
 	}
 };

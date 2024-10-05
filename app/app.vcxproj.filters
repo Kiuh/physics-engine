@@ -87,6 +87,12 @@
     <ClCompile Include="vulkan_device.cpp">
       <Filter>Source Files\graphic_engine</Filter>
     </ClCompile>
+    <ClCompile Include="vulkan_swapchain.cpp">
+      <Filter>Source Files\graphic_engine</Filter>
+    </ClCompile>
+    <ClCompile Include="shader_manager.cpp">
+      <Filter>Source Files\graphic_engine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="frag.spv">

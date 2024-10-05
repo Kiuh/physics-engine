@@ -168,11 +168,13 @@
     <ClCompile Include="physics_engine.cpp" />
     <ClCompile Include="fps_counter.cpp" />
     <ClCompile Include="random_helper.cpp" />
+    <ClCompile Include="shader_manager.cpp" />
     <ClCompile Include="validation_manager.cpp" />
     <ClCompile Include="graphic_engine.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="vertex.cpp" />
     <ClCompile Include="vulkan_device.cpp" />
+    <ClCompile Include="vulkan_swapchain.cpp" />
     <ClCompile Include="vulkan_tools.cpp" />
     <ClCompile Include="window_provider.cpp" />
     <ClCompile Include="data_provider.cpp" />
