@@ -48,12 +48,15 @@ struct VulkanDevice
 	QueueFamilyIndices queueFamilyIndices;
 	SwapChainSupportDetails swapChainSupport;
 
+	VkCommandPool graphicsCommandPool;
+
 	void init()
 	{
 		pickPhysicalDevice();
 		createLogicalDevice();
 		queueFamilyIndices = findQueueFamilies(physicalDevice);
 		swapChainSupport = querySwapChainSupport(physicalDevice);
+		createCommandPool();
 	}
 
 	void waitIdle() const
@@ -63,10 +66,57 @@ struct VulkanDevice
 
 	void cleanup() const
 	{
+		vkDestroyCommandPool(logicalDevice, graphicsCommandPool, nullptr);
 		vkDestroyDevice(logicalDevice, nullptr);
 	}
 
 	private:
+	void createCommandPool()
+	{
+		VkCommandPoolCreateInfo poolInfo{};
+		poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+		poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+		poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
+
+		VK_CHECK(vkCreateCommandPool(logicalDevice, &poolInfo, nullptr, &graphicsCommandPool));
+	}
+
+	void createLogicalDevice()
+	{
+		QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
+
+		std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+		std::set<uint32_t> uniqueQueueFamilies = { indices.graphicsFamily.value() };
+
+		float queuePriority = 1.0f;
+		for (uint32_t queueFamily : uniqueQueueFamilies)
+		{
+			VkDeviceQueueCreateInfo queueCreateInfo{};
+			queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+			queueCreateInfo.queueFamilyIndex = queueFamily;
+			queueCreateInfo.queueCount = 1;
+			queueCreateInfo.pQueuePriorities = &queuePriority;
+			queueCreateInfos.push_back(queueCreateInfo);
+		}
+
+		VkPhysicalDeviceFeatures deviceFeatures{};
+		deviceFeatures.fillModeNonSolid = VK_TRUE;
+
+		VkDeviceCreateInfo createInfo{};
+		createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+		createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
+		createInfo.pQueueCreateInfos = queueCreateInfos.data();
+		createInfo.pEnabledFeatures = &deviceFeatures;
+		createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
+		createInfo.ppEnabledExtensionNames = deviceExtensions.data();
+		validationManager->addMessengerToDevice(createInfo);
+
+		VK_CHECK(vkCreateDevice(physicalDevice, &createInfo, nullptr, &logicalDevice));
+
+		vkGetDeviceQueue(logicalDevice, indices.graphicsFamily.value(), 0, &graphicsQueue);
+		vkGetDeviceQueue(logicalDevice, indices.presentFamily.value(), 0, &presentQueue);
+	}
+
 	void pickPhysicalDevice()
 	{
 		uint32_t deviceCount = 0;
@@ -163,42 +213,6 @@ struct VulkanDevice
 		}
 
 		return indices;
-	}
-
-	void createLogicalDevice()
-	{
-		QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
-
-		std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
-		std::set<uint32_t> uniqueQueueFamilies = { indices.graphicsFamily.value() };
-
-		float queuePriority = 1.0f;
-		for (uint32_t queueFamily : uniqueQueueFamilies)
-		{
-			VkDeviceQueueCreateInfo queueCreateInfo{};
-			queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-			queueCreateInfo.queueFamilyIndex = queueFamily;
-			queueCreateInfo.queueCount = 1;
-			queueCreateInfo.pQueuePriorities = &queuePriority;
-			queueCreateInfos.push_back(queueCreateInfo);
-		}
-
-		VkPhysicalDeviceFeatures deviceFeatures{};
-		deviceFeatures.fillModeNonSolid = VK_TRUE;
-
-		VkDeviceCreateInfo createInfo{};
-		createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-		createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
-		createInfo.pQueueCreateInfos = queueCreateInfos.data();
-		createInfo.pEnabledFeatures = &deviceFeatures;
-		createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
-		createInfo.ppEnabledExtensionNames = deviceExtensions.data();
-		validationManager->addMessengerToDevice(createInfo);
-
-		VK_CHECK(vkCreateDevice(physicalDevice, &createInfo, nullptr, &logicalDevice));
-
-		vkGetDeviceQueue(logicalDevice, indices.graphicsFamily.value(), 0, &graphicsQueue);
-		vkGetDeviceQueue(logicalDevice, indices.presentFamily.value(), 0, &presentQueue);
 	}
 
 	SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device) const

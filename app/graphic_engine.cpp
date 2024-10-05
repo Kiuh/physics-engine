@@ -43,7 +43,6 @@ class GraphicEngine
 	VkPipelineLayout pipelineLayout;
 	VkPipeline graphicsPipeline;
 
-	VkCommandPool commandPool;
 	std::vector<VkCommandBuffer> commandBuffers;
 
 	std::vector<VkSemaphore> imageAvailableSemaphores;
@@ -115,7 +114,6 @@ class GraphicEngine
 		// Frame buffers
 		swapchain.addFrameBuffers(&renderPass);
 
-		createCommandPool();
 		createVertexBuffers(); // recreating
 		createCommandBuffer();
 		createSyncObjects();
@@ -154,8 +152,6 @@ class GraphicEngine
 			vkDestroySemaphore(device.logicalDevice, imageAvailableSemaphores[i], nullptr);
 			vkDestroyFence(device.logicalDevice, inFlightFences[i], nullptr);
 		}
-
-		vkDestroyCommandPool(device.logicalDevice, commandPool, nullptr);
 
 		device.cleanup();
 		validationManager.cleanup(instance);
@@ -388,21 +384,11 @@ class GraphicEngine
 
 		VkCommandBufferAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-		allocInfo.commandPool = commandPool;
+		allocInfo.commandPool = device.graphicsCommandPool;
 		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 		allocInfo.commandBufferCount = (uint32_t)commandBuffers.size();
 
 		VK_CHECK(vkAllocateCommandBuffers(device.logicalDevice, &allocInfo, commandBuffers.data()));
-	}
-
-	void createCommandPool()
-	{
-		VkCommandPoolCreateInfo poolInfo{};
-		poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-		poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-		poolInfo.queueFamilyIndex = device.queueFamilyIndices.graphicsFamily.value();
-
-		VK_CHECK(vkCreateCommandPool(device.logicalDevice, &poolInfo, nullptr, &commandPool));
 	}
 
 	void createRenderPass()
