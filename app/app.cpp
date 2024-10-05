@@ -23,7 +23,7 @@ class App
 	uint32_t targetPhysicsFps = 120;
 	bool isRunning = false;
 
-	EngineConfig graphicsEngineConfig;
+	GraphicsEngineConfig graphicsEngineConfig;
 
 	std::unique_ptr<WindowProvider> windowProvider;
 	std::unique_ptr<DataProvider> dataProvider;
@@ -39,7 +39,7 @@ class App
 	public:
 	App()
 	{
-		graphicsEngineConfig = EngineConfig{};
+		graphicsEngineConfig = GraphicsEngineConfig{};
 #ifdef NDEBUG
 		graphicsEngineConfig.isDebug = false;
 #else

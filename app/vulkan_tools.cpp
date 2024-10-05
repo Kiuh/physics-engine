@@ -1,11 +1,15 @@
 #pragma once
 
-#include <cstring>
-#include <iostream>
 #include <magic_enum/magic_enum.hpp>
 #include <stdexcept>
 #include <string>
 #include <vulkan/vulkan_core.h>
+
+struct GraphicsEngineConfig
+{
+	bool isDebug = false;
+	int maxFramesInFlight = 2;
+};
 
 #define VK_CHECK(f)													            \
 {																			    \

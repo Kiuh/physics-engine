@@ -1,5 +1,6 @@
 #pragma once
 
+#include "vulkan_tools.cpp"
 #include <cstdint>
 #include <iostream>
 #include <stdexcept>
@@ -7,10 +8,6 @@
 #include <vector>
 #include <vulkan/vk_platform.h>
 #include <vulkan/vulkan_core.h>
-
-const std::vector<const char*> validationLayers = {
-	"VK_LAYER_KHRONOS_validation"
-};
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 	VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -23,35 +20,73 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 	return VK_FALSE;
 }
 
-class ValidatorUtils
+struct ValidationManager
 {
+	private:
+	const std::vector<const char*> validationLayers = {
+		"VK_LAYER_KHRONOS_validation"
+	};
+	VkDebugUtilsMessengerEXT debugMessenger{};
+	VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
+	GraphicsEngineConfig config;
+
 	public:
-	void setValidationLayers(bool enableValidationLayers)
+	void init(GraphicsEngineConfig config)
 	{
-		this->enableValidationLayers = enableValidationLayers;
+		this->config = config;
+		if (config.isDebug && !checkValidationLayerSupport())
+		{
+			throw std::runtime_error("validation layers requested, but not available!");
+		}
 	}
 
-	void addMessenger(VkInstanceCreateInfo* createInfo)
+	std::vector<const char*> getDebugMessengerExtensions(GraphicsEngineConfig config)
 	{
-		if (enableValidationLayers)
+		if (config.isDebug)
 		{
-			createInfo->enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
-			createInfo->ppEnabledLayerNames = validationLayers.data();
-
-			populateDebugMessengerCreateInfo(debugCreateInfo);
-			createInfo->pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo;
+			return std::vector<const char*> {
+				VK_EXT_DEBUG_UTILS_EXTENSION_NAME
+			};
 		}
 		else
 		{
-			createInfo->enabledLayerCount = 0;
-			createInfo->pNext = nullptr;
+			return std::vector<const char*>{};
 		}
 	}
 
-	void setupDebugMessenger(VkInstance* instance)
+	void addMessengerToInstance(VkInstanceCreateInfo& createInfo)
 	{
-		this->instance = instance;
-		if (!enableValidationLayers)
+		if (config.isDebug)
+		{
+			populateDebugMessengerCreateInfo(debugCreateInfo);
+
+			createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+			createInfo.ppEnabledLayerNames = validationLayers.data();
+			createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo;
+		}
+		else
+		{
+			createInfo.enabledLayerCount = 0;
+			createInfo.pNext = nullptr;
+		}
+	}
+
+	void addMessengerToDevice(VkDeviceCreateInfo& createInfo)
+	{
+		if (config.isDebug)
+		{
+			createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+			createInfo.ppEnabledLayerNames = validationLayers.data();
+		}
+		else
+		{
+			createInfo.enabledLayerCount = 0;
+		}
+	}
+
+	void setupDebugMessenger(VkInstance& instance)
+	{
+		if (!config.isDebug)
 		{
 			return;
 		}
@@ -59,17 +94,17 @@ class ValidatorUtils
 		VkDebugUtilsMessengerCreateInfoEXT createInfo;
 		populateDebugMessengerCreateInfo(createInfo);
 
-		if (CreateDebugUtilsMessengerEXT(*instance, &createInfo, nullptr, &debugMessenger) != VK_SUCCESS)
+		if (CreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr, &debugMessenger) != VK_SUCCESS)
 		{
 			throw std::runtime_error("failed to set up debug messenger!");
 		}
 	}
 
-	void cleanup()
+	void cleanup(VkInstance& instance)
 	{
-		if (enableValidationLayers)
+		if (config.isDebug)
 		{
-			DestroyDebugUtilsMessengerEXT(*instance, debugMessenger, nullptr);
+			DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
 		}
 	}
 
@@ -101,11 +136,6 @@ class ValidatorUtils
 	}
 
 	private:
-	VkDebugUtilsMessengerEXT debugMessenger{};
-	VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
-	VkInstance* instance = nullptr;
-	bool enableValidationLayers = false;
-
 	VkResult CreateDebugUtilsMessengerEXT(VkInstance& instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger)
 	{
 		auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");

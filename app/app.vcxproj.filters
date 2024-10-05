@@ -45,7 +45,7 @@
     <ClCompile Include="graphic_engine.cpp">
       <Filter>Source Files\graphic_engine</Filter>
     </ClCompile>
-    <ClCompile Include="validation_utils.cpp">
+    <ClCompile Include="validation_manager.cpp">
       <Filter>Source Files\graphic_engine</Filter>
     </ClCompile>
     <ClCompile Include="data_provider.cpp">
@@ -80,6 +80,12 @@
     </ClCompile>
     <ClCompile Include="random_helper.cpp">
       <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="graphic_engine_builders.cpp">
+      <Filter>Source Files\graphic_engine</Filter>
+    </ClCompile>
+    <ClCompile Include="vulkan_device.cpp">
+      <Filter>Source Files\graphic_engine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

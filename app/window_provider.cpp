@@ -76,10 +76,10 @@ class WindowProvider
 		return std::vector<const char*>(glfwExtensions, glfwExtensions + glfwExtensionCount);
 	}
 
-	VkSurfaceKHR createVkSurface(VkInstance* instance)
+	VkSurfaceKHR createVkSurface(VkInstance& instance)
 	{
 		VkSurfaceKHR surface;
-		if (glfwCreateWindowSurface(*instance, window, nullptr, &surface) != VK_SUCCESS)
+		if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS)
 		{
 			throw std::runtime_error("failed to create window surface!");
 		}
