@@ -63,12 +63,6 @@
     <ClCompile Include="vulkan_tools.cpp">
       <Filter>Source Files\graphic_engine</Filter>
     </ClCompile>
-    <ClCompile Include="vulkan_buffer.cpp">
-      <Filter>Source Files\graphic_engine</Filter>
-    </ClCompile>
-    <ClCompile Include="vulkan_device.cpp">
-      <Filter>Source Files\graphic_engine</Filter>
-    </ClCompile>
     <ClCompile Include="color.cpp">
       <Filter>Source Files\data_tools</Filter>
     </ClCompile>
@@ -104,21 +98,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lodepng.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="vulkan_tools.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="vulkan_initializers.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="vulkan_frame_buffer.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="vulkan_device.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="vulkan_buffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

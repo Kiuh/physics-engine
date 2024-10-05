@@ -3,7 +3,7 @@
 #include "data_provider.cpp"
 #include "validation_utils.cpp"
 #include "vertex.cpp"
-#include "vulkan_tools.h"
+#include "vulkan_tools.cpp"
 #include "window_provider.cpp"
 #include <algorithm>
 #include <boost/bind/bind.hpp>
@@ -129,9 +129,7 @@ class GraphicEngine
 
 	void initVulkan()
 	{
-		validationUtils.setValidationLayers(config.isDebug);
 		createInstance();
-		validationUtils.setupDebugMessenger(&instance);
 		createSurface();
 		pickPhysicalDevice();
 		createLogicalDevice();
@@ -261,7 +259,7 @@ class GraphicEngine
 		submitInfo.signalSemaphoreCount = 1;
 		submitInfo.pSignalSemaphores = signalSemaphores;
 
-		VK_CHECK_RESULT(vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFences[currentFrame]));
+		VK_CHECK(vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFences[currentFrame]));
 
 		VkSwapchainKHR swapChains[] = { swapChain };
 
@@ -322,7 +320,7 @@ class GraphicEngine
 		beginInfo.flags = 0;
 		beginInfo.pInheritanceInfo = nullptr;
 
-		VK_CHECK_RESULT(vkBeginCommandBuffer(commandBuffer, &beginInfo));
+		VK_CHECK(vkBeginCommandBuffer(commandBuffer, &beginInfo));
 
 		VkClearValue clearColor = { {{0.0f, 0.0f, 0.0f, 1.0f}} };
 
@@ -361,7 +359,7 @@ class GraphicEngine
 
 		vkCmdEndRenderPass(commandBuffer);
 
-		VK_CHECK_RESULT(vkEndCommandBuffer(commandBuffer));
+		VK_CHECK(vkEndCommandBuffer(commandBuffer));
 	}
 
 	void createVertexBuffers()
@@ -393,7 +391,7 @@ class GraphicEngine
 		bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
 		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-		VK_CHECK_RESULT(vkCreateBuffer(device, &bufferInfo, nullptr, &vertexBuffers[i]));
+		VK_CHECK(vkCreateBuffer(device, &bufferInfo, nullptr, &vertexBuffers[i]));
 
 		VkMemoryRequirements memRequirements;
 		vkGetBufferMemoryRequirements(device, vertexBuffers[i], &memRequirements);
@@ -403,7 +401,7 @@ class GraphicEngine
 		allocInfo.allocationSize = memRequirements.size;
 		allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
-		VK_CHECK_RESULT(vkAllocateMemory(device, &allocInfo, nullptr, &vertexBufferMemories[i]));
+		VK_CHECK(vkAllocateMemory(device, &allocInfo, nullptr, &vertexBufferMemories[i]));
 
 		vkBindBufferMemory(device, vertexBuffers[i], vertexBufferMemories[i], 0);
 	}
@@ -442,7 +440,7 @@ class GraphicEngine
 		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 		allocInfo.commandBufferCount = (uint32_t)commandBuffers.size();
 
-		VK_CHECK_RESULT(vkAllocateCommandBuffers(device, &allocInfo, commandBuffers.data()));
+		VK_CHECK(vkAllocateCommandBuffers(device, &allocInfo, commandBuffers.data()));
 	}
 
 	void createCommandPool()
@@ -454,7 +452,7 @@ class GraphicEngine
 		poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 		poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
 
-		VK_CHECK_RESULT(vkCreateCommandPool(device, &poolInfo, nullptr, &commandPool));
+		VK_CHECK(vkCreateCommandPool(device, &poolInfo, nullptr, &commandPool));
 	}
 
 	void createFramebuffers()
@@ -476,7 +474,7 @@ class GraphicEngine
 			framebufferInfo.height = swapChainExtent.height;
 			framebufferInfo.layers = 1;
 
-			VK_CHECK_RESULT(vkCreateFramebuffer(device, &framebufferInfo, nullptr, &swapChainFramebuffers[i]))
+			VK_CHECK(vkCreateFramebuffer(device, &framebufferInfo, nullptr, &swapChainFramebuffers[i]))
 		}
 	}
 
@@ -518,7 +516,7 @@ class GraphicEngine
 		renderPassInfo.dependencyCount = 1;
 		renderPassInfo.pDependencies = &dependency;
 
-		VK_CHECK_RESULT(vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass));
+		VK_CHECK(vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass));
 	}
 
 	void createGraphicsPipeline()
@@ -607,7 +605,7 @@ class GraphicEngine
 		pipelineLayoutInfo.setLayoutCount = 0;
 		pipelineLayoutInfo.pushConstantRangeCount = 0;
 
-		VK_CHECK_RESULT(vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayout));
+		VK_CHECK(vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayout));
 
 		VkGraphicsPipelineCreateInfo pipelineInfo{};
 		pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -627,7 +625,7 @@ class GraphicEngine
 		pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 		pipelineInfo.basePipelineIndex = -1;
 
-		VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline));
+		VK_CHECK(vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline));
 
 		vkDestroyShaderModule(device, fragShaderModule, nullptr);
 		vkDestroyShaderModule(device, vertShaderModule, nullptr);
@@ -641,7 +639,7 @@ class GraphicEngine
 		createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
 
 		VkShaderModule shaderModule;
-		VK_CHECK_RESULT(vkCreateShaderModule(device, &createInfo, nullptr, &shaderModule));
+		VK_CHECK(vkCreateShaderModule(device, &createInfo, nullptr, &shaderModule));
 		return shaderModule;
 	}
 
@@ -668,12 +666,13 @@ class GraphicEngine
 			createInfo.subresourceRange.baseArrayLayer = 0;
 			createInfo.subresourceRange.layerCount = 1;
 
-			VK_CHECK_RESULT(vkCreateImageView(device, &createInfo, nullptr, &swapChainImageViews[i]));
+			VK_CHECK(vkCreateImageView(device, &createInfo, nullptr, &swapChainImageViews[i]));
 		}
 	}
 
 	void createInstance()
 	{
+		validationUtils.setValidationLayers(config.isDebug);
 		if (config.isDebug)
 		{
 			if (!validationUtils.checkValidationLayerSupport())
@@ -704,7 +703,8 @@ class GraphicEngine
 
 		validationUtils.addMessenger(&createInfo);
 
-		VK_CHECK_RESULT(vkCreateInstance(&createInfo, nullptr, &instance));
+		VK_CHECK(vkCreateInstance(&createInfo, nullptr, &instance));
+		validationUtils.setupDebugMessenger(&instance);
 	}
 
 	void createSurface()
@@ -829,7 +829,7 @@ class GraphicEngine
 		createInfo.clipped = VK_TRUE;
 		createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-		VK_CHECK_RESULT(vkCreateSwapchainKHR(device, &createInfo, nullptr, &swapChain));
+		VK_CHECK(vkCreateSwapchainKHR(device, &createInfo, nullptr, &swapChain));
 
 		vkGetSwapchainImagesKHR(device, swapChain, &imageCount, nullptr);
 		swapChainImages.resize(imageCount);
@@ -943,7 +943,7 @@ class GraphicEngine
 			createInfo.enabledLayerCount = 0;
 		}
 
-		VK_CHECK_RESULT(vkCreateDevice(physicalDevice, &createInfo, nullptr, &device));
+		VK_CHECK(vkCreateDevice(physicalDevice, &createInfo, nullptr, &device));
 
 		vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
 		vkGetDeviceQueue(device, indices.presentFamily.value(), 0, &presentQueue);

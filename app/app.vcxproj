@@ -81,7 +81,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.290.0\Include;C:\glfw-3.4.bin.WIN64\include;C:\glm;C:\boost_1_86_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.290.0\Include;C:\glfw-3.4.bin.WIN64\include;C:\glm;C:\boost_1_86_0;D:\GitHub\magic_enum\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -103,7 +103,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.290.0\Include;C:\glfw-3.4.bin.WIN64\include;C:\glm;C:\boost_1_86_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.290.0\Include;C:\glfw-3.4.bin.WIN64\include;C:\glm;C:\boost_1_86_0;D:\GitHub\magic_enum\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -124,7 +124,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.290.0\Include;C:\glfw-3.4.bin.WIN64\include;C:\glm;C:\boost_1_86_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.290.0\Include;C:\glfw-3.4.bin.WIN64\include;C:\glm;C:\boost_1_86_0;D:\GitHub\magic_enum\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -146,7 +146,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.290.0\Include;C:\glfw-3.4.bin.WIN64\include;C:\glm;C:\boost_1_86_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.290.0\Include;C:\glfw-3.4.bin.WIN64\include;C:\glm;C:\boost_1_86_0;D:\GitHub\magic_enum\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -171,8 +171,6 @@
     <ClCompile Include="graphic_engine.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="vertex.cpp" />
-    <ClCompile Include="vulkan_buffer.cpp" />
-    <ClCompile Include="vulkan_device.cpp" />
     <ClCompile Include="vulkan_tools.cpp" />
     <ClCompile Include="window_provider.cpp" />
     <ClCompile Include="data_provider.cpp" />
@@ -185,11 +183,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lodepng.h" />
-    <ClInclude Include="vulkan_buffer.h" />
-    <ClInclude Include="vulkan_device.h" />
-    <ClInclude Include="vulkan_frame_buffer.hpp" />
-    <ClInclude Include="vulkan_initializers.hpp" />
-    <ClInclude Include="vulkan_tools.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="icon.png" />
