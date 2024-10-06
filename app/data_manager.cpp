@@ -15,13 +15,12 @@ class DataManager
 	uint32_t pixelsPerUnit = 50;
 
 	public:
-	std::vector<AABB> boxes = {};
+	std::vector<AABB> boxes = { AABB{} };
 	std::mutex data_mutex{};
 
 	DataManager(WindowManager* window)
 	{
 		this->window = window;
-		prepareDataToDraw();
 	}
 
 	void addBox(AABB& box)
@@ -31,7 +30,7 @@ class DataManager
 		data_mutex.unlock();
 	}
 
-	bool prepareDataToDraw()
+	void prepareDataToDraw()
 	{
 		data_mutex.lock();
 		auto prev_size = vertices.size();
@@ -47,13 +46,6 @@ class DataManager
 			}
 		}
 		data_mutex.unlock();
-
-		if (prev_size != vertices.size())
-		{
-			return true;
-		}
-
-		return false;
 	}
 
 	uint32_t verticesSize() const

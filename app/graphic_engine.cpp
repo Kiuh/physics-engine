@@ -1,5 +1,6 @@
 #pragma once
 
+#include "vulkan_tools.cpp"
 #include "data_manager.cpp"
 #include "graphic_engine_builders.cpp"
 #include "shader_manager.cpp"
@@ -7,8 +8,8 @@
 #include "vertex.cpp"
 #include "vulkan_device.cpp"
 #include "vulkan_swapchain.cpp"
-#include "vulkan_tools.cpp"
 #include "window_manager.cpp"
+#include "vulkan_buffer_tools.cpp"
 
 #include <algorithm>
 #include <boost/bind/bind.hpp>
@@ -51,9 +52,8 @@ class GraphicEngine
 	uint32_t currentFrame = 0;
 	bool swapChainRecreationPending = false;
 
-	std::vector<bool> vertexBuffersRecreationPending;
 	std::vector<VkBuffer> vertexBuffers;
-	std::vector<VkDeviceMemory> vertexBufferMemories;
+	std::vector<VkDeviceMemory> vertexBuffersMemory;
 
 	GraphicEngine(WindowManager* windowProvider, DataManager* dataProvider, GraphicsEngineConfig config)
 	{
@@ -114,7 +114,8 @@ class GraphicEngine
 		// Frame buffers
 		swapchain.addFrameBuffers(&renderPass);
 
-		createVertexBuffers(); // recreating
+		dataManager->prepareDataToDraw();
+		createVertexBuffers();
 		createSyncObjects();
 	}
 
@@ -128,7 +129,7 @@ class GraphicEngine
 	void cleanupVertexBuffer(size_t i)
 	{
 		vkDestroyBuffer(device.logicalDevice, vertexBuffers[i], nullptr);
-		vkFreeMemory(device.logicalDevice, vertexBufferMemories[i], nullptr);
+		vkFreeMemory(device.logicalDevice, vertexBuffersMemory[i], nullptr);
 	}
 
 	void cleanup()
@@ -176,19 +177,8 @@ class GraphicEngine
 			throw std::runtime_error("failed to acquire swap chain image!");
 		}
 
-		if (dataManager->prepareDataToDraw())
-		{
-			for (size_t i = 0; i < config.maxFramesInFlight; i++)
-			{
-				vertexBuffersRecreationPending[i] = true;
-			}
-		}
-
-		if (vertexBuffersRecreationPending[currentFrame])
-		{
-			recreateVertexBuffer(currentFrame);
-		}
-		copyBufferMemory(currentFrame);
+		dataManager->prepareDataToDraw();
+		copyNewDataToBuffer(currentFrame);
 
 		vkResetFences(device.logicalDevice, 1, &inFlightFences[currentFrame]);
 
@@ -228,8 +218,6 @@ class GraphicEngine
 		{
 			swapChainRecreationPending = false;
 			waitAndRecreateSwapChain();
-			recreateVertexBuffer(currentFrame);
-			copyBufferMemory(currentFrame);
 		}
 		else if (result != VK_SUCCESS)
 		{
@@ -309,70 +297,47 @@ class GraphicEngine
 
 	void createVertexBuffers()
 	{
-		vertexBuffersRecreationPending.resize(config.maxFramesInFlight);
 		vertexBuffers.resize(config.maxFramesInFlight);
-		vertexBufferMemories.resize(config.maxFramesInFlight);
+		vertexBuffersMemory.resize(config.maxFramesInFlight);
 
 		for (size_t i = 0; i < config.maxFramesInFlight; i++)
 		{
-			createVertexBuffer(i);
-			copyBufferMemory(i);
-			vertexBuffersRecreationPending[i] = false;
+			// Create working buffer
+			createBuffer(
+				device,
+				dataManager->getVkSize(),
+				VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+				VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+				vertexBuffers[i],
+				vertexBuffersMemory[i]
+			);
+
+			copyNewDataToBuffer(i);
 		}
 	}
 
-	void recreateVertexBuffer(size_t i)
+	void copyNewDataToBuffer(size_t idx)
 	{
-		cleanupVertexBuffer(i);
-		createVertexBuffer(i);
-		vertexBuffersRecreationPending[i] = false;
-	}
+		VkBuffer stagingBuffer{};
+		VkDeviceMemory stagingBufferMemory{};
+		createBuffer(
+			device,
+			dataManager->getVkSize(),
+			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+			stagingBuffer,
+			stagingBufferMemory
+		);
 
-	void createVertexBuffer(size_t i)
-	{
-		VkBufferCreateInfo bufferInfo{};
-		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-		bufferInfo.size = dataManager->getVkSize();
-		bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-
-		VK_CHECK(vkCreateBuffer(device.logicalDevice, &bufferInfo, nullptr, &vertexBuffers[i]));
-
-		VkMemoryRequirements memRequirements;
-		vkGetBufferMemoryRequirements(device.logicalDevice, vertexBuffers[i], &memRequirements);
-
-		VkMemoryAllocateInfo allocInfo{};
-		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-		allocInfo.allocationSize = memRequirements.size;
-		allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-
-		VK_CHECK(vkAllocateMemory(device.logicalDevice, &allocInfo, nullptr, &vertexBufferMemories[i]));
-
-		vkBindBufferMemory(device.logicalDevice, vertexBuffers[i], vertexBufferMemories[i], 0);
-	}
-
-	void copyBufferMemory(size_t idx)
-	{
 		void* data;
-		vkMapMemory(device.logicalDevice, vertexBufferMemories[idx], 0, dataManager->getVkSize(), 0, &data);
+		VK_CHECK(vkMapMemory(device.logicalDevice, stagingBufferMemory, 0, dataManager->getVkSize(), 0, &data));
 		memcpy(data, dataManager->getDataPointer(), (size_t)dataManager->getVkSize());
-		vkUnmapMemory(device.logicalDevice, vertexBufferMemories[idx]);
-	}
+		vkUnmapMemory(device.logicalDevice, stagingBufferMemory);
 
-	uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) const
-	{
-		VkPhysicalDeviceMemoryProperties memProperties;
-		vkGetPhysicalDeviceMemoryProperties(device.physicalDevice, &memProperties);
+		copyBuffer(device, stagingBuffer, vertexBuffers[idx], dataManager->getVkSize());
 
-		for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
-		{
-			if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties)
-			{
-				return i;
-			}
-		}
-
-		throw std::runtime_error("failed to find suitable memory type!");
+		vkDestroyBuffer(device.logicalDevice, stagingBuffer, nullptr);
+		vkFreeMemory(device.logicalDevice, stagingBufferMemory, nullptr);
 	}
 
 	void createRenderPass()

@@ -173,6 +173,7 @@
     <ClCompile Include="graphic_engine.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="vertex.cpp" />
+    <ClCompile Include="vulkan_buffer_tools.cpp" />
     <ClCompile Include="vulkan_device.cpp" />
     <ClCompile Include="vulkan_swapchain.cpp" />
     <ClCompile Include="vulkan_tools.cpp" />

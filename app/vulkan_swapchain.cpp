@@ -19,25 +19,25 @@ struct VulkanSwapchain
 {
 	public:
 	// Required
-	VulkanDevice* vulkanDevice;
-	VkSurfaceKHR surface;
-	WindowManager* windowManager;
+	VulkanDevice* vulkanDevice = nullptr;
+	VkSurfaceKHR surface{};
+	WindowManager* windowManager = nullptr;
 
 	// Exposed
-	VkSwapchainKHR instance;
-	std::vector<VkImage> images;
-	VkFormat imageFormat;
-	VkExtent2D extent;
+	VkSwapchainKHR instance{};
+	std::vector<VkImage> images{};
+	VkFormat imageFormat{};
+	VkExtent2D extent{};
 
-	std::vector<VkImageView> imageViews;
-	std::vector<VkFramebuffer> framebuffers;
+	std::vector<VkImageView> imageViews{};
+	std::vector<VkFramebuffer> framebuffers{};
 
 	private:
-	VkRenderPass* renderPass;
-	VkSurfaceFormatKHR surfaceFormat;
-	VkPresentModeKHR presentMode;
+	VkRenderPass* renderPass = nullptr;
+	VkSurfaceFormatKHR surfaceFormat{};
+	VkPresentModeKHR presentMode{};
 	VkSwapchainCreateInfoKHR createInfo{};
-	uint32_t imageCount;
+	uint32_t imageCount = 0;
 
 	public:
 	void create()
@@ -139,9 +139,9 @@ struct VulkanSwapchain
 
 		VK_CHECK(vkCreateSwapchainKHR(vulkanDevice->logicalDevice, &createInfo, nullptr, &instance));
 
-		vkGetSwapchainImagesKHR(vulkanDevice->logicalDevice, instance, &imageCount, nullptr);
+		VK_CHECK(vkGetSwapchainImagesKHR(vulkanDevice->logicalDevice, instance, &imageCount, nullptr));
 		images.resize(imageCount);
-		vkGetSwapchainImagesKHR(vulkanDevice->logicalDevice, instance, &imageCount, images.data());
+		VK_CHECK(vkGetSwapchainImagesKHR(vulkanDevice->logicalDevice, instance, &imageCount, images.data()));
 
 		imageFormat = surfaceFormat.format;
 		this->extent = extent;

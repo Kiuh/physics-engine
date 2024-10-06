@@ -22,13 +22,13 @@ enum KeyCode
 class WindowManager
 {
 	private:
-	glm::ivec2 size;
-	std::string title;
-	GLFWwindow* window;
+	glm::ivec2 size{};
+	std::string title{};
+	GLFWwindow* window = nullptr;
 
 	public:
-	boost::signals2::signal<void()> windowResized;
-	boost::signals2::signal<void(KeyCode)> keyPressed;
+	boost::signals2::signal<void()> windowResized{};
+	boost::signals2::signal<void(KeyCode)> keyPressed{};
 
 	WindowManager(glm::ivec2 size, std::string title)
 	{

@@ -12,8 +12,8 @@
 
 struct QueueFamilyIndices
 {
-	std::optional<uint32_t> graphicsFamily;
-	std::optional<uint32_t> presentFamily;
+	std::optional<uint32_t> graphicsFamily{};
+	std::optional<uint32_t> presentFamily{};
 
 	bool isComplete() const
 	{
@@ -24,8 +24,8 @@ struct QueueFamilyIndices
 struct SwapChainSupportDetails
 {
 	VkSurfaceCapabilitiesKHR capabilities{};
-	std::vector<VkSurfaceFormatKHR> formats;
-	std::vector<VkPresentModeKHR> presentModes;
+	std::vector<VkSurfaceFormatKHR> formats{};
+	std::vector<VkPresentModeKHR> presentModes{};
 };
 
 struct VulkanDevice
@@ -36,21 +36,21 @@ struct VulkanDevice
 	};
 
 	// Required
-	VkInstance instance;
-	VkSurfaceKHR surface;
-	ValidationManager* validationManager;
-	GraphicsEngineConfig config;
+	VkInstance instance{};
+	VkSurfaceKHR surface{};
+	ValidationManager* validationManager = nullptr;
+	GraphicsEngineConfig config{};
 
 	// Exposed
-	VkPhysicalDevice physicalDevice;
-	VkDevice logicalDevice;
-	VkQueue graphicsQueue;
-	VkQueue presentQueue;
-	QueueFamilyIndices queueFamilyIndices;
-	SwapChainSupportDetails swapChainSupport;
+	VkPhysicalDevice physicalDevice{};
+	VkDevice logicalDevice{};
+	VkQueue graphicsQueue{};
+	VkQueue presentQueue{};
+	QueueFamilyIndices queueFamilyIndices{};
+	SwapChainSupportDetails swapChainSupport{};
 
-	VkCommandPool graphicsCommandPool;
-	std::vector<VkCommandBuffer> commandBuffers;
+	VkCommandPool graphicsCommandPool{};
+	std::vector<VkCommandBuffer> commandBuffers{};
 
 	void init()
 	{
@@ -136,7 +136,7 @@ struct VulkanDevice
 	void pickPhysicalDevice()
 	{
 		uint32_t deviceCount = 0;
-		vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
+		VK_CHECK(vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr));
 
 		if (deviceCount == 0)
 		{
@@ -144,7 +144,7 @@ struct VulkanDevice
 		}
 
 		std::vector<VkPhysicalDevice> devices(deviceCount);
-		vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
+		VK_CHECK(vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data()));
 
 		for (const auto& device : devices)
 		{
@@ -179,10 +179,10 @@ struct VulkanDevice
 	bool checkDeviceExtensionSupport(VkPhysicalDevice device)
 	{
 		uint32_t extensionCount;
-		vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
+		VK_CHECK(vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr));
 
 		std::vector<VkExtensionProperties> availableExtensions(extensionCount);
-		vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
+		VK_CHECK(vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data()));
 
 		std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
 
@@ -235,24 +235,24 @@ struct VulkanDevice
 	{
 		SwapChainSupportDetails details;
 
-		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, &details.capabilities);
+		VK_CHECK(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, &details.capabilities));
 
 		uint32_t formatCount;
-		vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, nullptr);
+		VK_CHECK(vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, nullptr));
 
 		if (formatCount != 0)
 		{
 			details.formats.resize(formatCount);
-			vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, details.formats.data());
+			VK_CHECK(vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, details.formats.data()));
 		}
 
 		uint32_t presentModeCount;
-		vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, nullptr);
+		VK_CHECK(vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, nullptr));
 
 		if (presentModeCount != 0)
 		{
 			details.presentModes.resize(presentModeCount);
-			vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, details.presentModes.data());
+			VK_CHECK(vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, details.presentModes.data()));
 		}
 
 		return details;

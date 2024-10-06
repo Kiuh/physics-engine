@@ -8,6 +8,7 @@
 #include <vector>
 #include <vulkan/vk_platform.h>
 #include <vulkan/vulkan_core.h>
+#include <magic_enum/magic_enum.hpp>
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 	VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -15,8 +16,8 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 	const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
 	void* pUserData)
 {
-	std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
-
+	std::cerr << std::string(magic_enum::enum_name(messageSeverity)) << std::endl;
+	std::cerr << pCallbackData->pMessage << std::endl;
 	return VK_FALSE;
 }
 
