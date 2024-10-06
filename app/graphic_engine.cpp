@@ -1,6 +1,6 @@
 #pragma once
 
-#include "data_provider.cpp"
+#include "data_manager.cpp"
 #include "graphic_engine_builders.cpp"
 #include "shader_manager.cpp"
 #include "validation_manager.cpp"
@@ -8,7 +8,8 @@
 #include "vulkan_device.cpp"
 #include "vulkan_swapchain.cpp"
 #include "vulkan_tools.cpp"
-#include "window_provider.cpp"
+#include "window_manager.cpp"
+
 #include <algorithm>
 #include <boost/bind/bind.hpp>
 #include <cstdint>
@@ -27,8 +28,8 @@ class GraphicEngine
 	public:
 	GraphicsEngineConfig config;
 
-	WindowProvider* windowProvider;
-	DataProvider* dataProvider;
+	WindowManager* windowManager;
+	DataManager* dataManager;
 
 	VkInstance instance;
 	ValidationManager validationManager;
@@ -43,8 +44,6 @@ class GraphicEngine
 	VkPipelineLayout pipelineLayout;
 	VkPipeline graphicsPipeline;
 
-	std::vector<VkCommandBuffer> commandBuffers;
-
 	std::vector<VkSemaphore> imageAvailableSemaphores;
 	std::vector<VkSemaphore> renderFinishedSemaphores;
 	std::vector<VkFence> inFlightFences;
@@ -56,12 +55,12 @@ class GraphicEngine
 	std::vector<VkBuffer> vertexBuffers;
 	std::vector<VkDeviceMemory> vertexBufferMemories;
 
-	GraphicEngine(WindowProvider* windowProvider, DataProvider* dataProvider, GraphicsEngineConfig config)
+	GraphicEngine(WindowManager* windowProvider, DataManager* dataProvider, GraphicsEngineConfig config)
 	{
 		this->config = config;
-		this->windowProvider = windowProvider;
+		this->windowManager = windowProvider;
 		windowProvider->windowResized.connect(boost::bind(&GraphicEngine::pendSwapChainRecreation, this));
-		this->dataProvider = dataProvider;
+		this->dataManager = dataProvider;
 		dataProvider->prepareDataToDraw();
 		initVulkan();
 	}
@@ -89,22 +88,23 @@ class GraphicEngine
 		InstanceBuilder instanceBuilder{};
 		instanceBuilder.config = config;
 		instanceBuilder.validationManager = &validationManager;
-		instanceBuilder.windowProvider = windowProvider;
+		instanceBuilder.windowManager = windowManager;
 		instanceBuilder.build(&instance);
 
 		// Create Surface
-		surface = windowProvider->createVkSurface(instance);
+		surface = windowManager->createVkSurface(instance);
 
 		// VkPhysical device and VkDevice
 		device.instance = instance;
 		device.surface = surface;
 		device.validationManager = &validationManager;
+		device.config = config;
 		device.init();
 
 		// VkSwapchainKHR
 		swapchain.surface = surface;
 		swapchain.vulkanDevice = &device;
-		swapchain.windowProvider = windowProvider;
+		swapchain.windowManager = windowManager;
 		swapchain.create();
 
 		shaderManager.vulkanDevice = &device;
@@ -115,13 +115,12 @@ class GraphicEngine
 		swapchain.addFrameBuffers(&renderPass);
 
 		createVertexBuffers(); // recreating
-		createCommandBuffer();
 		createSyncObjects();
 	}
 
 	void waitAndRecreateSwapChain()
 	{
-		windowProvider->waitForNoZero();
+		windowManager->waitForNoZero();
 		device.waitIdle();
 		swapchain.recreate();
 	}
@@ -177,7 +176,7 @@ class GraphicEngine
 			throw std::runtime_error("failed to acquire swap chain image!");
 		}
 
-		if (dataProvider->prepareDataToDraw())
+		if (dataManager->prepareDataToDraw())
 		{
 			for (size_t i = 0; i < config.maxFramesInFlight; i++)
 			{
@@ -193,8 +192,8 @@ class GraphicEngine
 
 		vkResetFences(device.logicalDevice, 1, &inFlightFences[currentFrame]);
 
-		vkResetCommandBuffer(commandBuffers[currentFrame], 0);
-		recordCommandBuffer(commandBuffers[currentFrame], imageIndex);
+		vkResetCommandBuffer(device.commandBuffers[currentFrame], 0);
+		recordCommandBuffer(device.commandBuffers[currentFrame], imageIndex);
 
 		VkSemaphore waitSemaphores[] = { imageAvailableSemaphores[currentFrame] };
 		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
@@ -206,7 +205,7 @@ class GraphicEngine
 		submitInfo.pWaitSemaphores = waitSemaphores;
 		submitInfo.pWaitDstStageMask = waitStages;
 		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &commandBuffers[currentFrame];
+		submitInfo.pCommandBuffers = &device.commandBuffers[currentFrame];
 		submitInfo.signalSemaphoreCount = 1;
 		submitInfo.pSignalSemaphores = signalSemaphores;
 
@@ -265,8 +264,6 @@ class GraphicEngine
 	{
 		VkCommandBufferBeginInfo beginInfo{};
 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-		beginInfo.flags = 0;
-		beginInfo.pInheritanceInfo = nullptr;
 
 		VK_CHECK(vkBeginCommandBuffer(commandBuffer, &beginInfo));
 
@@ -283,6 +280,8 @@ class GraphicEngine
 
 		vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
+		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+
 		VkViewport viewport{};
 		viewport.x = 0.0f;
 		viewport.y = 0.0f;
@@ -297,13 +296,11 @@ class GraphicEngine
 		scissor.extent = swapchain.extent;
 		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
-
 		VkBuffer vertexBuffers[] = { this->vertexBuffers[currentFrame] };
 		VkDeviceSize offsets[] = { 0 };
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 
-		vkCmdDraw(commandBuffer, dataProvider->verticesSize(), dataProvider->triangleCount(), 0, 0);
+		vkCmdDraw(commandBuffer, dataManager->verticesSize(), dataManager->triangleCount(), 0, 0);
 
 		vkCmdEndRenderPass(commandBuffer);
 
@@ -335,7 +332,7 @@ class GraphicEngine
 	{
 		VkBufferCreateInfo bufferInfo{};
 		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-		bufferInfo.size = dataProvider->getVkSize();
+		bufferInfo.size = dataManager->getVkSize();
 		bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
 		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
@@ -357,8 +354,8 @@ class GraphicEngine
 	void copyBufferMemory(size_t idx)
 	{
 		void* data;
-		vkMapMemory(device.logicalDevice, vertexBufferMemories[idx], 0, dataProvider->getVkSize(), 0, &data);
-		memcpy(data, dataProvider->getDataPointer(), (size_t)dataProvider->getVkSize());
+		vkMapMemory(device.logicalDevice, vertexBufferMemories[idx], 0, dataManager->getVkSize(), 0, &data);
+		memcpy(data, dataManager->getDataPointer(), (size_t)dataManager->getVkSize());
 		vkUnmapMemory(device.logicalDevice, vertexBufferMemories[idx]);
 	}
 
@@ -376,19 +373,6 @@ class GraphicEngine
 		}
 
 		throw std::runtime_error("failed to find suitable memory type!");
-	}
-
-	void createCommandBuffer()
-	{
-		commandBuffers.resize(config.maxFramesInFlight);
-
-		VkCommandBufferAllocateInfo allocInfo{};
-		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-		allocInfo.commandPool = device.graphicsCommandPool;
-		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-		allocInfo.commandBufferCount = (uint32_t)commandBuffers.size();
-
-		VK_CHECK(vkAllocateCommandBuffers(device.logicalDevice, &allocInfo, commandBuffers.data()));
 	}
 
 	void createRenderPass()

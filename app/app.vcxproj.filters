@@ -48,7 +48,7 @@
     <ClCompile Include="validation_manager.cpp">
       <Filter>Source Files\graphic_engine</Filter>
     </ClCompile>
-    <ClCompile Include="data_provider.cpp">
+    <ClCompile Include="data_manager.cpp">
       <Filter>Source Files\data_tools</Filter>
     </ClCompile>
     <ClCompile Include="vertex.cpp">
@@ -72,7 +72,7 @@
     <ClCompile Include="fps_counter.cpp">
       <Filter>Source Files\core</Filter>
     </ClCompile>
-    <ClCompile Include="window_provider.cpp">
+    <ClCompile Include="window_manager.cpp">
       <Filter>Source Files\window</Filter>
     </ClCompile>
     <ClCompile Include="aabb.cpp">

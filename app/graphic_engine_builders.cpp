@@ -2,14 +2,14 @@
 
 #include "validation_manager.cpp"
 #include "vulkan_tools.cpp"
-#include "window_provider.cpp"
+#include "window_manager.cpp"
 #include <vulkan/vulkan_core.h>
 
 struct InstanceBuilder
 {
 	ValidationManager* validationManager;
 	GraphicsEngineConfig config;
-	WindowProvider* windowProvider;
+	WindowManager* windowManager;
 
 	void build(VkInstance* instance)
 	{
@@ -25,7 +25,7 @@ struct InstanceBuilder
 
 		std::vector<const char*> instance_extensions{};
 
-		auto win_ext = windowProvider->getVulkanExtensions();
+		auto win_ext = windowManager->getVulkanExtensions();
 		instance_extensions.insert(instance_extensions.end(), win_ext.begin(), win_ext.end());
 
 		auto debug_ext = validationManager->getDebugMessengerExtensions(config);

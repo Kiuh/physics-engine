@@ -2,15 +2,15 @@
 
 #include "aabb.cpp"
 #include "vertex.cpp"
-#include "window_provider.cpp"
+#include "window_manager.cpp"
 #include <cstdint>
 #include <mutex>
 #include <vector>
 
-class DataProvider
+class DataManager
 {
 	private:
-	WindowProvider* window;
+	WindowManager* window;
 	std::vector<Vertex> vertices = {};
 	uint32_t pixelsPerUnit = 50;
 
@@ -18,7 +18,7 @@ class DataProvider
 	std::vector<AABB> boxes = {};
 	std::mutex data_mutex{};
 
-	DataProvider(WindowProvider* window)
+	DataManager(WindowManager* window)
 	{
 		this->window = window;
 		prepareDataToDraw();
@@ -76,7 +76,7 @@ class DataProvider
 		return vertices.data();
 	}
 
-	void worldToScreen(Vertex& vert, WindowProvider* wp, uint32_t pixelsPerUnit)
+	void worldToScreen(Vertex& vert, WindowManager* wp, uint32_t pixelsPerUnit)
 	{
 		auto screen = wp->getSize();
 		screen /= 2.0f;

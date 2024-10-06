@@ -19,7 +19,7 @@ enum KeyCode
 	R,
 };
 
-class WindowProvider
+class WindowManager
 {
 	private:
 	glm::ivec2 size;
@@ -30,7 +30,7 @@ class WindowProvider
 	boost::signals2::signal<void()> windowResized;
 	boost::signals2::signal<void(KeyCode)> keyPressed;
 
-	WindowProvider(glm::ivec2 size, std::string title)
+	WindowManager(glm::ivec2 size, std::string title)
 	{
 		this->size = size;
 		this->title = title;
@@ -86,7 +86,7 @@ class WindowProvider
 		return surface;
 	}
 
-	~WindowProvider()
+	~WindowManager()
 	{
 		glfwDestroyWindow(window);
 		glfwTerminate();
@@ -95,14 +95,14 @@ class WindowProvider
 	private:
 	static void framebufferResizeCallback(GLFWwindow* window, int width, int height)
 	{
-		auto window_provider = reinterpret_cast<WindowProvider*>(glfwGetWindowUserPointer(window));
+		auto window_provider = reinterpret_cast<WindowManager*>(glfwGetWindowUserPointer(window));
 		glfwGetFramebufferSize(window, &window_provider->size.x, &window_provider->size.y);
 		window_provider->windowResized();
 	}
 
 	static void keyCallback(GLFWwindow* window, int key, int scanCode, int action, int mods)
 	{
-		auto window_provider = reinterpret_cast<WindowProvider*>(glfwGetWindowUserPointer(window));
+		auto window_provider = reinterpret_cast<WindowManager*>(glfwGetWindowUserPointer(window));
 		if (action == GLFW_PRESS)
 		{
 			KeyCode code = KeyCode::Undefined;

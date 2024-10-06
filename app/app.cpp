@@ -1,10 +1,10 @@
 #pragma once
 
-#include "data_provider.cpp"
+#include "data_manager.cpp"
 #include "fps_counter.cpp"
 #include "graphic_engine.cpp"
 #include "physics_engine.cpp"
-#include "window_provider.cpp"
+#include "window_manager.cpp"
 
 #include <cstdint>
 #include <exception>
@@ -25,8 +25,9 @@ class App
 
 	GraphicsEngineConfig graphicsEngineConfig;
 
-	std::unique_ptr<WindowProvider> windowProvider;
-	std::unique_ptr<DataProvider> dataProvider;
+	std::unique_ptr<WindowManager> windowManager;
+	std::unique_ptr<DataManager> dataManager;
+
 	std::unique_ptr<GraphicEngine> graphicsEngine;
 	std::unique_ptr<PhysicsEngine> physicsEngine;
 
@@ -47,10 +48,11 @@ class App
 #endif
 		graphicsEngineConfig.maxFramesInFlight = 2;
 
-		this->windowProvider = std::make_unique<WindowProvider>(size, title);
-		this->dataProvider = std::make_unique<DataProvider>(windowProvider.get());
-		this->physicsEngine = std::make_unique<PhysicsEngine>(windowProvider.get(), dataProvider.get());
-		this->graphicsEngine = std::make_unique<GraphicEngine>(windowProvider.get(), dataProvider.get(), graphicsEngineConfig);
+		this->windowManager = std::make_unique<WindowManager>(size, title);
+		this->dataManager = std::make_unique<DataManager>(windowManager.get());
+
+		this->physicsEngine = std::make_unique<PhysicsEngine>(windowManager.get(), dataManager.get());
+		this->graphicsEngine = std::make_unique<GraphicEngine>(windowManager.get(), dataManager.get(), graphicsEngineConfig);
 
 		this->graphicFrameCounter = std::make_unique<FpsCounter>("Graphic FPS");
 		this->physicFrameCounter = std::make_unique<FpsCounter>("Physics FPS");
@@ -66,9 +68,9 @@ class App
 		graphicThread = std::make_unique<std::thread>(&App::graphicThreadFunc, this);
 		physicsThread = std::make_unique<std::thread>(&App::physicsThreadFunc, this);
 
-		while (!windowProvider->isShouldClose())
+		while (!windowManager->isShouldClose())
 		{
-			windowProvider->poolEvents();
+			windowManager->poolEvents();
 		}
 		isRunning = false;
 

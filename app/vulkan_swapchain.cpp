@@ -2,7 +2,7 @@
 
 #include "vulkan_device.cpp"
 #include "vulkan_tools.cpp"
-#include "window_provider.cpp"
+#include "window_manager.cpp"
 #include <algorithm>
 #include <cstdint>
 #include <cstring>
@@ -21,7 +21,7 @@ struct VulkanSwapchain
 	// Required
 	VulkanDevice* vulkanDevice;
 	VkSurfaceKHR surface;
-	WindowProvider* windowProvider;
+	WindowManager* windowManager;
 
 	// Exposed
 	VkSwapchainKHR instance;
@@ -231,7 +231,7 @@ struct VulkanSwapchain
 		}
 		else
 		{
-			auto extendSize = windowProvider->getSize();
+			auto extendSize = windowManager->getSize();
 
 			VkExtent2D actualExtent = {
 				static_cast<uint32_t>(extendSize.x),

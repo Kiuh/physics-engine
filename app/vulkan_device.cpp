@@ -39,6 +39,7 @@ struct VulkanDevice
 	VkInstance instance;
 	VkSurfaceKHR surface;
 	ValidationManager* validationManager;
+	GraphicsEngineConfig config;
 
 	// Exposed
 	VkPhysicalDevice physicalDevice;
@@ -49,6 +50,7 @@ struct VulkanDevice
 	SwapChainSupportDetails swapChainSupport;
 
 	VkCommandPool graphicsCommandPool;
+	std::vector<VkCommandBuffer> commandBuffers;
 
 	void init()
 	{
@@ -57,6 +59,7 @@ struct VulkanDevice
 		queueFamilyIndices = findQueueFamilies(physicalDevice);
 		swapChainSupport = querySwapChainSupport(physicalDevice);
 		createCommandPool();
+		createCommandBuffers();
 	}
 
 	void waitIdle() const
@@ -71,6 +74,19 @@ struct VulkanDevice
 	}
 
 	private:
+	void createCommandBuffers()
+	{
+		commandBuffers.resize(config.maxFramesInFlight);
+
+		VkCommandBufferAllocateInfo allocInfo{};
+		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+		allocInfo.commandPool = graphicsCommandPool;
+		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+		allocInfo.commandBufferCount = (uint32_t)commandBuffers.size();
+
+		VK_CHECK(vkAllocateCommandBuffers(logicalDevice, &allocInfo, commandBuffers.data()));
+	}
+
 	void createCommandPool()
 	{
 		VkCommandPoolCreateInfo poolInfo{};

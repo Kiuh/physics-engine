@@ -1,9 +1,10 @@
 #pragma once
 
 #include "aabb.cpp"
-#include "data_provider.cpp"
+#include "data_manager.cpp"
 #include "random_helper.cpp"
-#include "window_provider.cpp"
+#include "window_manager.cpp"
+
 #include <boost/bind/bind.hpp>
 #include <boost/random.hpp>
 #include <iostream>
@@ -14,11 +15,11 @@ static const float gravity_scale = 3.0f;
 class PhysicsEngine
 {
 	private:
-	DataProvider* data;
+	DataManager* data;
 	size_t initialBoxCount = 10;
 
 	public:
-	PhysicsEngine(WindowProvider* win, DataProvider* data)
+	PhysicsEngine(WindowManager* win, DataManager* data)
 	{
 		this->data = data;
 		win->keyPressed.connect(boost::bind(&PhysicsEngine::processKeyPress, this, boost::placeholders::_1));
