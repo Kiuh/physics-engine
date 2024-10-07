@@ -2,6 +2,7 @@
 
 #include "validation_manager.cpp"
 #include "vulkan_tools.cpp"
+#include "log_tools.cpp"
 #include <cstdint>
 #include <optional>
 #include <set>
@@ -14,10 +15,13 @@ struct QueueFamilyIndices
 {
 	std::optional<uint32_t> graphicsFamily{};
 	std::optional<uint32_t> presentFamily{};
+	std::optional<uint32_t> transferFamily{};
 
 	bool isComplete() const
 	{
-		return graphicsFamily.has_value() && presentFamily.has_value();
+		return graphicsFamily.has_value()
+			&& presentFamily.has_value()
+			&& transferFamily.has_value();
 	}
 };
 
@@ -46,10 +50,12 @@ struct VulkanDevice
 	VkDevice logicalDevice{};
 	VkQueue graphicsQueue{};
 	VkQueue presentQueue{};
+	VkQueue transferQueue{};
 	QueueFamilyIndices queueFamilyIndices{};
 	SwapChainSupportDetails swapChainSupport{};
 
 	VkCommandPool graphicsCommandPool{};
+	VkCommandPool transferCommandPool{};
 	std::vector<VkCommandBuffer> commandBuffers{};
 
 	void init()
@@ -58,8 +64,19 @@ struct VulkanDevice
 		createLogicalDevice();
 		queueFamilyIndices = findQueueFamilies(physicalDevice);
 		swapChainSupport = querySwapChainSupport(physicalDevice);
-		createCommandPool();
+		createCommandPools();
 		createCommandBuffers();
+
+		if (config.isDebug)
+		{
+			VkPhysicalDeviceProperties prop{};
+			vkGetPhysicalDeviceProperties(physicalDevice, &prop);
+			std::cerr << "+++Picked device: " << prop.deviceName << std::endl;
+			std::cerr << "graphicsQueue: " << queueFamilyIndices.graphicsFamily.value() << std::endl;
+			std::cerr << "presentQueue: " << queueFamilyIndices.presentFamily.value() << std::endl;
+			std::cerr << "transferQueue: " << queueFamilyIndices.transferFamily.value() << std::endl;
+			std::cerr << std::endl;
+		}
 	}
 
 	void waitIdle() const
@@ -70,6 +87,7 @@ struct VulkanDevice
 	void cleanup() const
 	{
 		vkDestroyCommandPool(logicalDevice, graphicsCommandPool, nullptr);
+		vkDestroyCommandPool(logicalDevice, transferCommandPool, nullptr);
 		vkDestroyDevice(logicalDevice, nullptr);
 	}
 
@@ -87,7 +105,7 @@ struct VulkanDevice
 		VK_CHECK(vkAllocateCommandBuffers(logicalDevice, &allocInfo, commandBuffers.data()));
 	}
 
-	void createCommandPool()
+	void createCommandPools()
 	{
 		VkCommandPoolCreateInfo poolInfo{};
 		poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -95,6 +113,13 @@ struct VulkanDevice
 		poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
 
 		VK_CHECK(vkCreateCommandPool(logicalDevice, &poolInfo, nullptr, &graphicsCommandPool));
+
+		VkCommandPoolCreateInfo poolInfo1{};
+		poolInfo1.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+		poolInfo1.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
+		poolInfo1.queueFamilyIndex = queueFamilyIndices.transferFamily.value();
+
+		VK_CHECK(vkCreateCommandPool(logicalDevice, &poolInfo1, nullptr, &transferCommandPool));
 	}
 
 	void createLogicalDevice()
@@ -102,7 +127,10 @@ struct VulkanDevice
 		QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
 
 		std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
-		std::set<uint32_t> uniqueQueueFamilies = { indices.graphicsFamily.value() };
+		std::set<uint32_t> uniqueQueueFamilies = {
+			indices.graphicsFamily.value(),
+			indices.transferFamily.value(),
+		};
 
 		float queuePriority = 1.0f;
 		for (uint32_t queueFamily : uniqueQueueFamilies)
@@ -112,6 +140,7 @@ struct VulkanDevice
 			queueCreateInfo.queueFamilyIndex = queueFamily;
 			queueCreateInfo.queueCount = 1;
 			queueCreateInfo.pQueuePriorities = &queuePriority;
+
 			queueCreateInfos.push_back(queueCreateInfo);
 		}
 
@@ -131,6 +160,7 @@ struct VulkanDevice
 
 		vkGetDeviceQueue(logicalDevice, indices.graphicsFamily.value(), 0, &graphicsQueue);
 		vkGetDeviceQueue(logicalDevice, indices.presentFamily.value(), 0, &presentQueue);
+		vkGetDeviceQueue(logicalDevice, indices.transferFamily.value(), 0, &transferQueue);
 	}
 
 	void pickPhysicalDevice()
@@ -145,6 +175,11 @@ struct VulkanDevice
 
 		std::vector<VkPhysicalDevice> devices(deviceCount);
 		VK_CHECK(vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data()));
+
+		if (config.isDebug)
+		{
+			logAllVkPhysicalDevices(devices);
+		}
 
 		for (const auto& device : devices)
 		{
@@ -204,28 +239,42 @@ struct VulkanDevice
 		std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
 		vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
 
-		int i = 0;
-		for (const auto& queueFamily : queueFamilies)
+		// Find Graphics family
+		for (uint32_t i = 0; i < queueFamilies.size(); i++)
 		{
-			if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+			if (queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
 			{
 				indices.graphicsFamily = i;
+				break;
 			}
+		}
 
+		// Find Present family
+		for (uint32_t i = 0; i < queueFamilies.size(); i++)
+		{
 			VkBool32 presentSupport = false;
 			vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
 
 			if (presentSupport)
 			{
 				indices.presentFamily = i;
-			}
-
-			if (indices.isComplete())
-			{
 				break;
 			}
+		}
 
-			i++;
+		// Find Graphics family
+		for (uint32_t i = 0; i < queueFamilies.size(); i++)
+		{
+			if (i == indices.graphicsFamily.value())
+			{
+				continue;
+			}
+
+			if (queueFamilies[i].queueFlags & VK_QUEUE_TRANSFER_BIT)
+			{
+				indices.transferFamily = i;
+				break;
+			}
 		}
 
 		return indices;

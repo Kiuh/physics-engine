@@ -11,7 +11,7 @@ struct InstanceBuilder
 	GraphicsEngineConfig config;
 	WindowManager* windowManager;
 
-	void build(VkInstance* instance)
+	void build(VkInstance& instance)
 	{
 		validationManager->init(config);
 
@@ -38,8 +38,8 @@ struct InstanceBuilder
 		createInfo.ppEnabledExtensionNames = instance_extensions.data();
 		validationManager->addMessengerToInstance(createInfo);
 
-		VK_CHECK(vkCreateInstance(&createInfo, nullptr, instance));
+		VK_CHECK(vkCreateInstance(&createInfo, nullptr, &instance));
 
-		validationManager->setupDebugMessenger(*instance);
+		validationManager->setupDebugMessenger(instance);
 	}
 };

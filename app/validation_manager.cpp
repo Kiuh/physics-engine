@@ -10,14 +10,25 @@
 #include <vulkan/vulkan_core.h>
 #include <magic_enum/magic_enum.hpp>
 
+static bool replace(std::string& str, const std::string& from, const std::string& to)
+{
+	size_t start_pos = str.find(from);
+	if (start_pos == std::string::npos)
+		return false;
+	str.replace(start_pos, from.length(), to);
+	return true;
+}
+
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 	VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
 	VkDebugUtilsMessageTypeFlagsEXT messageType,
 	const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
 	void* pUserData)
 {
-	std::cerr << std::string(magic_enum::enum_name(messageSeverity)) << std::endl;
-	std::cerr << pCallbackData->pMessage << std::endl;
+	auto msg = std::string(pCallbackData->pMessage);
+	replace(msg, " The Vulkan spec states", "\nThe Vulkan spec states");
+	replace(msg, " (https:", "\n(https:");
+	std::cerr << msg << std::endl << std::endl;
 	return VK_FALSE;
 }
 
@@ -25,7 +36,7 @@ struct ValidationManager
 {
 	private:
 	const std::vector<const char*> validationLayers = {
-		"VK_LAYER_KHRONOS_validation"
+		"VK_LAYER_KHRONOS_validation",
 	};
 	VkDebugUtilsMessengerEXT debugMessenger{};
 	VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
@@ -109,12 +120,21 @@ struct ValidationManager
 		}
 	}
 
+	private:
 	bool checkValidationLayerSupport()
 	{
 		uint32_t layerCount;
 		vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
 		std::vector<VkLayerProperties> availableLayers(layerCount);
 		vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
+
+		std::cerr << "Available Validation Layers: " << std::endl;
+		for (const char* layerName : validationLayers)
+		{
+			std::cerr << layerName << std::endl;
+		}
+		std::cerr << std::endl;
+
 		for (const char* layerName : validationLayers)
 		{
 			bool layerFound = false;
@@ -136,7 +156,21 @@ struct ValidationManager
 		return true;
 	}
 
-	private:
+	void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo)
+	{
+		createInfo = {};
+		createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+		createInfo.messageSeverity =
+			VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
+			VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+			VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+		createInfo.messageType =
+			VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
+			VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
+			VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+		createInfo.pfnUserCallback = debugCallback;
+	}
+
 	VkResult CreateDebugUtilsMessengerEXT(VkInstance& instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger)
 	{
 		auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
@@ -148,15 +182,6 @@ struct ValidationManager
 		{
 			return VK_ERROR_EXTENSION_NOT_PRESENT;
 		}
-	}
-
-	void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo)
-	{
-		createInfo = {};
-		createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-		createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
-		createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
-		createInfo.pfnUserCallback = debugCallback;
 	}
 
 	void DestroyDebugUtilsMessengerEXT(VkInstance& instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator)

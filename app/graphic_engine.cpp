@@ -89,7 +89,7 @@ class GraphicEngine
 		instanceBuilder.config = config;
 		instanceBuilder.validationManager = &validationManager;
 		instanceBuilder.windowManager = windowManager;
-		instanceBuilder.build(&instance);
+		instanceBuilder.build(instance);
 
 		// Create Surface
 		surface = windowManager->createVkSurface(instance);
@@ -303,10 +303,23 @@ class GraphicEngine
 		for (size_t i = 0; i < config.maxFramesInFlight; i++)
 		{
 			// Create working buffer
+			auto queueFamilyIndices = std::vector<uint32_t>
+			{
+				device.queueFamilyIndices.graphicsFamily.value(),
+				device.queueFamilyIndices.transferFamily.value(),
+			};
+
+			VkBufferCreateInfo createInfo{};
+			createInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+			createInfo.size = dataManager->getVkSize();
+			createInfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+			createInfo.sharingMode = VK_SHARING_MODE_CONCURRENT;
+			createInfo.queueFamilyIndexCount = (uint32_t)queueFamilyIndices.size();
+			createInfo.pQueueFamilyIndices = queueFamilyIndices.data();
+
 			createBuffer(
 				device,
-				dataManager->getVkSize(),
-				VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+				createInfo,
 				VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 				vertexBuffers[i],
 				vertexBuffersMemory[i]
@@ -318,12 +331,19 @@ class GraphicEngine
 
 	void copyNewDataToBuffer(size_t idx)
 	{
+		VkBufferCreateInfo createInfo{};
+		createInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+		createInfo.size = dataManager->getVkSize();
+		createInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+		createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+		createInfo.queueFamilyIndexCount = 1;
+		createInfo.pQueueFamilyIndices = &device.queueFamilyIndices.transferFamily.value();
+
 		VkBuffer stagingBuffer{};
 		VkDeviceMemory stagingBufferMemory{};
 		createBuffer(
 			device,
-			dataManager->getVkSize(),
-			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+			createInfo,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
 			stagingBuffer,
 			stagingBufferMemory

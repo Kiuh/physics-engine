@@ -20,21 +20,13 @@ static uint32_t findMemoryType(VulkanDevice device, uint32_t typeFilter, VkMemor
 
 static void createBuffer(
 	VulkanDevice device,
-	VkDeviceSize size,
-	VkBufferUsageFlags usage,
+	VkBufferCreateInfo createInfo,
 	VkMemoryPropertyFlags properties,
 	VkBuffer& buffer,
 	VkDeviceMemory& bufferMemory
 )
 {
-	VkBufferCreateInfo bufferInfo{};
-	bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-	bufferInfo.size = size;
-	bufferInfo.usage = usage;
-	bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-
-	VK_CHECK(vkCreateBuffer(device.logicalDevice, &bufferInfo, nullptr, &buffer));
-
+	VK_CHECK(vkCreateBuffer(device.logicalDevice, &createInfo, nullptr, &buffer));
 	VkMemoryRequirements memRequirements;
 	vkGetBufferMemoryRequirements(device.logicalDevice, buffer, &memRequirements);
 
@@ -53,7 +45,7 @@ static void copyBuffer(VulkanDevice device, VkBuffer srcBuffer, VkBuffer dstBuff
 	VkCommandBufferAllocateInfo allocInfo{};
 	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-	allocInfo.commandPool = device.graphicsCommandPool;
+	allocInfo.commandPool = device.transferCommandPool;
 	allocInfo.commandBufferCount = 1;
 
 	VkCommandBuffer commandBuffer;
@@ -76,8 +68,8 @@ static void copyBuffer(VulkanDevice device, VkBuffer srcBuffer, VkBuffer dstBuff
 	submitInfo.commandBufferCount = 1;
 	submitInfo.pCommandBuffers = &commandBuffer;
 
-	VK_CHECK(vkQueueSubmit(device.graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE));
-	VK_CHECK(vkQueueWaitIdle(device.graphicsQueue));
+	VK_CHECK(vkQueueSubmit(device.transferQueue, 1, &submitInfo, VK_NULL_HANDLE));
+	VK_CHECK(vkQueueWaitIdle(device.transferQueue));
 
-	vkFreeCommandBuffers(device.logicalDevice, device.graphicsCommandPool, 1, &commandBuffer);
+	vkFreeCommandBuffers(device.logicalDevice, device.transferCommandPool, 1, &commandBuffer);
 }

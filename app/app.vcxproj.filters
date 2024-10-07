@@ -96,6 +96,9 @@
     <ClCompile Include="vulkan_buffer_tools.cpp">
       <Filter>Source Files\graphic_engine</Filter>
     </ClCompile>
+    <ClCompile Include="log_tools.cpp">
+      <Filter>Source Files\graphic_engine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="frag.spv">
