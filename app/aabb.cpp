@@ -7,7 +7,9 @@
 #include <stdexcept>
 #include <vector>
 
-static constexpr const size_t BOX_VERTEX_COUNT = 6;
+static const size_t AABB_VERTEX_COUNT = 4;
+static const size_t AABB_INDEXES_COUNT = 6;
+const std::vector<size_t> AABB_INDEXES = { 0, 1, 2, 2, 3, 0 };
 
 struct AABB
 {
@@ -60,21 +62,17 @@ struct AABB
 		this->color = color;
 	}
 
-	std::vector<Vertex> calculateVertices() const
+	std::vector<Vertex> getVertices() const
 	{
-		std::vector<Vertex> vertices(BOX_VERTEX_COUNT);
-
-		for (size_t i = 0; i < BOX_VERTEX_COUNT; i++)
+		std::vector<Vertex> vertices(AABB_VERTEX_COUNT);
+		for (size_t i = 0; i < AABB_VERTEX_COUNT; i++)
 		{
 			vertices[i].color = color.getValues();
 		}
 		vertices[0].pos = min;
 		vertices[1].pos = glm::vec2(min.x, max.y);
 		vertices[2].pos = max;
-		vertices[3].pos = min;
-		vertices[4].pos = max;
-		vertices[5].pos = glm::vec2(max.x, min.y);
-
+		vertices[3].pos = glm::vec2(max.x, min.y);
 		return vertices;
 	}
 

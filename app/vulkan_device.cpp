@@ -52,7 +52,6 @@ struct VulkanDevice
 	VkQueue presentQueue{};
 	VkQueue transferQueue{};
 	QueueFamilyIndices queueFamilyIndices{};
-	SwapChainSupportDetails swapChainSupport{};
 
 	VkCommandPool graphicsCommandPool{};
 	VkCommandPool transferCommandPool{};
@@ -63,7 +62,6 @@ struct VulkanDevice
 		pickPhysicalDevice();
 		createLogicalDevice();
 		queueFamilyIndices = findQueueFamilies(physicalDevice);
-		swapChainSupport = querySwapChainSupport(physicalDevice);
 		createCommandPools();
 		createCommandBuffers();
 
@@ -82,6 +80,11 @@ struct VulkanDevice
 	void waitIdle() const
 	{
 		vkDeviceWaitIdle(logicalDevice);
+	}
+
+	SwapChainSupportDetails getSwapChainSupportDetails() const
+	{
+		return querySwapChainSupport(physicalDevice);
 	}
 
 	void cleanup() const

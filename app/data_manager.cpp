@@ -12,6 +12,7 @@ class DataManager
 	private:
 	WindowManager* window;
 	std::vector<Vertex> vertices = {};
+	std::vector<uint16_t> indexes = {};
 	uint32_t pixelsPerUnit = 50;
 
 	public:
@@ -25,47 +26,62 @@ class DataManager
 
 	void addBox(AABB& box)
 	{
-		data_mutex.lock();
 		boxes.push_back(box);
-		data_mutex.unlock();
 	}
 
 	void prepareDataToDraw()
 	{
 		data_mutex.lock();
-		auto prev_size = vertices.size();
-		vertices.resize(boxes.size() * BOX_VERTEX_COUNT);
+		vertices.resize(boxes.size() * AABB_VERTEX_COUNT);
+		indexes.resize(boxes.size() * AABB_INDEXES_COUNT);
 		for (uint32_t i = 0; i < boxes.size(); i++)
 		{
-			auto box_vertices = boxes[i].calculateVertices();
-			for (uint32_t j = 0; j < BOX_VERTEX_COUNT; j++)
+			auto box_vertices = boxes[i].getVertices();
+			// Vertexes
+			for (uint32_t j = 0; j < AABB_VERTEX_COUNT; j++)
 			{
-				auto ind = i * BOX_VERTEX_COUNT + j;
+				auto ind = i * AABB_VERTEX_COUNT + j;
 				vertices[ind] = box_vertices[j];
 				worldToScreen(vertices[ind], window, pixelsPerUnit);
+			}
+			// Indexes
+			for (uint32_t j = 0; j < AABB_INDEXES_COUNT; j++)
+			{
+				auto ind = i * AABB_INDEXES_COUNT + j;
+				indexes[ind] = (uint16_t)(AABB_INDEXES[j] + i * AABB_VERTEX_COUNT);
 			}
 		}
 		data_mutex.unlock();
 	}
 
-	uint32_t verticesSize() const
+	uint32_t indexesCount() const
 	{
-		return static_cast<uint32_t>(vertices.size());
+		return static_cast<uint32_t>(indexes.size());
 	}
 
 	uint32_t triangleCount() const
 	{
-		return verticesSize() / 3;
+		return static_cast<uint32_t>(indexes.size() / 3);
 	}
 
-	VkDeviceSize getVkSize() const
+	VkDeviceSize getVkVertexesSize() const
 	{
 		return sizeof(Vertex) * vertices.size();
 	}
 
-	void* getDataPointer()
+	VkDeviceSize getVkIndexesSize() const
+	{
+		return sizeof(uint16_t) * indexes.size();
+	}
+
+	void* getVertexesPointer()
 	{
 		return vertices.data();
+	}
+
+	void* getIndexesPointer()
+	{
+		return indexes.data();
 	}
 
 	void worldToScreen(Vertex& vert, WindowManager* wp, uint32_t pixelsPerUnit)

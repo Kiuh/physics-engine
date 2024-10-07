@@ -34,10 +34,6 @@ struct VulkanSwapchain
 
 	private:
 	VkRenderPass* renderPass = nullptr;
-	VkSurfaceFormatKHR surfaceFormat{};
-	VkPresentModeKHR presentMode{};
-	VkSwapchainCreateInfoKHR createInfo{};
-	uint32_t imageCount = 0;
 
 	public:
 	void create()
@@ -55,7 +51,7 @@ struct VulkanSwapchain
 	void recreate()
 	{
 		cleanup();
-		recreateSwapChain();
+		createSwapChain();
 		createImageViews();
 		createFramebuffers();
 	}
@@ -76,36 +72,23 @@ struct VulkanSwapchain
 	}
 
 	private:
-	void recreateSwapChain()
-	{
-		VkExtent2D extent = chooseSwapExtent(vulkanDevice->swapChainSupport.capabilities);
-		createInfo.imageExtent = extent;
-
-		VK_CHECK(vkCreateSwapchainKHR(vulkanDevice->logicalDevice, &createInfo, nullptr, &instance));
-
-		vkGetSwapchainImagesKHR(vulkanDevice->logicalDevice, instance, &imageCount, nullptr);
-		images.resize(imageCount);
-		vkGetSwapchainImagesKHR(vulkanDevice->logicalDevice, instance, &imageCount, images.data());
-
-		imageFormat = surfaceFormat.format;
-		extent = extent;
-	}
-
 	void createSwapChain()
 	{
-		SwapChainSupportDetails swapChainSupport = vulkanDevice->swapChainSupport;
+		SwapChainSupportDetails swapChainSupport = vulkanDevice->getSwapChainSupportDetails();
 
-		surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
-		presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
+		VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
+		VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
 		VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
 
 		uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
 
-		if (swapChainSupport.capabilities.maxImageCount > 0 && imageCount > swapChainSupport.capabilities.maxImageCount)
+		if (swapChainSupport.capabilities.maxImageCount > 0
+			&& imageCount > swapChainSupport.capabilities.maxImageCount)
 		{
 			imageCount = swapChainSupport.capabilities.maxImageCount;
 		}
 
+		VkSwapchainCreateInfoKHR createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
 		createInfo.surface = surface;
 		createInfo.minImageCount = imageCount;
@@ -116,7 +99,10 @@ struct VulkanSwapchain
 		createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
 		QueueFamilyIndices indices = vulkanDevice->queueFamilyIndices;
-		uint32_t queueFamilyIndices[] = { indices.graphicsFamily.value(), indices.presentFamily.value() };
+		uint32_t queueFamilyIndices[] = {
+			indices.graphicsFamily.value(),
+			indices.presentFamily.value()
+		};
 
 		if (indices.graphicsFamily != indices.presentFamily)
 		{
@@ -201,7 +187,8 @@ struct VulkanSwapchain
 	{
 		for (const auto& availableFormat : availableFormats)
 		{
-			if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
+			if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB &&
+				availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
 			{
 				return availableFormat;
 			}
@@ -225,23 +212,24 @@ struct VulkanSwapchain
 
 	VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) const
 	{
-		if (capabilities.currentExtent.width != (std::numeric_limits<uint32_t>::max)())
-		{
-			return capabilities.currentExtent;
-		}
-		else
-		{
-			auto extendSize = windowManager->getSize();
+		auto extendSize = windowManager->getSize();
 
-			VkExtent2D actualExtent = {
-				static_cast<uint32_t>(extendSize.x),
-				static_cast<uint32_t>(extendSize.y)
-			};
+		VkExtent2D actualExtent = {
+			static_cast<uint32_t>(extendSize.x),
+			static_cast<uint32_t>(extendSize.y)
+		};
 
-			actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
-			actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
+		actualExtent.width = std::clamp(
+			actualExtent.width,
+			capabilities.minImageExtent.width,
+			capabilities.maxImageExtent.width
+		);
+		actualExtent.height = std::clamp(
+			actualExtent.height,
+			capabilities.minImageExtent.height,
+			capabilities.maxImageExtent.height
+		);
 
-			return actualExtent;
-		}
+		return actualExtent;
 	}
 };

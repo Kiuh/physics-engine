@@ -55,6 +55,9 @@ class GraphicEngine
 	std::vector<VkBuffer> vertexBuffers;
 	std::vector<VkDeviceMemory> vertexBuffersMemory;
 
+	std::vector<VkBuffer> indexBuffers;
+	std::vector<VkDeviceMemory> indexBuffersMemory;
+
 	GraphicEngine(WindowManager* windowProvider, DataManager* dataProvider, GraphicsEngineConfig config)
 	{
 		this->config = config;
@@ -115,7 +118,7 @@ class GraphicEngine
 		swapchain.addFrameBuffers(&renderPass);
 
 		dataManager->prepareDataToDraw();
-		createVertexBuffers();
+		createBuffers();
 		createSyncObjects();
 	}
 
@@ -126,10 +129,13 @@ class GraphicEngine
 		swapchain.recreate();
 	}
 
-	void cleanupVertexBuffer(size_t i)
+	void cleanupBuffers(size_t i)
 	{
 		vkDestroyBuffer(device.logicalDevice, vertexBuffers[i], nullptr);
 		vkFreeMemory(device.logicalDevice, vertexBuffersMemory[i], nullptr);
+
+		vkDestroyBuffer(device.logicalDevice, indexBuffers[i], nullptr);
+		vkFreeMemory(device.logicalDevice, indexBuffersMemory[i], nullptr);
 	}
 
 	void cleanup()
@@ -138,7 +144,7 @@ class GraphicEngine
 
 		for (size_t i = 0; i < config.maxFramesInFlight; i++)
 		{
-			cleanupVertexBuffer(i);
+			cleanupBuffers(i);
 		}
 
 		vkDestroyPipeline(device.logicalDevice, graphicsPipeline, nullptr);
@@ -165,7 +171,14 @@ class GraphicEngine
 		vkWaitForFences(device.logicalDevice, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
 		uint32_t imageIndex;
-		VkResult result = vkAcquireNextImageKHR(device.logicalDevice, swapchain.instance, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
+		VkResult result = vkAcquireNextImageKHR(
+			device.logicalDevice,
+			swapchain.instance,
+			UINT64_MAX,
+			imageAvailableSemaphores[currentFrame],
+			VK_NULL_HANDLE,
+			&imageIndex
+		);
 
 		if (result == VK_ERROR_OUT_OF_DATE_KHR)
 		{
@@ -178,7 +191,7 @@ class GraphicEngine
 		}
 
 		dataManager->prepareDataToDraw();
-		copyNewDataToBuffer(currentFrame);
+		copyNewDataToBuffers(currentFrame);
 
 		vkResetFences(device.logicalDevice, 1, &inFlightFences[currentFrame]);
 
@@ -286,19 +299,23 @@ class GraphicEngine
 
 		VkBuffer vertexBuffers[] = { this->vertexBuffers[currentFrame] };
 		VkDeviceSize offsets[] = { 0 };
-		vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 
-		vkCmdDraw(commandBuffer, dataManager->verticesSize(), dataManager->triangleCount(), 0, 0);
+		vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+		vkCmdBindIndexBuffer(commandBuffer, indexBuffers[currentFrame], 0, VK_INDEX_TYPE_UINT16);
+
+		vkCmdDrawIndexed(commandBuffer, dataManager->indexesCount(), dataManager->triangleCount(), 0, 0, 0);
 
 		vkCmdEndRenderPass(commandBuffer);
 
 		VK_CHECK(vkEndCommandBuffer(commandBuffer));
 	}
 
-	void createVertexBuffers()
+	void createBuffers()
 	{
 		vertexBuffers.resize(config.maxFramesInFlight);
 		vertexBuffersMemory.resize(config.maxFramesInFlight);
+		indexBuffers.resize(config.maxFramesInFlight);
+		indexBuffersMemory.resize(config.maxFramesInFlight);
 
 		for (size_t i = 0; i < config.maxFramesInFlight; i++)
 		{
@@ -309,55 +326,109 @@ class GraphicEngine
 				device.queueFamilyIndices.transferFamily.value(),
 			};
 
-			VkBufferCreateInfo createInfo{};
-			createInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-			createInfo.size = dataManager->getVkSize();
-			createInfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-			createInfo.sharingMode = VK_SHARING_MODE_CONCURRENT;
-			createInfo.queueFamilyIndexCount = (uint32_t)queueFamilyIndices.size();
-			createInfo.pQueueFamilyIndices = queueFamilyIndices.data();
+			VkBufferCreateInfo vertexCreateInfo{};
+			vertexCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+			vertexCreateInfo.size = dataManager->getVkVertexesSize();
+			vertexCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+			vertexCreateInfo.sharingMode = VK_SHARING_MODE_CONCURRENT;
+			vertexCreateInfo.queueFamilyIndexCount = (uint32_t)queueFamilyIndices.size();
+			vertexCreateInfo.pQueueFamilyIndices = queueFamilyIndices.data();
 
 			createBuffer(
 				device,
-				createInfo,
+				vertexCreateInfo,
 				VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 				vertexBuffers[i],
 				vertexBuffersMemory[i]
 			);
 
-			copyNewDataToBuffer(i);
+			VkBufferCreateInfo indicesCreateInfo{};
+			indicesCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+			indicesCreateInfo.size = dataManager->getVkIndexesSize();
+			indicesCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+			indicesCreateInfo.sharingMode = VK_SHARING_MODE_CONCURRENT;
+			indicesCreateInfo.queueFamilyIndexCount = (uint32_t)queueFamilyIndices.size();
+			indicesCreateInfo.pQueueFamilyIndices = queueFamilyIndices.data();
+
+			createBuffer(
+				device,
+				indicesCreateInfo,
+				VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+				indexBuffers[i],
+				indexBuffersMemory[i]
+			);
 		}
 	}
 
-	void copyNewDataToBuffer(size_t idx)
+	void copyNewDataToBuffers(size_t idx)
 	{
-		VkBufferCreateInfo createInfo{};
-		createInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-		createInfo.size = dataManager->getVkSize();
-		createInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-		createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-		createInfo.queueFamilyIndexCount = 1;
-		createInfo.pQueueFamilyIndices = &device.queueFamilyIndices.transferFamily.value();
+		dataManager->data_mutex.lock();
+		auto vertexesBufferSize = dataManager->getVkVertexesSize();
 
-		VkBuffer stagingBuffer{};
-		VkDeviceMemory stagingBufferMemory{};
+		VkBufferCreateInfo vertexCreateInfo{};
+		vertexCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+		vertexCreateInfo.size = vertexesBufferSize;
+		vertexCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+		vertexCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+		vertexCreateInfo.queueFamilyIndexCount = 1;
+		vertexCreateInfo.pQueueFamilyIndices = &device.queueFamilyIndices.transferFamily.value();
+
+		VkBuffer vertexStagingBuffer{};
+		VkDeviceMemory vertexStagingBufferMemory{};
 		createBuffer(
 			device,
-			createInfo,
+			vertexCreateInfo,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-			stagingBuffer,
-			stagingBufferMemory
+			vertexStagingBuffer,
+			vertexStagingBufferMemory
 		);
 
-		void* data;
-		VK_CHECK(vkMapMemory(device.logicalDevice, stagingBufferMemory, 0, dataManager->getVkSize(), 0, &data));
-		memcpy(data, dataManager->getDataPointer(), (size_t)dataManager->getVkSize());
-		vkUnmapMemory(device.logicalDevice, stagingBufferMemory);
+		// Copy data to stage buffer
+		void* vertexes_data;
+		VK_CHECK(vkMapMemory(device.logicalDevice, vertexStagingBufferMemory, 0, vertexesBufferSize, 0, &vertexes_data));
+		memcpy(vertexes_data, dataManager->getVertexesPointer(), (size_t)vertexesBufferSize);
+		vkUnmapMemory(device.logicalDevice, vertexStagingBufferMemory);
 
-		copyBuffer(device, stagingBuffer, vertexBuffers[idx], dataManager->getVkSize());
+		// Copy data from stage buffer to working buffer
+		copyBuffer(device, vertexStagingBuffer, vertexBuffers[idx], vertexesBufferSize);
 
-		vkDestroyBuffer(device.logicalDevice, stagingBuffer, nullptr);
-		vkFreeMemory(device.logicalDevice, stagingBufferMemory, nullptr);
+		vkDestroyBuffer(device.logicalDevice, vertexStagingBuffer, nullptr);
+		vkFreeMemory(device.logicalDevice, vertexStagingBufferMemory, nullptr);
+
+		// -- INDEXES
+
+		auto indexesBufferSize = dataManager->getVkIndexesSize();
+
+		VkBufferCreateInfo indicesCreateInfo{};
+		indicesCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+		indicesCreateInfo.size = indexesBufferSize;
+		indicesCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+		indicesCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+		indicesCreateInfo.queueFamilyIndexCount = 1;
+		indicesCreateInfo.pQueueFamilyIndices = &device.queueFamilyIndices.transferFamily.value();
+
+		VkBuffer indicesStagingBuffer{};
+		VkDeviceMemory indicesStagingBufferMemory{};
+		createBuffer(
+			device,
+			indicesCreateInfo,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+			indicesStagingBuffer,
+			indicesStagingBufferMemory
+		);
+
+		// Copy data to stage buffer
+		void* indices_data;
+		VK_CHECK(vkMapMemory(device.logicalDevice, indicesStagingBufferMemory, 0, indexesBufferSize, 0, &indices_data));
+		memcpy(indices_data, dataManager->getIndexesPointer(), (size_t)indexesBufferSize);
+		vkUnmapMemory(device.logicalDevice, indicesStagingBufferMemory);
+
+		// Copy data from stage buffer to working buffer
+		copyBuffer(device, indicesStagingBuffer, indexBuffers[idx], indexesBufferSize);
+
+		vkDestroyBuffer(device.logicalDevice, indicesStagingBuffer, nullptr);
+		vkFreeMemory(device.logicalDevice, indicesStagingBufferMemory, nullptr);
+		dataManager->data_mutex.unlock();
 	}
 
 	void createRenderPass()

@@ -28,6 +28,7 @@ class PhysicsEngine
 
 	void createInitialObjects()
 	{
+		data->data_mutex.lock();
 		data->boxes.clear();
 		for (size_t i = 0; i < initialBoxCount; i++)
 		{
@@ -36,6 +37,7 @@ class PhysicsEngine
 		auto plate = AABB::make(glm::vec2{ -10, -8 }, glm::vec2{ 10, -5 }, Color{});
 		plate.mass = 100.0f;
 		data->addBox(plate);
+		data->data_mutex.unlock();
 	}
 
 	void createBox()
