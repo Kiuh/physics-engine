@@ -162,6 +162,7 @@
   <ItemGroup>
     <ClCompile Include="app.cpp" />
     <ClCompile Include="aabb.cpp" />
+    <ClCompile Include="circle.cpp" />
     <ClCompile Include="color.cpp" />
     <ClCompile Include="graphic_engine_builders.cpp" />
     <ClCompile Include="lodepng.cpp" />
@@ -174,6 +175,7 @@
     <ClCompile Include="graphic_engine.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="vertex.cpp" />
+    <ClCompile Include="vertex_source.cpp" />
     <ClCompile Include="vulkan_buffer.cpp" />
     <ClCompile Include="vulkan_device.cpp" />
     <ClCompile Include="vulkan_swapchain.cpp" />

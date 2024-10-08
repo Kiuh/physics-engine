@@ -1,8 +1,9 @@
 #pragma once
 
-#include "aabb.cpp"
+#include "vertex_source.cpp"
 #include "vertex.cpp"
 #include "window_manager.cpp"
+#include "aabb.cpp"
 #include <cstdint>
 #include <mutex>
 #include <vector>
@@ -10,50 +11,84 @@
 class DataManager
 {
 	private:
-	WindowManager* window;
-	std::vector<Vertex> vertices = {};
-	std::vector<uint16_t> indexes = {};
+	WindowManager* window = nullptr;
+	std::vector<Vertex> vertices{};
+	std::vector<uint16_t> indexes{};
 	uint32_t pixelsPerUnit = 50;
+	std::vector<VertexSource*> dataSources{};
 
 	public:
-	std::vector<AABB> boxes = { AABB{} };
 	std::mutex data_mutex{};
+	boost::signals2::signal<void()> dataStructureChanged{};
+	std::vector<AABB*> boxes{};
 
 	DataManager(WindowManager* window)
 	{
 		this->window = window;
 	}
 
-	void addBox(AABB& box)
+	void clearObjects()
 	{
+		dataSources.clear();
+		for (size_t i = 0; i < boxes.size(); i++)
+		{
+			delete boxes[i];
+		}
+		boxes.clear();
+	}
+
+	void addAABB(AABB* box)
+	{
+		dataSources.push_back(box);
 		boxes.push_back(box);
+	}
+
+	void notifyStructureChanging()
+	{
+		createDataSpace();
+		dataStructureChanged();
 	}
 
 	void createDataSpace() // resize and add correct indexes
 	{
-		vertices.resize(boxes.size() * AABB_VERTEX_COUNT, Vertex{});
-		indexes.resize(boxes.size() * AABB_INDEXES_COUNT, 0);
-		for (uint32_t i = 0; i < boxes.size(); i++)
+		data_mutex.lock();
+		size_t vertices_count = 0;
+		size_t indexes_count = 0;
+
+		for (size_t i = 0; i < dataSources.size(); i++)
 		{
-			for (uint32_t j = 0; j < AABB_INDEXES_COUNT; j++)
-			{
-				auto ind = i * AABB_INDEXES_COUNT + j;
-				indexes[ind] = (uint16_t)(AABB_INDEXES[j] + i * AABB_VERTEX_COUNT);
-			}
+			vertices_count += dataSources[i]->getVertexesCount();
+			indexes_count += dataSources[i]->getIndexesCount();
 		}
+
+		vertices.resize(vertices_count, Vertex{});
+		indexes.resize(indexes_count, 0);
+
+		size_t start_space = 0;
+		size_t ind_iter = 0;
+		for (auto& source : dataSources)
+		{
+			for (auto& index : source->getIndexes())
+			{
+				indexes[ind_iter] = static_cast<uint16_t>(start_space + index);
+				ind_iter++;
+			}
+			start_space += source->getVertexesCount();
+		}
+		data_mutex.unlock();
 	}
 
-	void recalculateValues() // copy vertexes from boxes
+	void recalculateVertexes() // copy vertexes from boxes
 	{
 		data_mutex.lock();
-		for (uint32_t i = 0; i < boxes.size(); i++)
+		uint32_t vert_iter = 0;
+		for (auto& source : dataSources)
 		{
-			auto box_vertices = boxes[i].getVertices();
-			for (uint32_t j = 0; j < AABB_VERTEX_COUNT; j++)
+			for (auto& vert : source->getVertexes())
 			{
-				auto ind = i * AABB_VERTEX_COUNT + j;
-				vertices[ind] = box_vertices[j];
-				worldToScreen(vertices[ind], window, pixelsPerUnit);
+				vertices[vert_iter] = vert;
+				worldToScreen(vertices[vert_iter], window, pixelsPerUnit);
+				vert_iter++;
 			}
 		}
 		data_mutex.unlock();
@@ -97,5 +132,10 @@ class DataManager
 		vert.pos /= screen;
 
 		vert.pos.y *= -1;
+	}
+
+	~DataManager()
+	{
+		clearObjects();
 	}
 };

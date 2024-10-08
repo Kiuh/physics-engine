@@ -29,15 +29,16 @@ class PhysicsEngine
 	void createInitialObjects()
 	{
 		data->data_mutex.lock();
-		data->boxes.clear();
+		data->clearObjects();
 		for (size_t i = 0; i < initialBoxCount; i++)
 		{
 			createBox();
 		}
 		auto plate = AABB::make(glm::vec2{ -10, -8 }, glm::vec2{ 10, -5 }, Color{});
-		plate.mass = 100.0f;
-		data->addBox(plate);
+		plate->mass = 100.0f;
+		data->addAABB(plate);
 		data->data_mutex.unlock();
+		data->notifyStructureChanging();
 	}
 
 	void createBox()
@@ -49,12 +50,10 @@ class PhysicsEngine
 
 		glm::vec2 center(randomFloat(leftDown.x, rightUp.x), randomFloat(leftDown.y, rightUp.y));
 
-		AABB box{};
-		box.setMinMax(center - shift, center + shift);
-		box.setColor(Color::randomColor());
-		box.isStatic = false;
-		box.mass = mass;
-		data->addBox(box);
+		AABB* box = AABB::make(center - shift, center + shift, Color::randomColor());
+		box->isStatic = false;
+		box->mass = mass;
+		data->addAABB(box);
 	}
 
 	void processKeyPress(KeyCode key)
@@ -73,24 +72,22 @@ class PhysicsEngine
 
 	void calculateVelocity(float deltaTime)
 	{
-		for (size_t i = 0; i < data->boxes.size(); i++)
+		for (auto box : data->boxes)
 		{
-			auto& box1 = data->boxes[i];
-
 			// Refresh
-			box1.velocity = glm::vec2{};
+			box->velocity = glm::vec2{};
 
 			// Add gravity
-			box1.velocity += glm::vec2{ 0,-1 } *gravity_scale * box1.mass;
+			box->velocity += glm::vec2{ 0,-1 } *gravity_scale * box->mass;
 		}
 
+		// Simple resolve collision
 		for (size_t i = 0; i < data->boxes.size(); i++)
 		{
-			auto& box1 = data->boxes[i];
+			auto& box1 = *data->boxes[i];
 			for (size_t j = i + 1; j < data->boxes.size(); j++)
 			{
-				auto& box2 = data->boxes[j];
-
+				auto& box2 = *data->boxes[j];
 				if (AABB::isOverlaps(box1, box2))
 				{
 					auto force = AABB::getShortestOverlap(box1, box2);
@@ -105,11 +102,11 @@ class PhysicsEngine
 
 	void applyVelocity(float deltaTime)
 	{
-		for (auto& box : data->boxes)
+		for (auto box : data->boxes)
 		{
-			if (!box.isStatic)
+			if (!box->isStatic)
 			{
-				box.move(box.velocity * deltaTime);
+				box->move(box->velocity * deltaTime);
 			}
 		}
 	}

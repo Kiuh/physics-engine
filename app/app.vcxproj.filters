@@ -99,6 +99,12 @@
     <ClCompile Include="vulkan_buffer.cpp">
       <Filter>Source Files\graphic_engine</Filter>
     </ClCompile>
+    <ClCompile Include="circle.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="vertex_source.cpp">
+      <Filter>Source Files\data_tools</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="frag.spv">

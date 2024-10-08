@@ -51,17 +51,17 @@ class GraphicEngine
 
 	uint32_t currentFrame = 0;
 	bool swapChainRecreationPending = false;
+	std::vector<bool> bufferRecreationPending{};
 
 	std::vector<VulkanBuffer> vertexBuffers;
 	std::vector<VulkanBuffer> indexBuffers;
 
-	GraphicEngine(WindowManager* windowProvider, DataManager* dataProvider, GraphicsEngineConfig config)
+	GraphicEngine(WindowManager* windowManager, DataManager* dataManager, GraphicsEngineConfig config)
 	{
 		this->config = config;
-		this->windowManager = windowProvider;
-		windowProvider->windowResized.connect(boost::bind(&GraphicEngine::pendSwapChainRecreation, this));
-		this->dataManager = dataProvider;
-		dataProvider->createDataSpace();
+		this->windowManager = windowManager;
+		this->dataManager = dataManager;
+		initManagers();
 		initVulkan();
 	}
 
@@ -80,6 +80,21 @@ class GraphicEngine
 	void pendSwapChainRecreation()
 	{
 		swapChainRecreationPending = true;
+	}
+
+	void pendBuffersRecreation()
+	{
+		for (size_t i = 0; i < bufferRecreationPending.size(); i++)
+		{
+			bufferRecreationPending[i] = true;
+		}
+	}
+
+	void initManagers()
+	{
+		windowManager->windowResized.connect(boost::bind(&GraphicEngine::pendSwapChainRecreation, this));
+		dataManager->createDataSpace();
+		dataManager->dataStructureChanged.connect(boost::bind(&GraphicEngine::pendBuffersRecreation, this));
 	}
 
 	void initVulkan()
@@ -125,14 +140,19 @@ class GraphicEngine
 		swapchain.recreate();
 	}
 
+	void cleanupBuffer(size_t idx)
+	{
+		vertexBuffers[idx].cleanup();
+		indexBuffers[idx].cleanup();
+	}
+
 	void cleanup()
 	{
 		swapchain.cleanup();
 
 		for (size_t i = 0; i < config.maxFramesInFlight; i++)
 		{
-			vertexBuffers[i].cleanup();
-			indexBuffers[i].cleanup();
+			cleanupBuffer(i);
 		}
 
 		vkDestroyPipeline(device.logicalDevice, graphicsPipeline, nullptr);
@@ -178,7 +198,13 @@ class GraphicEngine
 			throw std::runtime_error("failed to acquire swap chain image!");
 		}
 
-		dataManager->recalculateValues();
+		if (bufferRecreationPending[currentFrame])
+		{
+			cleanupBuffer(currentFrame);
+			createBuffer(currentFrame);
+			bufferRecreationPending[currentFrame] = false;
+		}
+		dataManager->recalculateVertexes();
 		vertexBuffers[currentFrame].copyNewData();
 
 		vkResetFences(device.logicalDevice, 1, &inFlightFences[currentFrame]);
@@ -302,26 +328,32 @@ class GraphicEngine
 	{
 		vertexBuffers.resize(config.maxFramesInFlight);
 		indexBuffers.resize(config.maxFramesInFlight);
+		bufferRecreationPending = std::vector<bool>(config.maxFramesInFlight, false);
 
 		for (size_t i = 0; i < config.maxFramesInFlight; i++)
 		{
-			VulkanBufferBuilder vertexBuilder{};
-			vertexBuilder.device = &device;
-			vertexBuilder.usageFlags = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-			vertexBuilder.bufferSize = dataManager->getVkVertexesSize();
-			vertexBuilder.data_mutex = &dataManager->data_mutex;
-			vertexBuilder.sourceData = dataManager->getVertexesPointer();
-			vertexBuffers[i] = vertexBuilder.build();
-
-			VulkanBufferBuilder indexBuilder{};
-			indexBuilder.device = &device;
-			indexBuilder.usageFlags = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
-			indexBuilder.bufferSize = dataManager->getVkIndexesSize();
-			indexBuilder.data_mutex = &dataManager->data_mutex;
-			indexBuilder.sourceData = dataManager->getIndexesPointer();
-			indexBuffers[i] = indexBuilder.build();
-			indexBuffers[i].copyNewData();
+			createBuffer(i);
 		}
+	}
+
+	void createBuffer(size_t idx)
+	{
+		VulkanBufferBuilder vertexBuilder{};
+		vertexBuilder.device = &device;
+		vertexBuilder.usageFlags = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+		vertexBuilder.bufferSize = dataManager->getVkVertexesSize();
+		vertexBuilder.data_mutex = &dataManager->data_mutex;
+		vertexBuilder.sourceData = dataManager->getVertexesPointer();
+		vertexBuffers[idx] = vertexBuilder.build();
+
+		VulkanBufferBuilder indexBuilder{};
+		indexBuilder.device = &device;
+		indexBuilder.usageFlags = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+		indexBuilder.bufferSize = dataManager->getVkIndexesSize();
+		indexBuilder.data_mutex = &dataManager->data_mutex;
+		indexBuilder.sourceData = dataManager->getIndexesPointer();
+		indexBuffers[idx] = indexBuilder.build();
+		indexBuffers[idx].copyNewData();
 	}
 
 	void createRenderPass()
