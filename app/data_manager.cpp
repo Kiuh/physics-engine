@@ -29,26 +29,31 @@ class DataManager
 		boxes.push_back(box);
 	}
 
-	void prepareDataToDraw()
+	void createDataSpace() // resize and add correct indexes
+	{
+		vertices.resize(boxes.size() * AABB_VERTEX_COUNT, Vertex{});
+		indexes.resize(boxes.size() * AABB_INDEXES_COUNT, 0);
+		for (uint32_t i = 0; i < boxes.size(); i++)
+		{
+			for (uint32_t j = 0; j < AABB_INDEXES_COUNT; j++)
+			{
+				auto ind = i * AABB_INDEXES_COUNT + j;
+				indexes[ind] = (uint16_t)(AABB_INDEXES[j] + i * AABB_VERTEX_COUNT);
+			}
+		}
+	}
+
+	void recalculateValues() // copy vertexes from boxes
 	{
 		data_mutex.lock();
-		vertices.resize(boxes.size() * AABB_VERTEX_COUNT);
-		indexes.resize(boxes.size() * AABB_INDEXES_COUNT);
 		for (uint32_t i = 0; i < boxes.size(); i++)
 		{
 			auto box_vertices = boxes[i].getVertices();
-			// Vertexes
 			for (uint32_t j = 0; j < AABB_VERTEX_COUNT; j++)
 			{
 				auto ind = i * AABB_VERTEX_COUNT + j;
 				vertices[ind] = box_vertices[j];
 				worldToScreen(vertices[ind], window, pixelsPerUnit);
-			}
-			// Indexes
-			for (uint32_t j = 0; j < AABB_INDEXES_COUNT; j++)
-			{
-				auto ind = i * AABB_INDEXES_COUNT + j;
-				indexes[ind] = (uint16_t)(AABB_INDEXES[j] + i * AABB_VERTEX_COUNT);
 			}
 		}
 		data_mutex.unlock();
@@ -74,12 +79,12 @@ class DataManager
 		return sizeof(uint16_t) * indexes.size();
 	}
 
-	void* getVertexesPointer()
+	const void* getVertexesPointer()
 	{
 		return vertices.data();
 	}
 
-	void* getIndexesPointer()
+	const void* getIndexesPointer()
 	{
 		return indexes.data();
 	}

@@ -20,7 +20,7 @@ static void logQueueFamilyProperties(VkQueueFamilyProperties queueProps)
 
 	std::cerr << "QueueCount: " << queueProps.queueCount << std::endl;
 	std::cerr << "Flags:" << std::endl;
-	for (auto flag : queueFlags)
+	for (auto& flag : queueFlags)
 	{
 		if (queueProps.queueFlags & flag)
 		{

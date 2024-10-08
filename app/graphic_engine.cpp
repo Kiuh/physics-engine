@@ -9,7 +9,7 @@
 #include "vulkan_device.cpp"
 #include "vulkan_swapchain.cpp"
 #include "window_manager.cpp"
-#include "vulkan_buffer_tools.cpp"
+#include "vulkan_buffer.cpp"
 
 #include <algorithm>
 #include <boost/bind/bind.hpp>
@@ -52,11 +52,8 @@ class GraphicEngine
 	uint32_t currentFrame = 0;
 	bool swapChainRecreationPending = false;
 
-	std::vector<VkBuffer> vertexBuffers;
-	std::vector<VkDeviceMemory> vertexBuffersMemory;
-
-	std::vector<VkBuffer> indexBuffers;
-	std::vector<VkDeviceMemory> indexBuffersMemory;
+	std::vector<VulkanBuffer> vertexBuffers;
+	std::vector<VulkanBuffer> indexBuffers;
 
 	GraphicEngine(WindowManager* windowProvider, DataManager* dataProvider, GraphicsEngineConfig config)
 	{
@@ -64,7 +61,7 @@ class GraphicEngine
 		this->windowManager = windowProvider;
 		windowProvider->windowResized.connect(boost::bind(&GraphicEngine::pendSwapChainRecreation, this));
 		this->dataManager = dataProvider;
-		dataProvider->prepareDataToDraw();
+		dataProvider->createDataSpace();
 		initVulkan();
 	}
 
@@ -117,7 +114,6 @@ class GraphicEngine
 		// Frame buffers
 		swapchain.addFrameBuffers(&renderPass);
 
-		dataManager->prepareDataToDraw();
 		createBuffers();
 		createSyncObjects();
 	}
@@ -129,22 +125,14 @@ class GraphicEngine
 		swapchain.recreate();
 	}
 
-	void cleanupBuffers(size_t i)
-	{
-		vkDestroyBuffer(device.logicalDevice, vertexBuffers[i], nullptr);
-		vkFreeMemory(device.logicalDevice, vertexBuffersMemory[i], nullptr);
-
-		vkDestroyBuffer(device.logicalDevice, indexBuffers[i], nullptr);
-		vkFreeMemory(device.logicalDevice, indexBuffersMemory[i], nullptr);
-	}
-
 	void cleanup()
 	{
 		swapchain.cleanup();
 
 		for (size_t i = 0; i < config.maxFramesInFlight; i++)
 		{
-			cleanupBuffers(i);
+			vertexBuffers[i].cleanup();
+			indexBuffers[i].cleanup();
 		}
 
 		vkDestroyPipeline(device.logicalDevice, graphicsPipeline, nullptr);
@@ -190,8 +178,8 @@ class GraphicEngine
 			throw std::runtime_error("failed to acquire swap chain image!");
 		}
 
-		dataManager->prepareDataToDraw();
-		copyNewDataToBuffers(currentFrame);
+		dataManager->recalculateValues();
+		vertexBuffers[currentFrame].copyNewData();
 
 		vkResetFences(device.logicalDevice, 1, &inFlightFences[currentFrame]);
 
@@ -268,7 +256,7 @@ class GraphicEngine
 
 		VK_CHECK(vkBeginCommandBuffer(commandBuffer, &beginInfo));
 
-		VkClearValue clearColor = { {{0.0f, 0.0f, 0.0f, 1.0f}} };
+		VkClearValue clearColor = { {{0.01f, 0.01f, 0.01f, 1.0f}} };
 
 		VkRenderPassBeginInfo renderPassInfo{};
 		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -297,11 +285,11 @@ class GraphicEngine
 		scissor.extent = swapchain.extent;
 		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-		VkBuffer vertexBuffers[] = { this->vertexBuffers[currentFrame] };
+		VkBuffer vertexBuffers[] = { this->vertexBuffers[currentFrame].buffer };
 		VkDeviceSize offsets[] = { 0 };
 
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
-		vkCmdBindIndexBuffer(commandBuffer, indexBuffers[currentFrame], 0, VK_INDEX_TYPE_UINT16);
+		vkCmdBindIndexBuffer(commandBuffer, indexBuffers[currentFrame].buffer, 0, VK_INDEX_TYPE_UINT16);
 
 		vkCmdDrawIndexed(commandBuffer, dataManager->indexesCount(), dataManager->triangleCount(), 0, 0, 0);
 
@@ -313,122 +301,27 @@ class GraphicEngine
 	void createBuffers()
 	{
 		vertexBuffers.resize(config.maxFramesInFlight);
-		vertexBuffersMemory.resize(config.maxFramesInFlight);
 		indexBuffers.resize(config.maxFramesInFlight);
-		indexBuffersMemory.resize(config.maxFramesInFlight);
 
 		for (size_t i = 0; i < config.maxFramesInFlight; i++)
 		{
-			// Create working buffer
-			auto queueFamilyIndices = std::vector<uint32_t>
-			{
-				device.queueFamilyIndices.graphicsFamily.value(),
-				device.queueFamilyIndices.transferFamily.value(),
-			};
+			VulkanBufferBuilder vertexBuilder{};
+			vertexBuilder.device = &device;
+			vertexBuilder.usageFlags = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+			vertexBuilder.bufferSize = dataManager->getVkVertexesSize();
+			vertexBuilder.data_mutex = &dataManager->data_mutex;
+			vertexBuilder.sourceData = dataManager->getVertexesPointer();
+			vertexBuffers[i] = vertexBuilder.build();
 
-			VkBufferCreateInfo vertexCreateInfo{};
-			vertexCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-			vertexCreateInfo.size = dataManager->getVkVertexesSize();
-			vertexCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-			vertexCreateInfo.sharingMode = VK_SHARING_MODE_CONCURRENT;
-			vertexCreateInfo.queueFamilyIndexCount = (uint32_t)queueFamilyIndices.size();
-			vertexCreateInfo.pQueueFamilyIndices = queueFamilyIndices.data();
-
-			createBuffer(
-				device,
-				vertexCreateInfo,
-				VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-				vertexBuffers[i],
-				vertexBuffersMemory[i]
-			);
-
-			VkBufferCreateInfo indicesCreateInfo{};
-			indicesCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-			indicesCreateInfo.size = dataManager->getVkIndexesSize();
-			indicesCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
-			indicesCreateInfo.sharingMode = VK_SHARING_MODE_CONCURRENT;
-			indicesCreateInfo.queueFamilyIndexCount = (uint32_t)queueFamilyIndices.size();
-			indicesCreateInfo.pQueueFamilyIndices = queueFamilyIndices.data();
-
-			createBuffer(
-				device,
-				indicesCreateInfo,
-				VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-				indexBuffers[i],
-				indexBuffersMemory[i]
-			);
+			VulkanBufferBuilder indexBuilder{};
+			indexBuilder.device = &device;
+			indexBuilder.usageFlags = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+			indexBuilder.bufferSize = dataManager->getVkIndexesSize();
+			indexBuilder.data_mutex = &dataManager->data_mutex;
+			indexBuilder.sourceData = dataManager->getIndexesPointer();
+			indexBuffers[i] = indexBuilder.build();
+			indexBuffers[i].copyNewData();
 		}
-	}
-
-	void copyNewDataToBuffers(size_t idx)
-	{
-		dataManager->data_mutex.lock();
-		auto vertexesBufferSize = dataManager->getVkVertexesSize();
-
-		VkBufferCreateInfo vertexCreateInfo{};
-		vertexCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-		vertexCreateInfo.size = vertexesBufferSize;
-		vertexCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-		vertexCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-		vertexCreateInfo.queueFamilyIndexCount = 1;
-		vertexCreateInfo.pQueueFamilyIndices = &device.queueFamilyIndices.transferFamily.value();
-
-		VkBuffer vertexStagingBuffer{};
-		VkDeviceMemory vertexStagingBufferMemory{};
-		createBuffer(
-			device,
-			vertexCreateInfo,
-			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-			vertexStagingBuffer,
-			vertexStagingBufferMemory
-		);
-
-		// Copy data to stage buffer
-		void* vertexes_data;
-		VK_CHECK(vkMapMemory(device.logicalDevice, vertexStagingBufferMemory, 0, vertexesBufferSize, 0, &vertexes_data));
-		memcpy(vertexes_data, dataManager->getVertexesPointer(), (size_t)vertexesBufferSize);
-		vkUnmapMemory(device.logicalDevice, vertexStagingBufferMemory);
-
-		// Copy data from stage buffer to working buffer
-		copyBuffer(device, vertexStagingBuffer, vertexBuffers[idx], vertexesBufferSize);
-
-		vkDestroyBuffer(device.logicalDevice, vertexStagingBuffer, nullptr);
-		vkFreeMemory(device.logicalDevice, vertexStagingBufferMemory, nullptr);
-
-		// -- INDEXES
-
-		auto indexesBufferSize = dataManager->getVkIndexesSize();
-
-		VkBufferCreateInfo indicesCreateInfo{};
-		indicesCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-		indicesCreateInfo.size = indexesBufferSize;
-		indicesCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-		indicesCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-		indicesCreateInfo.queueFamilyIndexCount = 1;
-		indicesCreateInfo.pQueueFamilyIndices = &device.queueFamilyIndices.transferFamily.value();
-
-		VkBuffer indicesStagingBuffer{};
-		VkDeviceMemory indicesStagingBufferMemory{};
-		createBuffer(
-			device,
-			indicesCreateInfo,
-			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-			indicesStagingBuffer,
-			indicesStagingBufferMemory
-		);
-
-		// Copy data to stage buffer
-		void* indices_data;
-		VK_CHECK(vkMapMemory(device.logicalDevice, indicesStagingBufferMemory, 0, indexesBufferSize, 0, &indices_data));
-		memcpy(indices_data, dataManager->getIndexesPointer(), (size_t)indexesBufferSize);
-		vkUnmapMemory(device.logicalDevice, indicesStagingBufferMemory);
-
-		// Copy data from stage buffer to working buffer
-		copyBuffer(device, indicesStagingBuffer, indexBuffers[idx], indexesBufferSize);
-
-		vkDestroyBuffer(device.logicalDevice, indicesStagingBuffer, nullptr);
-		vkFreeMemory(device.logicalDevice, indicesStagingBufferMemory, nullptr);
-		dataManager->data_mutex.unlock();
 	}
 
 	void createRenderPass()

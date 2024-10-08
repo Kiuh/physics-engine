@@ -93,10 +93,10 @@
     <ClCompile Include="shader_manager.cpp">
       <Filter>Source Files\graphic_engine</Filter>
     </ClCompile>
-    <ClCompile Include="vulkan_buffer_tools.cpp">
+    <ClCompile Include="log_tools.cpp">
       <Filter>Source Files\graphic_engine</Filter>
     </ClCompile>
-    <ClCompile Include="log_tools.cpp">
+    <ClCompile Include="vulkan_buffer.cpp">
       <Filter>Source Files\graphic_engine</Filter>
     </ClCompile>
   </ItemGroup>
