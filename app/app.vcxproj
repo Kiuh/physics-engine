@@ -177,6 +177,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="vertex.cpp" />
     <ClCompile Include="vertex_source.cpp" />
+    <ClCompile Include="vk_image_builder.cpp" />
     <ClCompile Include="vulkan_buffer.cpp" />
     <ClCompile Include="vulkan_device.cpp" />
     <ClCompile Include="vulkan_swapchain.cpp" />

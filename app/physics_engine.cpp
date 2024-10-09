@@ -41,7 +41,7 @@ class PhysicsEngine
 		data->addAABB(plate);
 
 		// Add circle
-		auto circle = Circle::make(glm::vec2(), 7.0f, Color::randomColor());
+		auto circle = Circle::make(glm::vec2(), 2.0f, Color::randomColor());
 		data->addCircle(circle);
 
 		data->data_mutex.unlock();

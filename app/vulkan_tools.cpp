@@ -11,17 +11,11 @@ struct GraphicsEngineConfig
 	int maxFramesInFlight = 2;
 };
 
-#define VK_CHECK(f)													             \
-{																			     \
-	VkResult res = (f);														     \
-	if (res != VK_SUCCESS)													     \
-	{																		     \
-		std::string msg = "Fatal:\nVkResult is \"" + vk_errorString(res) + "\""; \
-		throw std::runtime_error(msg);                                           \
-	}																		     \
-}                                                                                \
-
-static std::string vk_errorString(VkResult errorCode)
+static void VK_CHECK(VkResult res)
 {
-	return std::string(magic_enum::enum_name(errorCode));
+	if (res != VK_SUCCESS)
+	{
+		std::string msg = "Fatal:\nVkResult is \"" + std::string(magic_enum::enum_name((res))) + "\"";
+		throw std::runtime_error(msg);
+	}
 }

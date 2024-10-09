@@ -108,6 +108,9 @@
     <ClCompile Include="math_tools.cpp">
       <Filter>Source Files\common</Filter>
     </ClCompile>
+    <ClCompile Include="vk_image_builder.cpp">
+      <Filter>Source Files\graphic_engine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="frag.spv">

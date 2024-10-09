@@ -14,12 +14,13 @@
 #include <string>
 #include <vector>
 #include <vulkan/vulkan_core.h>
+#include "vk_image_builder.cpp"
 
 struct VulkanSwapchain
 {
 	public:
 	// Required
-	VulkanDevice* vulkanDevice = nullptr;
+	VulkanDevice* device = nullptr;
 	VkSurfaceKHR surface{};
 	WindowManager* windowManager = nullptr;
 
@@ -32,6 +33,11 @@ struct VulkanSwapchain
 	std::vector<VkImageView> imageViews{};
 	std::vector<VkFramebuffer> framebuffers{};
 
+	// For MSAA
+	VkImage colorImage;
+	VkDeviceMemory colorImageMemory;
+	VkImageView colorImageView;
+
 	private:
 	VkRenderPass* renderPass = nullptr;
 
@@ -39,6 +45,7 @@ struct VulkanSwapchain
 	void create()
 	{
 		createSwapChain();
+		createColorResources();
 		createImageViews();
 	}
 
@@ -58,23 +65,27 @@ struct VulkanSwapchain
 
 	void cleanup() const
 	{
+		vkDestroyImageView(device->logicalDevice, colorImageView, nullptr);
+		vkDestroyImage(device->logicalDevice, colorImage, nullptr);
+		vkFreeMemory(device->logicalDevice, colorImageMemory, nullptr);
+
 		for (size_t i = 0; i < framebuffers.size(); i++)
 		{
-			vkDestroyFramebuffer(vulkanDevice->logicalDevice, framebuffers[i], nullptr);
+			vkDestroyFramebuffer(device->logicalDevice, framebuffers[i], nullptr);
 		}
 
 		for (size_t i = 0; i < imageViews.size(); i++)
 		{
-			vkDestroyImageView(vulkanDevice->logicalDevice, imageViews[i], nullptr);
+			vkDestroyImageView(device->logicalDevice, imageViews[i], nullptr);
 		}
 
-		vkDestroySwapchainKHR(vulkanDevice->logicalDevice, instance, nullptr);
+		vkDestroySwapchainKHR(device->logicalDevice, instance, nullptr);
 	}
 
 	private:
 	void createSwapChain()
 	{
-		SwapChainSupportDetails swapChainSupport = vulkanDevice->getSwapChainSupportDetails();
+		SwapChainSupportDetails swapChainSupport = device->getSwapChainSupportDetails();
 
 		VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
 		VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
@@ -98,7 +109,7 @@ struct VulkanSwapchain
 		createInfo.imageArrayLayers = 1;
 		createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-		QueueFamilyIndices indices = vulkanDevice->queueFamilyIndices;
+		QueueFamilyIndices indices = device->queueFamilyIndices;
 		uint32_t queueFamilyIndices[] = {
 			indices.graphicsFamily.value(),
 			indices.presentFamily.value()
@@ -123,14 +134,31 @@ struct VulkanSwapchain
 		createInfo.clipped = VK_TRUE;
 		createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-		VK_CHECK(vkCreateSwapchainKHR(vulkanDevice->logicalDevice, &createInfo, nullptr, &instance));
+		VK_CHECK(vkCreateSwapchainKHR(device->logicalDevice, &createInfo, nullptr, &instance));
 
-		VK_CHECK(vkGetSwapchainImagesKHR(vulkanDevice->logicalDevice, instance, &imageCount, nullptr));
+		VK_CHECK(vkGetSwapchainImagesKHR(device->logicalDevice, instance, &imageCount, nullptr));
 		images.resize(imageCount);
-		VK_CHECK(vkGetSwapchainImagesKHR(vulkanDevice->logicalDevice, instance, &imageCount, images.data()));
+		VK_CHECK(vkGetSwapchainImagesKHR(device->logicalDevice, instance, &imageCount, images.data()));
 
 		imageFormat = surfaceFormat.format;
 		this->extent = extent;
+	}
+
+	void createColorResources()
+	{
+		createImage(
+			device,
+			extent.width,
+			extent.height,
+			1,
+			imageFormat,
+			VK_IMAGE_TILING_OPTIMAL,
+			VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+			colorImage,
+			colorImageMemory
+		);
+		colorImageView = createImageView(device, colorImage, imageFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
 	}
 
 	void createImageViews()
@@ -139,24 +167,7 @@ struct VulkanSwapchain
 
 		for (size_t i = 0; i < images.size(); i++)
 		{
-			VkImageViewCreateInfo createInfo{};
-			createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-			createInfo.image = images[i];
-			createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-			createInfo.format = imageFormat;
-
-			createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-			createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-			createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-			createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-
-			createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-			createInfo.subresourceRange.baseMipLevel = 0;
-			createInfo.subresourceRange.levelCount = 1;
-			createInfo.subresourceRange.baseArrayLayer = 0;
-			createInfo.subresourceRange.layerCount = 1;
-
-			VK_CHECK(vkCreateImageView(vulkanDevice->logicalDevice, &createInfo, nullptr, &imageViews[i]));
+			imageViews[i] = createImageView(device, images[i], imageFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
 		}
 	}
 
@@ -166,24 +177,25 @@ struct VulkanSwapchain
 
 		for (size_t i = 0; i < imageViews.size(); i++)
 		{
-			VkImageView attachments[] = {
+			std::array<VkImageView, 2> attachments = {
+				colorImageView,
 				imageViews[i]
 			};
 
 			VkFramebufferCreateInfo framebufferInfo{};
 			framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 			framebufferInfo.renderPass = *renderPass;
-			framebufferInfo.attachmentCount = 1;
-			framebufferInfo.pAttachments = attachments;
+			framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+			framebufferInfo.pAttachments = attachments.data();
 			framebufferInfo.width = extent.width;
 			framebufferInfo.height = extent.height;
 			framebufferInfo.layers = 1;
 
-			VK_CHECK(vkCreateFramebuffer(vulkanDevice->logicalDevice, &framebufferInfo, nullptr, &framebuffers[i]))
+			VK_CHECK(vkCreateFramebuffer(device->logicalDevice, &framebufferInfo, nullptr, &framebuffers[i]));
 		}
 	}
 
-	VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats)
+	VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) const
 	{
 		for (const auto& availableFormat : availableFormats)
 		{
@@ -197,7 +209,7 @@ struct VulkanSwapchain
 		return availableFormats[0];
 	}
 
-	VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes)
+	VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) const
 	{
 		for (const auto& availablePresentMode : availablePresentModes)
 		{
