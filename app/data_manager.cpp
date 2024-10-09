@@ -4,6 +4,7 @@
 #include "vertex.cpp"
 #include "window_manager.cpp"
 #include "aabb.cpp"
+#include "circle.cpp"
 #include <cstdint>
 #include <mutex>
 #include <vector>
@@ -21,6 +22,7 @@ class DataManager
 	std::mutex data_mutex{};
 	boost::signals2::signal<void()> dataStructureChanged{};
 	std::vector<AABB*> boxes{};
+	std::vector<Circle*> circles{};
 
 	DataManager(WindowManager* window)
 	{
@@ -34,13 +36,24 @@ class DataManager
 		{
 			delete boxes[i];
 		}
+		for (size_t i = 0; i < circles.size(); i++)
+		{
+			delete circles[i];
+		}
 		boxes.clear();
+		circles.clear();
 	}
 
 	void addAABB(AABB* box)
 	{
 		dataSources.push_back(box);
 		boxes.push_back(box);
+	}
+
+	void addCircle(Circle* circle)
+	{
+		dataSources.push_back(circle);
+		circles.push_back(circle);
 	}
 
 	void notifyStructureChanging()

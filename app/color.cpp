@@ -5,21 +5,21 @@
 
 struct Color
 {
-	glm::vec3 values;
+	glm::vec3 value;
 
 	Color()
 	{
-		this->values = glm::vec3(1, 1, 1);
+		this->value = glm::vec3(1, 1, 1);
 	}
 
-	Color(glm::vec3 values)
+	Color(glm::vec3 value)
 	{
-		this->values = values;
+		this->value = value;
 	}
 
-	glm::vec3 getValues() const
+	glm::vec3 getValue() const
 	{
-		return values;
+		return value;
 	}
 
 	static Color randomColor()

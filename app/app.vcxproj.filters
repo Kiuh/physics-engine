@@ -105,6 +105,9 @@
     <ClCompile Include="vertex_source.cpp">
       <Filter>Source Files\data_tools</Filter>
     </ClCompile>
+    <ClCompile Include="math_tools.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="frag.spv">

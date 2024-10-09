@@ -34,7 +34,7 @@ struct AABB : public VertexSource
 	{
 		auto* box = new AABB{};
 		box->setMinMax(min, max);
-		box->setColor(color);
+		box->color = color;
 		return box;
 	}
 
@@ -49,17 +49,12 @@ struct AABB : public VertexSource
 		this->max = max;
 	}
 
-	void setColor(Color color)
-	{
-		this->color = color;
-	}
-
 	std::vector<Vertex> getVertexes() const
 	{
 		std::vector<Vertex> vertices(4);
 		for (size_t i = 0; i < 4; i++)
 		{
-			vertices[i].color = color.getValues();
+			vertices[i].color = color.getValue();
 		}
 		vertices[0].pos = min;
 		vertices[1].pos = glm::vec2(min.x, max.y);
@@ -83,7 +78,7 @@ struct AABB : public VertexSource
 		return 6;
 	}
 
-// Physics properties
+	// Physics properties
 	bool isStatic = true;
 	glm::vec2 velocity{ 0,0 };
 	float mass = 1.0f;
@@ -101,9 +96,9 @@ struct AABB : public VertexSource
 		return true;
 	}
 
-	// Resulting vector moves box1
 	static glm::vec2 getShortestOverlap(AABB& box1, AABB& box2)
 	{
+		// Resulting vector moves box1
 		float x_overlap = getSegmentOverlap(box1.min.x, box1.max.x, box2.min.x, box2.max.x);
 		float y_overlap = getSegmentOverlap(box1.min.y, box1.max.y, box2.min.y, box2.max.y);
 

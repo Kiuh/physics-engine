@@ -34,9 +34,16 @@ class PhysicsEngine
 		{
 			createBox();
 		}
+
+		// Immutable box
 		auto plate = AABB::make(glm::vec2{ -10, -8 }, glm::vec2{ 10, -5 }, Color{});
 		plate->mass = 100.0f;
 		data->addAABB(plate);
+
+		// Add circle
+		auto circle = Circle::make(glm::vec2(), 7.0f, Color::randomColor());
+		data->addCircle(circle);
+
 		data->data_mutex.unlock();
 		data->notifyStructureChanging();
 	}

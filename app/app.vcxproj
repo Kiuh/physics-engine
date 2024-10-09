@@ -167,6 +167,7 @@
     <ClCompile Include="graphic_engine_builders.cpp" />
     <ClCompile Include="lodepng.cpp" />
     <ClCompile Include="log_tools.cpp" />
+    <ClCompile Include="math_tools.cpp" />
     <ClCompile Include="physics_engine.cpp" />
     <ClCompile Include="fps_counter.cpp" />
     <ClCompile Include="random_helper.cpp" />

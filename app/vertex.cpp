@@ -10,6 +10,14 @@ struct Vertex
 	glm::vec2 pos;
 	glm::vec3 color;
 
+	static Vertex make(glm::vec2 pos, glm::vec3 color)
+	{
+		return Vertex{
+			pos,
+			color
+		};
+	}
+
 	static VkVertexInputBindingDescription getBindingDescription()
 	{
 		VkVertexInputBindingDescription bindingDescription{};
