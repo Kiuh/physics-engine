@@ -25,9 +25,6 @@
     <Filter Include="Source Files\data_tools">
       <UniqueIdentifier>{12e0c025-99ff-46aa-8fce-ae860425fded}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\core">
-      <UniqueIdentifier>{07ca5de9-7e5c-4412-aec7-f401beac6d51}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\window">
       <UniqueIdentifier>{85bc2ad7-7f22-42d2-bdaf-6858d2ef4164}</UniqueIdentifier>
     </Filter>
@@ -36,6 +33,12 @@
     </Filter>
     <Filter Include="Resource Files\shaders">
       <UniqueIdentifier>{a91c2471-148b-4717-abd3-4e5845e239cd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\shapes">
+      <UniqueIdentifier>{1ea89e09-8999-48c2-9b12-dbbed69e26b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\core">
+      <UniqueIdentifier>{07ca5de9-7e5c-4412-aec7-f401beac6d51}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -63,9 +66,6 @@
     <ClCompile Include="vulkan_tools.cpp">
       <Filter>Source Files\graphic_engine</Filter>
     </ClCompile>
-    <ClCompile Include="color.cpp">
-      <Filter>Source Files\data_tools</Filter>
-    </ClCompile>
     <ClCompile Include="app.cpp">
       <Filter>Source Files\core</Filter>
     </ClCompile>
@@ -74,9 +74,6 @@
     </ClCompile>
     <ClCompile Include="window_manager.cpp">
       <Filter>Source Files\window</Filter>
-    </ClCompile>
-    <ClCompile Include="aabb.cpp">
-      <Filter>Source Files\common</Filter>
     </ClCompile>
     <ClCompile Include="random_helper.cpp">
       <Filter>Source Files\common</Filter>
@@ -99,9 +96,6 @@
     <ClCompile Include="vulkan_buffer.cpp">
       <Filter>Source Files\graphic_engine</Filter>
     </ClCompile>
-    <ClCompile Include="circle.cpp">
-      <Filter>Source Files\common</Filter>
-    </ClCompile>
     <ClCompile Include="vertex_source.cpp">
       <Filter>Source Files\data_tools</Filter>
     </ClCompile>
@@ -110,6 +104,39 @@
     </ClCompile>
     <ClCompile Include="vk_image_builder.cpp">
       <Filter>Source Files\graphic_engine</Filter>
+    </ClCompile>
+    <ClCompile Include="rigid_body.cpp">
+      <Filter>Source Files\physics_engine</Filter>
+    </ClCompile>
+    <ClCompile Include="vulkan_vec.cpp">
+      <Filter>Source Files\data_tools</Filter>
+    </ClCompile>
+    <ClCompile Include="color.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="aabb.cpp">
+      <Filter>Source Files\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="circle.cpp">
+      <Filter>Source Files\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="vec2_tools.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="controller.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="object.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="shape.cpp">
+      <Filter>Source Files\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="collision.cpp">
+      <Filter>Source Files\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="transform.cpp">
+      <Filter>Source Files\core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

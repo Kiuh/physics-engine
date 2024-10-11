@@ -5,10 +5,11 @@
 #include "graphic_engine.cpp"
 #include "physics_engine.cpp"
 #include "window_manager.cpp"
+#include "controller.cpp"
 
 #include <cstdint>
 #include <exception>
-#include <glm.hpp>
+#include "glm/glm.hpp"
 #include <iostream>
 #include <ostream>
 #include <stdlib.h>
@@ -31,6 +32,8 @@ class App
 	std::unique_ptr<GraphicEngine> graphicsEngine;
 	std::unique_ptr<PhysicsEngine> physicsEngine;
 
+	std::unique_ptr<Controller> controller;
+
 	std::unique_ptr<FpsCounter> graphicFrameCounter;
 	std::unique_ptr<FpsCounter> physicFrameCounter;
 
@@ -51,8 +54,10 @@ class App
 		this->windowManager = std::make_unique<WindowManager>(size, title);
 		this->dataManager = std::make_unique<DataManager>(windowManager.get());
 
-		this->physicsEngine = std::make_unique<PhysicsEngine>(windowManager.get(), dataManager.get());
+		this->physicsEngine = std::make_unique<PhysicsEngine>();
 		this->graphicsEngine = std::make_unique<GraphicEngine>(windowManager.get(), dataManager.get(), graphicsEngineConfig);
+
+		this->controller = std::make_unique<Controller>(windowManager.get(), dataManager.get(), physicsEngine.get());
 
 		this->graphicFrameCounter = std::make_unique<FpsCounter>("Graphic FPS");
 		this->physicFrameCounter = std::make_unique<FpsCounter>("Physics FPS");

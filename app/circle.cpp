@@ -1,30 +1,28 @@
 #pragma once
 
-#include <glm.hpp>
+#include "glm/glm.hpp"
 #include "color.cpp"
 #include "math_tools.cpp"
 #include "vertex_source.cpp"
+#include "vec2_tools.cpp"
+#include "shape.cpp"
 
-constexpr size_t circle_segment_splits = 6;
-constexpr size_t circle_tris = 4 * (1 + circle_segment_splits);
-constexpr float one_seg_deg = 360.0f / circle_tris;
-
-struct Circle : VertexSource
+struct Circle : public Shape
 {
-	// View properties
-	glm::vec2 center{ 0,0 };
-	float radius = 1;
-	Color color{ glm::vec3{ 1.0f, 1.0f, 1.0f } };
+	static constexpr size_t circle_segment_splits = 6;
+	static constexpr size_t circle_tris = 4 * (1 + circle_segment_splits);
+	static constexpr float one_seg_deg = 360.0f / circle_tris;
 
-	static Circle* make(glm::vec2 center, float radius, Color color)
+	float radius;
+	Color color;
+
+	Circle()
 	{
-		Circle* circle = new Circle{};
-		circle->center = center;
-		circle->radius = radius;
-		circle->color = color;
-		return circle;
+		radius = 1;
+		color = Color::randomColor();
 	}
 
+	// From VertexSource
 	std::vector<Vertex> getVertexes() const
 	{
 		std::vector<Vertex> vertices{};
@@ -32,26 +30,11 @@ struct Circle : VertexSource
 		auto shift = glm::vec2(-radius, 0);
 		for (size_t i = 0; i < circle_tris; i++)
 		{
-			auto vert = Vertex::make(center + shift, color.getValue());
+			Vertex vert(tr->getPosition() + shift, color.getValue());
 			vertices.push_back(vert);
-			rotateForOneSeg(shift, one_seg_deg);
+			rotateVec2(shift, one_seg_deg);
 		}
 		return vertices;
-	}
-
-	void rotateForOneSeg(glm::vec2& vec, float angle) const
-	{
-		vec = rotateVec2(vec, angle);
-	}
-
-	glm::vec2 rotateVec2(glm::vec2& v, float angle) const
-	{
-		float rad = glm::radians(angle);
-		glm::mat2 rotationMatrix = glm::mat2(
-			glm::cos(rad), -glm::sin(rad),
-			glm::sin(rad), glm::cos(rad)
-		);
-		return rotationMatrix * v;
 	}
 
 	size_t getVertexesCount() const

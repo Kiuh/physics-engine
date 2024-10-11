@@ -1,7 +1,7 @@
 #pragma once
 
 #include "random_helper.cpp"
-#include <glm.hpp>
+#include "glm/glm.hpp"
 
 struct Color
 {

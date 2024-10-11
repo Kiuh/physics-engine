@@ -6,7 +6,7 @@
 #include <boost/signals2.hpp>
 #include <cstdint>
 #include <filesystem>
-#include <glm.hpp>
+#include "glm/glm.hpp"
 #include <iostream>
 #include <stdexcept>
 #include <string>

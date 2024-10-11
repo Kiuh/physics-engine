@@ -2,53 +2,46 @@
 
 #include "color.cpp"
 #include "vertex.cpp"
-#include <glm.hpp>
+#include "glm/glm.hpp"
 #include <mutex>
 #include <stdexcept>
 #include <vector>
-#include "vertex_source.cpp"
+#include "shape.cpp"
 
-struct AABB : public VertexSource
+struct AABB : public Shape
 {
-	// View properties
-	glm::vec2 min{ 0,0 };
-	glm::vec2 max{ 1,1 };
-	Color color{ glm::vec3{ 1.0f, 1.0f, 1.0f } };
+	private:
+	glm::vec2 halfSize;
+	Color color;
 
-	glm::vec2 center() const
+	public:
+	AABB()
 	{
-		return min + ((max - min) / 2.0f);
+		halfSize = glm::vec2{ 0.5f,0.5f };
+		color = Color::randomColor();
+	}
+
+	void setHalfSize(glm::vec2 halfSize)
+	{
+		this->halfSize = halfSize;
+	}
+
+	glm::vec2 max() const
+	{
+		return tr->getPosition() + halfSize;
+	}
+
+	glm::vec2 min() const
+	{
+		return tr->getPosition() - halfSize;
 	}
 
 	glm::vec2 size() const
 	{
-		return max - min;
+		return halfSize * 2.0f;
 	}
 
-	glm::vec2 extends() const
-	{
-		return size() / 2.0f;
-	}
-
-	static AABB* make(glm::vec2 min, glm::vec2 max, Color color)
-	{
-		auto* box = new AABB{};
-		box->setMinMax(min, max);
-		box->color = color;
-		return box;
-	}
-
-	void setMinMax(glm::vec2 min, glm::vec2 max)
-	{
-		if (min.x >= max.x || min.y >= max.y)
-		{
-			throw new std::runtime_error("try set invalid min and max values in AABB");
-		}
-
-		this->min = min;
-		this->max = max;
-	}
-
+	// From VertexSource
 	std::vector<Vertex> getVertexes() const
 	{
 		std::vector<Vertex> vertices(4);
@@ -56,10 +49,10 @@ struct AABB : public VertexSource
 		{
 			vertices[i].color = color.getValue();
 		}
-		vertices[0].pos = min;
-		vertices[1].pos = glm::vec2(min.x, max.y);
-		vertices[2].pos = max;
-		vertices[3].pos = glm::vec2(max.x, min.y);
+		vertices[0].pos = min();
+		vertices[1].pos = glm::vec2(min().x, max().y);
+		vertices[2].pos = max();
+		vertices[3].pos = glm::vec2(max().x, min().y);
 		return vertices;
 	}
 
@@ -78,38 +71,54 @@ struct AABB : public VertexSource
 		return 6;
 	}
 
-	// Physics properties
-	bool isStatic = true;
-	glm::vec2 velocity{ 0,0 };
-	float mass = 1.0f;
-
-	void move(glm::vec2 delta)
+	// From Shape
+	bool isOverlaps(Shape* shape)
 	{
-		min += delta;
-		max += delta;
+		AABB* box = dynamic_cast<AABB*>(shape);
+		if (box != nullptr)
+		{
+			return isOverlaps(*this, *box);
+		}
+		return false;
+	}
+
+	Collision getCollision(Shape* shape)
+	{
+		AABB* box = dynamic_cast<AABB*>(shape);
+		if (box != nullptr)
+		{
+			return getShortestOverlap(*this, *box);
+		}
+
+		return Collision{};
 	}
 
 	static bool isOverlaps(AABB& box1, AABB& box2)
 	{
-		if (box2.min.x >= box1.max.x || box2.max.x <= box1.min.x) return false;
-		if (box2.min.y >= box1.max.y || box2.max.y <= box1.min.y) return false;
+		if (box2.min().x >= box1.max().x || box2.max().x <= box1.min().x) return false;
+		if (box2.min().y >= box1.max().y || box2.max().y <= box1.min().y) return false;
 		return true;
 	}
 
-	static glm::vec2 getShortestOverlap(AABB& box1, AABB& box2)
+	static Collision getShortestOverlap(AABB& box1, AABB& box2)
 	{
+		auto col = Collision{ true };
+
 		// Resulting vector moves box1
-		float x_overlap = getSegmentOverlap(box1.min.x, box1.max.x, box2.min.x, box2.max.x);
-		float y_overlap = getSegmentOverlap(box1.min.y, box1.max.y, box2.min.y, box2.max.y);
+		float x_overlap = getSegmentOverlap(box1.min().x, box1.max().x, box2.min().x, box2.max().x);
+		float y_overlap = getSegmentOverlap(box1.min().y, box1.max().y, box2.min().y, box2.max().y);
 
 		if (glm::abs(x_overlap) < glm::abs(y_overlap))
 		{
-			return glm::vec2(x_overlap, 0);
+			col.normal = glm::vec2(1, 0);
+			col.depth = x_overlap;
 		}
 		else
 		{
-			return glm::vec2(0, y_overlap);
+			col.normal = glm::vec2(0, 1);
+			col.depth = y_overlap;
 		}
+		return col;
 	}
 
 	static float getSegmentOverlap(float a1, float b1, float a2, float b2)

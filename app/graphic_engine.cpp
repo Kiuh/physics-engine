@@ -93,7 +93,6 @@ class GraphicEngine
 	void initManagers()
 	{
 		windowManager->windowResized.connect(boost::bind(&GraphicEngine::pendSwapChainRecreation, this));
-		dataManager->createDataSpace();
 		dataManager->dataStructureChanged.connect(boost::bind(&GraphicEngine::pendBuffersRecreation, this));
 	}
 
@@ -317,7 +316,9 @@ class GraphicEngine
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 		vkCmdBindIndexBuffer(commandBuffer, indexBuffers[currentFrame].buffer, 0, VK_INDEX_TYPE_UINT16);
 
-		vkCmdDrawIndexed(commandBuffer, dataManager->indexesCount(), dataManager->triangleCount(), 0, 0, 0);
+		uint32_t indexCount = dataManager->indexes.size();
+		uint32_t triangleCount = indexCount / 3;
+		vkCmdDrawIndexed(commandBuffer, indexCount, triangleCount, 0, 0, 0);
 
 		vkCmdEndRenderPass(commandBuffer);
 
@@ -341,17 +342,17 @@ class GraphicEngine
 		VulkanBufferBuilder vertexBuilder{};
 		vertexBuilder.device = &device;
 		vertexBuilder.usageFlags = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-		vertexBuilder.bufferSize = dataManager->getVkVertexesSize();
+		vertexBuilder.bufferSize = dataManager->vertices.getVkSize();
 		vertexBuilder.data_mutex = &dataManager->data_mutex;
-		vertexBuilder.sourceData = dataManager->getVertexesPointer();
+		vertexBuilder.sourceData = dataManager->vertices.getDataPointer();
 		vertexBuffers[idx] = vertexBuilder.build();
 
 		VulkanBufferBuilder indexBuilder{};
 		indexBuilder.device = &device;
 		indexBuilder.usageFlags = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
-		indexBuilder.bufferSize = dataManager->getVkIndexesSize();
+		indexBuilder.bufferSize = dataManager->indexes.getVkSize();
 		indexBuilder.data_mutex = &dataManager->data_mutex;
-		indexBuilder.sourceData = dataManager->getIndexesPointer();
+		indexBuilder.sourceData = dataManager->indexes.getDataPointer();
 		indexBuffers[idx] = indexBuilder.build();
 		indexBuffers[idx].copyNewData();
 	}

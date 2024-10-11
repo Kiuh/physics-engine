@@ -2,21 +2,13 @@
 
 #include <array>
 #include <cstddef>
-#include <glm.hpp>
+#include "glm/glm.hpp"
 #include <vulkan/vulkan_core.h>
 
 struct Vertex
 {
-	glm::vec2 pos;
-	glm::vec3 color;
-
-	static Vertex make(glm::vec2 pos, glm::vec3 color)
-	{
-		return Vertex{
-			pos,
-			color
-		};
-	}
+	glm::vec2 pos = { 0,0 };
+	glm::vec3 color = { 0,0,0 };
 
 	static VkVertexInputBindingDescription getBindingDescription()
 	{
