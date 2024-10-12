@@ -117,7 +117,7 @@
     <ClCompile Include="color.cpp">
       <Filter>Source Files\common</Filter>
     </ClCompile>
-    <ClCompile Include="aabb.cpp">
+    <ClCompile Include="box.cpp">
       <Filter>Source Files\physics_engine\shapes</Filter>
     </ClCompile>
     <ClCompile Include="circle.cpp">

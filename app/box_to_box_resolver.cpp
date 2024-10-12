@@ -1,16 +1,16 @@
 #pragma once
 
-#include "aabb.cpp"
+#include "box.cpp"
 #include "collision.cpp"
 #include "collision_resolver.cpp"
 
 class BoxToBoxResolver : public CollisionResolver
 {
-	AABB* box1;
-	AABB* box2;
+	Box* box1;
+	Box* box2;
 
 	public:
-	BoxToBoxResolver(AABB* box1, AABB* box2)
+	BoxToBoxResolver(Box* box1, Box* box2)
 	{
 		this->box1 = box1;
 		this->box2 = box2;
@@ -33,7 +33,7 @@ class BoxToBoxResolver : public CollisionResolver
 		return getCollision(box2, box1);
 	}
 
-	static Collision getCollision(AABB* box1, AABB* box2)
+	static Collision getCollision(Box* box1, Box* box2)
 	{
 		auto col = Collision{};
 

@@ -1,11 +1,11 @@
 #pragma once
 
 #include "glm/glm.hpp"
-#include "aabb.cpp"
+#include "box.cpp"
 #include "circle.cpp"
 #include "collision.cpp"
 
-static bool isTouchBoxCircle(AABB* box, Circle* circle)
+static bool isTouchBoxCircle(Box* box, Circle* circle)
 {
 	auto rad_vec = glm::vec2(circle->radius, circle->radius);
 	auto circle_min = circle->transform->getPos() - rad_vec;
@@ -16,7 +16,7 @@ static bool isTouchBoxCircle(AABB* box, Circle* circle)
 	return true;
 }
 
-static Collision getBoxCircleCollision(AABB* box, Circle* circle)
+static Collision getBoxCircleCollision(Box* box, Circle* circle)
 {
 	auto vec = box->transform->getPos() - circle->transform->getPos();
 	return Collision{

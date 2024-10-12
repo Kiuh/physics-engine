@@ -1,18 +1,18 @@
 #pragma once
 
 #include "circle.cpp"
-#include "aabb.cpp"
+#include "box.cpp"
 #include "collision.cpp"
 #include "collision_resolver.cpp"
 #include "box_circle_tools.cpp"
 
 class BoxToCircleResolver : public CollisionResolver
 {
-	AABB* box;
+	Box* box;
 	Circle* circle;
 
 	public:
-	BoxToCircleResolver(AABB* box, Circle* circle)
+	BoxToCircleResolver(Box* box, Circle* circle)
 	{
 		this->box = box;
 		this->circle = circle;

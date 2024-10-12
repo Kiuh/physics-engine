@@ -3,7 +3,7 @@
 #include "vertex_source.cpp"
 #include "vertex.cpp"
 #include "window_manager.cpp"
-#include "aabb.cpp"
+#include "box.cpp"
 #include "circle.cpp"
 #include <cstdint>
 #include <mutex>

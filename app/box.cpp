@@ -7,14 +7,14 @@
 #include <vector>
 #include "shape.cpp"
 
-struct AABB : public Shape
+struct Box : public Shape
 {
 	private:
 	glm::vec2 halfSize;
 	Color color;
 
 	public:
-	AABB()
+	Box()
 	{
 		halfSize = glm::vec2{ 1.0f,1.0f };
 		color = Color::randomColor();

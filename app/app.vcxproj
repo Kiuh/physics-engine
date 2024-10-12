@@ -165,7 +165,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="app.cpp" />
-    <ClCompile Include="aabb.cpp" />
+    <ClCompile Include="box.cpp" />
     <ClCompile Include="box_circle_tools.cpp" />
     <ClCompile Include="box_to_box_resolver.cpp" />
     <ClCompile Include="box_to_circle_resolver.cpp" />

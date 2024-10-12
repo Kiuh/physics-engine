@@ -43,7 +43,7 @@ class Controller
 
 	void createGround()
 	{
-		auto plateShape = new AABB();
+		auto plateShape = new Box();
 		plateShape->setHalfSize({ 10, 1.5f });
 
 		auto plate = new Object(plateShape);
@@ -67,7 +67,7 @@ class Controller
 	{
 		for (size_t i = 0; i < initialBoxCount; i++)
 		{
-			auto boxShape = new AABB();
+			auto boxShape = new Box();
 			auto box = new Object(boxShape);
 			box->transform->setPosition(getRandomPos());
 			objects.push_back(box);

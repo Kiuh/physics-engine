@@ -10,8 +10,8 @@
 
 static CollisionResolver* createCollisionResolver(Shape* sh1, Shape* sh2)
 {
-	AABB* box1 = dynamic_cast<AABB*>(sh1);
-	AABB* box2 = dynamic_cast<AABB*>(sh2);
+	Box* box1 = dynamic_cast<Box*>(sh1);
+	Box* box2 = dynamic_cast<Box*>(sh2);
 
 	if (box1 != nullptr && box2 != nullptr)
 	{

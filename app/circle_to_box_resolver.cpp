@@ -1,7 +1,7 @@
 #pragma once
 
 #include "circle.cpp"
-#include "aabb.cpp"
+#include "box.cpp"
 #include "collision.cpp"
 #include "collision_resolver.cpp"
 #include "box_circle_tools.cpp"
@@ -9,10 +9,10 @@
 class CircleToBoxResolver : public CollisionResolver
 {
 	Circle* circle;
-	AABB* box;
+	Box* box;
 
 	public:
-	CircleToBoxResolver(Circle* circle, AABB* box)
+	CircleToBoxResolver(Circle* circle, Box* box)
 	{
 		this->circle = circle;
 		this->box = box;
