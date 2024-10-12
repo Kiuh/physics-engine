@@ -34,11 +34,14 @@
     <Filter Include="Resource Files\shaders">
       <UniqueIdentifier>{a91c2471-148b-4717-abd3-4e5845e239cd}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\shapes">
-      <UniqueIdentifier>{1ea89e09-8999-48c2-9b12-dbbed69e26b6}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\core">
       <UniqueIdentifier>{07ca5de9-7e5c-4412-aec7-f401beac6d51}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\physics_engine\shapes">
+      <UniqueIdentifier>{1ea89e09-8999-48c2-9b12-dbbed69e26b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\physics_engine\collisions">
+      <UniqueIdentifier>{6af4a9a8-5745-4de7-ab8f-0bd8a6fd8d8c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -115,10 +118,10 @@
       <Filter>Source Files\common</Filter>
     </ClCompile>
     <ClCompile Include="aabb.cpp">
-      <Filter>Source Files\shapes</Filter>
+      <Filter>Source Files\physics_engine\shapes</Filter>
     </ClCompile>
     <ClCompile Include="circle.cpp">
-      <Filter>Source Files\shapes</Filter>
+      <Filter>Source Files\physics_engine\shapes</Filter>
     </ClCompile>
     <ClCompile Include="vec2_tools.cpp">
       <Filter>Source Files\common</Filter>
@@ -130,13 +133,34 @@
       <Filter>Source Files\core</Filter>
     </ClCompile>
     <ClCompile Include="shape.cpp">
-      <Filter>Source Files\shapes</Filter>
-    </ClCompile>
-    <ClCompile Include="collision.cpp">
-      <Filter>Source Files\shapes</Filter>
+      <Filter>Source Files\physics_engine\shapes</Filter>
     </ClCompile>
     <ClCompile Include="transform.cpp">
       <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="collision.cpp">
+      <Filter>Source Files\physics_engine\collisions</Filter>
+    </ClCompile>
+    <ClCompile Include="collision_resolver.cpp">
+      <Filter>Source Files\physics_engine\collisions</Filter>
+    </ClCompile>
+    <ClCompile Include="box_to_box_resolver.cpp">
+      <Filter>Source Files\physics_engine\collisions</Filter>
+    </ClCompile>
+    <ClCompile Include="collision_resolver_builder.cpp">
+      <Filter>Source Files\physics_engine\collisions</Filter>
+    </ClCompile>
+    <ClCompile Include="circle_to_circle_resolver.cpp">
+      <Filter>Source Files\physics_engine\collisions</Filter>
+    </ClCompile>
+    <ClCompile Include="circle_to_box_resolver.cpp">
+      <Filter>Source Files\physics_engine\collisions</Filter>
+    </ClCompile>
+    <ClCompile Include="box_to_circle_resolver.cpp">
+      <Filter>Source Files\physics_engine\collisions</Filter>
+    </ClCompile>
+    <ClCompile Include="box_circle_tools.cpp">
+      <Filter>Source Files\physics_engine\collisions</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

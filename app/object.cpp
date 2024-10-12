@@ -12,17 +12,11 @@ class Object
 	Shape* shape;
 	RigidBody* rigidBody;
 
-	Object()
+	Object(Shape* shapeRef)
 	{
 		transform = new Transform();
-		shape = nullptr;
-		rigidBody = new RigidBody(transform);
-	}
-
-	void setShape(Shape* shape)
-	{
-		this->shape = shape;
-		this->shape->setTransform(transform);
-		rigidBody->setShape(shape);
+		shape = shapeRef;
+		shape->setTransform(transform);
+		rigidBody = new RigidBody(transform, shape);
 	}
 };

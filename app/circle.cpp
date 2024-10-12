@@ -22,15 +22,14 @@ struct Circle : public Shape
 		color = Color::randomColor();
 	}
 
-	// From VertexSource
 	std::vector<Vertex> getVertexes() const
 	{
 		std::vector<Vertex> vertices{};
-		// around
+
 		auto shift = glm::vec2(-radius, 0);
 		for (size_t i = 0; i < getVertexesCount(); i++)
 		{
-			Vertex vert(tr->getPosition() + shift, color.getValue());
+			Vertex vert(transform->getPos() + shift, color.getValue());
 			vertices.push_back(vert);
 			rotateVec2(shift, one_seg_deg);
 		}
@@ -60,16 +59,5 @@ struct Circle : public Shape
 	size_t getIndexesCount() const
 	{
 		return static_cast<size_t>(3 * circle_tris);
-	}
-
-	// From Shape
-	bool isOverlaps(Shape* shape)
-	{
-		return false;
-	}
-
-	Collision getCollision(Shape* shape)
-	{
-		return Collision{};
 	}
 };

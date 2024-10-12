@@ -7,39 +7,46 @@
 
 struct RigidBody
 {
+	private:
 	Transform* transform;
-	Shape* shape;
 
-	float inverseMass = 0.1f;
 	glm::vec2 velocity{};
 
 	glm::vec2 forceAccumulator{};
 	glm::vec2 torqueAccumulator{};
 
-	RigidBody(Transform* tr)
+	public:
+	Shape* shape;
+
+	bool isStatic = false;
+	float mass = 1.0f;
+
+	RigidBody(Transform* tr, Shape* shape)
 	{
 		this->transform = tr;
-	}
-
-	void setShape(Shape* shape)
-	{
 		this->shape = shape;
 	}
 
 	void update(float deltaTime)
 	{
+		if (isStatic)
+		{
+			return;
+		}
+
 		applyForces(deltaTime);
 		clearAccumulators();
-	}
-
-	void applyForces(float deltaTime)
-	{
-		transform->movePosition(forceAccumulator * deltaTime);
 	}
 
 	void addForce(glm::vec2& force)
 	{
 		forceAccumulator += force;
+	}
+
+	private:
+	void applyForces(float deltaTime)
+	{
+		transform->movePosition(forceAccumulator * deltaTime);
 	}
 
 	void clearAccumulators()

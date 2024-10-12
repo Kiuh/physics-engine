@@ -13,8 +13,8 @@ class Controller
 	PhysicsEngine* engine;
 
 	std::vector<Object*> objects{};
-	size_t initialBoxCount = 3;
-	size_t initialCircleCount = 3;
+	size_t initialBoxCount = 7;
+	size_t initialCircleCount = 14;
 
 	public:
 	Controller(WindowManager* win, DataManager* data, PhysicsEngine* engine)
@@ -46,17 +46,17 @@ class Controller
 		auto plateShape = new AABB();
 		plateShape->setHalfSize({ 10, 1.5f });
 
-		auto plate = new Object();
+		auto plate = new Object(plateShape);
 		plate->transform->setPosition({ 0, -5.0f });
-		plate->rigidBody->inverseMass = 0;
-		plate->setShape(plateShape);
+		plate->rigidBody->isStatic = true;
+		plate->rigidBody->mass = 20.0f;
 		objects.push_back(plate);
 	}
 
 	const glm::vec2 getRandomPos()
 	{
-		static const glm::vec2 leftDown(-7, 0);
-		static const glm::vec2 rightUp(7, 5);
+		static const glm::vec2 leftDown(-10, 0);
+		static const glm::vec2 rightUp(10, 7);
 		return {
 			randomFloat(leftDown.x, rightUp.x),
 			randomFloat(leftDown.y, rightUp.y)
@@ -68,23 +68,19 @@ class Controller
 		for (size_t i = 0; i < initialBoxCount; i++)
 		{
 			auto boxShape = new AABB();
-
-			auto box = new Object();
+			auto box = new Object(boxShape);
 			box->transform->setPosition(getRandomPos());
-			box->setShape(boxShape);
 			objects.push_back(box);
 		}
 	}
 
 	void createCircles()
 	{
-		for (size_t i = 0; i < initialBoxCount; i++)
+		for (size_t i = 0; i < initialCircleCount; i++)
 		{
 			auto circleShape = new Circle();
-
-			auto circle = new Object();
+			auto circle = new Object(circleShape);
 			circle->transform->setPosition(getRandomPos());
-			circle->setShape(circleShape);
 			objects.push_back(circle);
 		}
 	}

@@ -4,7 +4,7 @@
 
 struct Transform
 {
-	protected:
+	private:
 	float orientation;
 	glm::vec2 position;
 	glm::vec2 rotation;
@@ -17,7 +17,7 @@ struct Transform
 		rotation = { 0,0 };
 	}
 
-	glm::vec2 getPosition() const
+	glm::vec2 getPos() const
 	{
 		return position;
 	}

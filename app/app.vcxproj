@@ -166,8 +166,15 @@
   <ItemGroup>
     <ClCompile Include="app.cpp" />
     <ClCompile Include="aabb.cpp" />
+    <ClCompile Include="box_circle_tools.cpp" />
+    <ClCompile Include="box_to_box_resolver.cpp" />
+    <ClCompile Include="box_to_circle_resolver.cpp" />
     <ClCompile Include="circle.cpp" />
+    <ClCompile Include="circle_to_box_resolver.cpp" />
+    <ClCompile Include="circle_to_circle_resolver.cpp" />
     <ClCompile Include="collision.cpp" />
+    <ClCompile Include="collision_resolver.cpp" />
+    <ClCompile Include="collision_resolver_builder.cpp" />
     <ClCompile Include="color.cpp" />
     <ClCompile Include="controller.cpp" />
     <ClCompile Include="graphic_engine_builders.cpp" />
