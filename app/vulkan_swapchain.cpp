@@ -20,18 +20,18 @@ struct VulkanSwapchain
 {
 	public:
 	// Required
-	VulkanDevice* device = nullptr;
-	VkSurfaceKHR surface{};
-	WindowManager* windowManager = nullptr;
+	VulkanDevice* device;
+	VkSurfaceKHR surface;
+	WindowManager* windowManager;
 
 	// Exposed
-	VkSwapchainKHR instance{};
-	std::vector<VkImage> images{};
-	VkFormat imageFormat{};
-	VkExtent2D extent{};
+	VkSwapchainKHR instance;
+	std::vector<VkImage> images;
+	VkFormat imageFormat;
+	VkExtent2D extent;
 
-	std::vector<VkImageView> imageViews{};
-	std::vector<VkFramebuffer> framebuffers{};
+	std::vector<VkImageView> imageViews;
+	std::vector<VkFramebuffer> framebuffers;
 
 	// For MSAA
 	VkImage colorImage;
@@ -39,7 +39,7 @@ struct VulkanSwapchain
 	VkImageView colorImageView;
 
 	private:
-	VkRenderPass* renderPass = nullptr;
+	VkRenderPass* renderPass;
 
 	public:
 	void create()
@@ -59,6 +59,7 @@ struct VulkanSwapchain
 	{
 		cleanup();
 		createSwapChain();
+		createColorResources();
 		createImageViews();
 		createFramebuffers();
 	}

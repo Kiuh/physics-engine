@@ -18,11 +18,11 @@ struct Shape : public VertexSource
 
 	virtual bool isOverlaps(Shape* shape)
 	{
-		return false;
+		throw std::runtime_error("Called isOverlaps from raw Shape!");
 	}
 
 	virtual Collision getCollision(Shape* shape)
 	{
-		return Collision{};
+		throw std::runtime_error("Called getCollision from raw Shape!");
 	}
 };

@@ -15,7 +15,7 @@ class Object
 	Object()
 	{
 		transform = new Transform();
-		shape = new Shape();
+		shape = nullptr;
 		rigidBody = new RigidBody(transform);
 	}
 
@@ -23,5 +23,6 @@ class Object
 	{
 		this->shape = shape;
 		this->shape->setTransform(transform);
+		rigidBody->setShape(shape);
 	}
 };

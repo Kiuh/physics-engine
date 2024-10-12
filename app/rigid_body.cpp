@@ -3,10 +3,12 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/quaternion.hpp"
 #include "transform.cpp"
+#include "shape.cpp"
 
 struct RigidBody
 {
-	Transform* transform = nullptr;
+	Transform* transform;
+	Shape* shape;
 
 	float inverseMass = 0.1f;
 	glm::vec2 velocity{};
@@ -17,6 +19,11 @@ struct RigidBody
 	RigidBody(Transform* tr)
 	{
 		this->transform = tr;
+	}
+
+	void setShape(Shape* shape)
+	{
+		this->shape = shape;
 	}
 
 	void update(float deltaTime)
@@ -37,7 +44,7 @@ struct RigidBody
 
 	void clearAccumulators()
 	{
-		forceAccumulator = {};
-		torqueAccumulator = {};
+		forceAccumulator = { 0,0 };
+		torqueAccumulator = { 0,0 };
 	}
 };

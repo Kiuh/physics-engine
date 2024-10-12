@@ -17,18 +17,17 @@ static const float gravity_scale = 3.0f;
 class PhysicsEngine
 {
 	public:
-	std::vector<RigidBody*> rigidBodies{};
-
-	PhysicsEngine()
-	{
-	}
+	std::vector<RigidBody*> rigidBodies;
+	std::mutex process_mutex;
 
 	void update(float deltaTime)
 	{
+		process_mutex.lock();
+
 		// Gravity
 		for (auto rb : rigidBodies)
 		{
-			auto shift = glm::vec2{ 0,-1 } *gravity_scale * (1.0f / rb->inverseMass);
+			auto shift = glm::vec2{ 0,-1 } *gravity_scale * rb->inverseMass;
 			rb->addForce(shift);
 		}
 
@@ -37,5 +36,7 @@ class PhysicsEngine
 		{
 			rb->applyForces(deltaTime);
 		}
+
+		process_mutex.unlock();
 	}
 };

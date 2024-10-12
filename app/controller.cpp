@@ -13,7 +13,8 @@ class Controller
 	PhysicsEngine* engine;
 
 	std::vector<Object*> objects{};
-	size_t initialBoxCount = 1;
+	size_t initialBoxCount = 3;
+	size_t initialCircleCount = 3;
 
 	public:
 	Controller(WindowManager* win, DataManager* data, PhysicsEngine* engine)
@@ -25,32 +26,76 @@ class Controller
 		setup();
 	}
 
+	~Controller()
+	{
+		cleanup();
+	}
+
 	private:
 	void setup()
 	{
-		for (size_t i = 0; i < initialBoxCount; i++)
-		{
-			createBox();
-		}
+		createGround();
+		createBoxes();
+		createCircles();
 
-		// Immutable box
+		fillRepresentations();
+	}
+
+	void createGround()
+	{
 		auto plateShape = new AABB();
-		plateShape->setHalfSize(glm::vec2{ 10, 1.5f });
+		plateShape->setHalfSize({ 10, 1.5f });
 
 		auto plate = new Object();
-		plate->transform->setPosition(glm::vec2{ 0, -6.5f });
-		plate->rigidBody->inverseMass = std::numeric_limits<float>::infinity();
+		plate->transform->setPosition({ 0, -5.0f });
+		plate->rigidBody->inverseMass = 0;
 		plate->setShape(plateShape);
 		objects.push_back(plate);
+	}
 
-		// Add circle
-		auto circleShape = new Circle();
+	const glm::vec2 getRandomPos()
+	{
+		static const glm::vec2 leftDown(-7, 0);
+		static const glm::vec2 rightUp(7, 5);
+		return {
+			randomFloat(leftDown.x, rightUp.x),
+			randomFloat(leftDown.y, rightUp.y)
+		};
+	}
 
-		auto circle = new Object();
-		circle->setShape(plateShape);
-		objects.push_back(plate);
+	void createBoxes()
+	{
+		for (size_t i = 0; i < initialBoxCount; i++)
+		{
+			auto boxShape = new AABB();
 
+			auto box = new Object();
+			box->transform->setPosition(getRandomPos());
+			box->setShape(boxShape);
+			objects.push_back(box);
+		}
+	}
+
+	void createCircles()
+	{
+		for (size_t i = 0; i < initialBoxCount; i++)
+		{
+			auto circleShape = new Circle();
+
+			auto circle = new Object();
+			circle->transform->setPosition(getRandomPos());
+			circle->setShape(circleShape);
+			objects.push_back(circle);
+		}
+	}
+
+	void fillRepresentations()
+	{
 		data->data_mutex.lock();
+		engine->process_mutex.lock();
+
+		data->dataSources.clear();
+		engine->rigidBodies.clear();
 
 		for (size_t i = 0; i < objects.size(); i++)
 		{
@@ -58,33 +103,26 @@ class Controller
 			engine->rigidBodies.push_back(objects[i]->rigidBody);
 		}
 
+		engine->process_mutex.unlock();
 		data->data_mutex.unlock();
 		data->notifyStructureChanging();
 	}
 
-	void createBox()
+	void cleanup()
 	{
-		static const glm::vec2 leftDown(-7, 0);
-		static const glm::vec2 rightUp(7, 5);
-		static const glm::vec2 halfSize(0.5f, 0.5f);
-		static const float mass = 3.0f;
-
-		glm::vec2 position(randomFloat(leftDown.x, rightUp.x), randomFloat(leftDown.y, rightUp.y));
-
-		auto boxShape = new AABB();
-		boxShape->setHalfSize(halfSize);
-
-		auto box = new Object();
-		box->transform->setPosition(position);
-		box->setShape(boxShape);
-		objects.push_back(box);
+		for (size_t i = 0; i < objects.size(); i++)
+		{
+			delete objects[i];
+		}
+		objects.clear();
 	}
 
 	void processKeyPress(KeyCode key)
 	{
 		if (key == KeyCode::R)
 		{
-			//setup();
+			cleanup();
+			setup();
 		}
 	}
 };

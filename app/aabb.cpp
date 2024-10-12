@@ -17,7 +17,7 @@ struct AABB : public Shape
 	public:
 	AABB()
 	{
-		halfSize = glm::vec2{ 0.5f,0.5f };
+		halfSize = glm::vec2{ 1.0f,1.0f };
 		color = Color::randomColor();
 	}
 
@@ -102,7 +102,7 @@ struct AABB : public Shape
 
 	static Collision getShortestOverlap(AABB& box1, AABB& box2)
 	{
-		auto col = Collision{ true };
+		auto col = Collision{};
 
 		// Resulting vector moves box1
 		float x_overlap = getSegmentOverlap(box1.min().x, box1.max().x, box2.min().x, box2.max().x);

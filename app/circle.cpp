@@ -28,7 +28,7 @@ struct Circle : public Shape
 		std::vector<Vertex> vertices{};
 		// around
 		auto shift = glm::vec2(-radius, 0);
-		for (size_t i = 0; i < circle_tris; i++)
+		for (size_t i = 0; i < getVertexesCount(); i++)
 		{
 			Vertex vert(tr->getPosition() + shift, color.getValue());
 			vertices.push_back(vert);
@@ -39,7 +39,7 @@ struct Circle : public Shape
 
 	size_t getVertexesCount() const
 	{
-		return static_cast<size_t>(1 + circle_tris);
+		return static_cast<size_t>(circle_tris + 1);
 	}
 
 	std::vector<size_t> getIndexes() const
@@ -60,5 +60,16 @@ struct Circle : public Shape
 	size_t getIndexesCount() const
 	{
 		return static_cast<size_t>(3 * circle_tris);
+	}
+
+	// From Shape
+	bool isOverlaps(Shape* shape)
+	{
+		return false;
+	}
+
+	Collision getCollision(Shape* shape)
+	{
+		return Collision{};
 	}
 };

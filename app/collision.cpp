@@ -4,8 +4,6 @@
 
 struct Collision
 {
-	bool isCollide = false;
-
-	glm::vec2 normal{};
-	float depth = 0;
+	glm::vec2 normal;
+	float depth;
 };
