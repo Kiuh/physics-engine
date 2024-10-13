@@ -46,7 +46,7 @@ struct ValidationManager
 	void init(GraphicsEngineConfig config)
 	{
 		this->config = config;
-		if (config.isDebug && !checkValidationLayerSupport())
+		if (config.validation && !checkValidationLayerSupport())
 		{
 			throw std::runtime_error("validation layers requested, but not available!");
 		}
@@ -54,7 +54,7 @@ struct ValidationManager
 
 	std::vector<const char*> getDebugMessengerExtensions(GraphicsEngineConfig config)
 	{
-		if (config.isDebug)
+		if (config.validation)
 		{
 			return std::vector<const char*> {
 				VK_EXT_DEBUG_UTILS_EXTENSION_NAME
@@ -68,7 +68,7 @@ struct ValidationManager
 
 	void addMessengerToInstance(VkInstanceCreateInfo& createInfo)
 	{
-		if (config.isDebug)
+		if (config.validation)
 		{
 			populateDebugMessengerCreateInfo(debugCreateInfo);
 
@@ -85,7 +85,7 @@ struct ValidationManager
 
 	void addMessengerToDevice(VkDeviceCreateInfo& createInfo)
 	{
-		if (config.isDebug)
+		if (config.validation)
 		{
 			createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
 			createInfo.ppEnabledLayerNames = validationLayers.data();
@@ -98,7 +98,7 @@ struct ValidationManager
 
 	void setupDebugMessenger(VkInstance& instance)
 	{
-		if (!config.isDebug)
+		if (!config.validation)
 		{
 			return;
 		}
@@ -114,7 +114,7 @@ struct ValidationManager
 
 	void cleanup(VkInstance& instance)
 	{
-		if (config.isDebug)
+		if (config.validation)
 		{
 			DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
 		}

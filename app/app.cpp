@@ -45,9 +45,9 @@ class App
 	{
 		graphicsEngineConfig = GraphicsEngineConfig{};
 #ifdef NDEBUG
-		graphicsEngineConfig.isDebug = false;
+		graphicsEngineConfig.validation = false;
 #else
-		graphicsEngineConfig.isDebug = true;
+		graphicsEngineConfig.validation = true;
 #endif
 		graphicsEngineConfig.maxFramesInFlight = 2;
 

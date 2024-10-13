@@ -7,7 +7,8 @@
 
 struct GraphicsEngineConfig
 {
-	bool isDebug = false;
+	bool validation = false;
+	bool logging = true;
 	int maxFramesInFlight = 2;
 };
 

@@ -66,7 +66,7 @@ struct VulkanDevice
 		createCommandPools();
 		createCommandBuffers();
 
-		if (config.isDebug)
+		if (config.logging)
 		{
 			VkPhysicalDeviceProperties prop{};
 			vkGetPhysicalDeviceProperties(physicalDevice, &prop);
@@ -180,7 +180,7 @@ struct VulkanDevice
 		std::vector<VkPhysicalDevice> devices(deviceCount);
 		VK_CHECK(vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data()));
 
-		if (config.isDebug)
+		if (config.logging)
 		{
 			logAllVkPhysicalDevices(devices);
 		}
