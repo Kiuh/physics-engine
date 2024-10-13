@@ -8,7 +8,7 @@
 #include <vector>
 #include <vulkan/vk_platform.h>
 #include <vulkan/vulkan_core.h>
-#include <magic_enum/magic_enum.hpp>
+#include <magic_enum.hpp>
 
 static bool replace(std::string& str, const std::string& from, const std::string& to)
 {

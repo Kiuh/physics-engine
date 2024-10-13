@@ -2,7 +2,7 @@
 
 #include <vector>
 #include <iostream>
-#include "magic_enum/magic_enum.hpp"
+#include <magic_enum.hpp>
 #include <vulkan/vulkan_core.h>
 
 static void logDeviceProperties(VkPhysicalDevice device)
