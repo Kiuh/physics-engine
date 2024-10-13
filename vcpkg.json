@@ -5,6 +5,8 @@
     "boost-signals2",
     "glfw3",
     "glm",
-    "magic-enum"
+    "magic-enum",
+    "vulkan-headers",
+    "vulkan-loader"
   ]
 }
