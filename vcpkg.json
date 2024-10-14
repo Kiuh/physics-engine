@@ -1,7 +1,6 @@
 {
   "dependencies": [
     "boost-bind",
-    "boost-random",
     "boost-signals2",
     "glfw3",
     "glm",

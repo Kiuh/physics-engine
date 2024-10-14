@@ -1,17 +1,13 @@
 #pragma once
 
-#include <iostream>
-#include <random>
+#include <glm/gtc/random.hpp>
 
-static float randomFloat(float a, float b)
+static inline float randomFloat(float a, float b)
 {
-	std::random_device rd;
-	std::mt19937 gen = std::mt19937(rd());
-	std::uniform_real_distribution<> dis(a, b);
-	return static_cast<float>(dis(gen));
+	return glm::linearRand(a, b);
 }
 
-static float randomFloat01()
+static inline float randomFloat01()
 {
-	return randomFloat(0, 1);
+	return glm::linearRand(0.0f, 1.0f);
 }

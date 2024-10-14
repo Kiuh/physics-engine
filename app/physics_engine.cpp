@@ -8,7 +8,6 @@
 #include "collision_resolver_builder.cpp"
 
 #include <boost/bind/bind.hpp>
-#include <boost/random.hpp>
 #include <iostream>
 #include <vector>
 
