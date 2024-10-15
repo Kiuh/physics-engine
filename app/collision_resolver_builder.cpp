@@ -28,7 +28,7 @@ static CollisionResolver* createCollisionResolver(Shape* sh1, Shape* sh2)
 
 	if (box1 != nullptr && circle2 != nullptr)
 	{
-		return new BoxToCircleResolver(box1, circle2);
+		return new BoxToCircleResolver(*box1, *circle2);
 	}
 
 	if (circle1 != nullptr && box2 != nullptr)

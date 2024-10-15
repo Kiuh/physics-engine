@@ -8,29 +8,27 @@
 
 class BoxToCircleResolver : public CollisionResolver
 {
-	Box* box;
-	Circle* circle;
+	Box& box;
+	Circle& circle;
 
 	public:
-	BoxToCircleResolver(Box* box, Circle* circle)
+	BoxToCircleResolver(Box& box, Circle& circle) : box(box), circle(circle)
 	{
-		this->box = box;
-		this->circle = circle;
 	}
 
 	bool isOverlaps()
 	{
-		return isTouchBoxCircle(*box, *circle);
+		return isTouchBoxCircle(box, circle);
 	}
 
 	Collision getForwardCollision()
 	{
-		return getBoxCircleCollision(*box, *circle);
+		return getBoxCircleCollision(box, circle);
 	}
 
 	Collision getReverseCollision()
 	{
-		auto result = getBoxCircleCollision(*box, *circle);
+		auto result = getBoxCircleCollision(box, circle);
 		result.contact.normal *= -1;
 		return result;
 	}
