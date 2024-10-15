@@ -20,18 +20,18 @@ class CircleToBoxResolver : public CollisionResolver
 
 	bool isOverlaps()
 	{
-		return isTouchBoxCircle(box, circle);
+		return isTouchBoxCircle(*box, *circle);
 	}
 
 	Collision getForwardCollision()
 	{
-		auto result = getBoxCircleCollision(box, circle);
-		result.normal *= -1;
+		auto result = getBoxCircleCollision(*box, *circle);
+		result.contact.normal *= -1;
 		return result;
 	}
 
 	Collision getReverseCollision()
 	{
-		return getBoxCircleCollision(box, circle);
+		return getBoxCircleCollision(*box, *circle);
 	}
 };

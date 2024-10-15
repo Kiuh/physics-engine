@@ -6,10 +6,9 @@
 struct Shape : public VertexSource
 {
 	public:
-	Transform* transform = nullptr;
+	Transform& transform;
 
-	void setTransform(Transform* tr)
+	Shape(Transform& tr) : transform(tr)
 	{
-		this->transform = tr;
 	}
 };

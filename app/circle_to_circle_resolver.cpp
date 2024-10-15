@@ -18,7 +18,7 @@ class CircleToCircleResolver : public CollisionResolver
 
 	bool isOverlaps()
 	{
-		auto dis = glm::distance(circle1->transform->getPos(), circle2->transform->getPos());
+		auto dis = glm::distance(circle1->transform.pos(), circle2->transform.pos());
 		return dis <= circle1->radius + circle2->radius;
 	}
 
@@ -26,8 +26,11 @@ class CircleToCircleResolver : public CollisionResolver
 	{
 		auto overlapVec = overlap();
 		return Collision{
-			glm::normalize(overlapVec),
-			glm::length(overlapVec),
+			Contact{
+				glm::vec2{0,0},
+				glm::normalize(overlapVec),
+				glm::length(overlapVec),
+			}
 		};
 	}
 
@@ -35,14 +38,17 @@ class CircleToCircleResolver : public CollisionResolver
 	{
 		auto overlapVec = overlap();
 		return Collision{
-			-glm::normalize(overlapVec),
-			glm::length(overlapVec),
+			Contact{
+				glm::vec2{0,0},
+				-glm::normalize(overlapVec),
+				glm::length(overlapVec),
+			}
 		};
 	}
 
 	glm::vec2 overlap()
 	{
-		auto vec12 = circle1->transform->getPos() - circle2->transform->getPos();
+		auto vec12 = circle1->transform.pos() - circle2->transform.pos();
 		auto dist = glm::length(vec12);
 
 		auto extra = (dist - circle1->radius) + (dist - circle2->radius);

@@ -17,17 +17,17 @@ struct Transform
 		rotation = { 0,0 };
 	}
 
-	glm::vec2 getPos() const
+	glm::vec2 pos() const
 	{
 		return position;
 	}
 
-	void setPosition(glm::vec2 position)
+	void setPos(glm::vec2 position)
 	{
 		this->position = position;
 	}
 
-	void movePosition(glm::vec2 shift)
+	void movePos(glm::vec2 shift)
 	{
 		this->position += shift;
 	}

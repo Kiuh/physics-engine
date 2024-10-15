@@ -16,7 +16,7 @@ struct Circle : public Shape
 	float radius;
 	Color color;
 
-	Circle()
+	Circle(Transform& tr) : Shape(tr)
 	{
 		radius = 1;
 		color = Color::randomColor();
@@ -29,7 +29,7 @@ struct Circle : public Shape
 		auto shift = glm::vec2(-radius, 0);
 		for (size_t i = 0; i < getVertexesCount(); i++)
 		{
-			Vertex vert(transform->getPos() + shift, color.getValue());
+			Vertex vert(transform.pos() + shift, color.getValue());
 			vertices.push_back(vert);
 			rotateVec2(shift, one_seg_deg);
 		}

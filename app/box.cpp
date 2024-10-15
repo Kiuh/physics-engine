@@ -1,11 +1,24 @@
 #pragma once
 
+#ifndef GLM_ENABLE_EXPERIMENTAL
+#define GLM_ENABLE_EXPERIMENTAL
+#endif
+
 #include "color.cpp"
 #include "vertex.cpp"
 #include "glm/glm.hpp"
 #include <mutex>
 #include <vector>
 #include "shape.cpp"
+#include <glm/gtx/vector_angle.hpp>
+
+enum Corner
+{
+	LeftUp,
+	RightUp,
+	LeftDown,
+	RightDown,
+};
 
 struct Box : public Shape
 {
@@ -14,7 +27,7 @@ struct Box : public Shape
 	Color color;
 
 	public:
-	Box()
+	Box(Transform& tr) : Shape(tr)
 	{
 		halfSize = glm::vec2{ 1.0f,1.0f };
 		color = Color::randomColor();
@@ -27,12 +40,31 @@ struct Box : public Shape
 
 	glm::vec2 max() const
 	{
-		return transform->getPos() + halfSize;
+		return transform.pos() + halfSize;
 	}
 
 	glm::vec2 min() const
 	{
-		return transform->getPos() - halfSize;
+		return transform.pos() - halfSize;
+	}
+
+	glm::vec2 getPos(Corner corner) const
+	{
+		switch (corner)
+		{
+			case LeftUp: return { min().x, max().y };
+			case RightUp: return max();
+			case LeftDown: return min();
+			case RightDown: return { max().x, min().y };
+			default: throw std::runtime_error("Invalid input corner value");
+		}
+	}
+
+	float getDegrees(Corner corner) const
+	{
+		auto vec = getPos(corner) - transform.pos();
+		auto angle = glm::orientedAngle(glm::vec2(1.0f, 0), glm::normalize(vec));
+		return glm::degrees(angle);
 	}
 
 	glm::vec2 size() const

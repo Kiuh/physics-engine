@@ -43,13 +43,13 @@ class BoxToBoxResolver : public CollisionResolver
 
 		if (glm::abs(x_overlap) < glm::abs(y_overlap))
 		{
-			col.normal = glm::vec2(1, 0);
-			col.depth = x_overlap;
+			col.contact.normal = glm::vec2(1, 0);
+			col.contact.penetration = x_overlap;
 		}
 		else
 		{
-			col.normal = glm::vec2(0, 1);
-			col.depth = y_overlap;
+			col.contact.normal = glm::vec2(0, 1);
+			col.contact.penetration = y_overlap;
 		}
 		return col;
 	}

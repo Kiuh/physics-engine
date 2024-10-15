@@ -65,7 +65,7 @@ class PhysicsEngine
 
 	void applyCollisionForce(Collision col, RigidBody* rb1, RigidBody* rb2)
 	{
-		auto force = col.depth * col.normal * rb2->mass;
+		auto force = col.contact.penetration * col.contact.normal * rb2->mass;
 		rb1->addForce(force);
 	}
 };

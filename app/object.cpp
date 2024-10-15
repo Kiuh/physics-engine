@@ -14,9 +14,8 @@ class Object
 
 	Object(Shape* shapeRef)
 	{
-		transform = new Transform();
+		transform = &shapeRef->transform;
 		shape = shapeRef;
-		shape->setTransform(transform);
 		rigidBody = new RigidBody(transform, shape);
 	}
 };

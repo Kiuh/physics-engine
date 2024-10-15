@@ -13,8 +13,8 @@ class Controller
 	PhysicsEngine* engine;
 
 	std::vector<Object*> objects{};
-	size_t initialBoxCount = 7;
-	size_t initialCircleCount = 14;
+	size_t initialBoxCount = 5;
+	size_t initialCircleCount = 7;
 
 	public:
 	Controller(WindowManager* win, DataManager* data, PhysicsEngine* engine)
@@ -43,11 +43,12 @@ class Controller
 
 	void createGround()
 	{
-		auto plateShape = new Box();
+		auto tr = new Transform();
+		auto plateShape = new Box(*tr);
 		plateShape->setHalfSize({ 10, 1.5f });
 
 		auto plate = new Object(plateShape);
-		plate->transform->setPosition({ 0, -5.0f });
+		plate->transform->setPos({ 0, -5.0f });
 		plate->rigidBody->isStatic = true;
 		plate->rigidBody->mass = 20.0f;
 		objects.push_back(plate);
@@ -67,9 +68,10 @@ class Controller
 	{
 		for (size_t i = 0; i < initialBoxCount; i++)
 		{
-			auto boxShape = new Box();
+			auto tr = new Transform();
+			auto boxShape = new Box(*tr);
 			auto box = new Object(boxShape);
-			box->transform->setPosition(getRandomPos());
+			box->transform->setPos(getRandomPos());
 			objects.push_back(box);
 		}
 	}
@@ -78,9 +80,10 @@ class Controller
 	{
 		for (size_t i = 0; i < initialCircleCount; i++)
 		{
-			auto circleShape = new Circle();
+			auto tr = new Transform();
+			auto circleShape = new Circle(*tr);
 			auto circle = new Object(circleShape);
-			circle->transform->setPosition(getRandomPos());
+			circle->transform->setPos(getRandomPos());
 			objects.push_back(circle);
 		}
 	}

@@ -46,7 +46,7 @@ struct RigidBody
 	private:
 	void applyForces(float deltaTime)
 	{
-		transform->movePosition(forceAccumulator * deltaTime);
+		transform->movePos(forceAccumulator * deltaTime);
 	}
 
 	void clearAccumulators()
