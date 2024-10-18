@@ -1,8 +1,8 @@
 #pragma once
 
-#include<vector>
+#include <vector>
 #include <stdexcept>
-#include"vertex.cpp"
+#include "vertex.hpp"
 
 struct VertexSource
 {

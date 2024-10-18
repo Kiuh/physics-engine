@@ -4,12 +4,12 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #endif
 
-#include "color.cpp"
-#include "vertex.cpp"
+#include "color.hpp"
+#include "vertex.hpp"
 #include "glm/glm.hpp"
 #include <mutex>
 #include <vector>
-#include "shape.cpp"
+#include "shape.hpp"
 #include <glm/gtx/vector_angle.hpp>
 
 enum Corner

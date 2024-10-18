@@ -1,7 +1,7 @@
 #pragma once
 
-#include "transform.cpp"
-#include "vertex_source.cpp"
+#include "transform.hpp"
+#include "vertex_source.hpp"
 
 struct Shape : public VertexSource
 {

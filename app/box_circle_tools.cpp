@@ -8,7 +8,7 @@
 #include "math_tools.cpp"
 #include "box.cpp"
 #include "circle.cpp"
-#include "collision.cpp"
+#include "collision.hpp"
 #include <glm/gtx/vector_angle.hpp>
 #include <iostream>
 
@@ -77,12 +77,18 @@ static Collision getBoxCircleCollision(Box& box, Circle& circle)
 {
 	auto vec = box.transform.pos() - circle.transform.pos();
 	auto params = getParams(box, circle);
-	//auto inters = intersection(mt::Circle(circle.transform.pos(), circle.radius), );
+	glm::vec2 norm{ 0,0 };
+	if (fabs(vec.x) > fabs(vec.y))
+	{
+		norm.y = vec.y > 0.0f ? 1.0f : -1.0f;
+	}
+	else
+	{
+		norm.x = vec.x > 0.0f ? 1.0f : -1.0f;
+	}
 	return Collision{
-		Contact{
 			glm::vec2{0,0},
-			glm::normalize(vec),
+			norm,
 			params.boxSide + circle.radius - params.distance,
-		}
 	};
 }

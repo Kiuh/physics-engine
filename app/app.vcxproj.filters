@@ -43,6 +43,18 @@
     <Filter Include="Source Files\physics_engine\collisions">
       <UniqueIdentifier>{6af4a9a8-5745-4de7-ab8f-0bd8a6fd8d8c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\physics_engine">
+      <UniqueIdentifier>{6f2e5f24-813c-4b10-b166-85820784c512}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\data_tools">
+      <UniqueIdentifier>{01a28c85-5679-41f9-a6c1-048ca866c587}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\core">
+      <UniqueIdentifier>{9e58cda5-ccf3-49e7-8d75-aa53d691c478}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\common">
+      <UniqueIdentifier>{7d9eac6e-ed9a-40a2-8040-631b80350034}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -55,9 +67,6 @@
       <Filter>Source Files\graphic_engine</Filter>
     </ClCompile>
     <ClCompile Include="data_manager.cpp">
-      <Filter>Source Files\data_tools</Filter>
-    </ClCompile>
-    <ClCompile Include="vertex.cpp">
       <Filter>Source Files\data_tools</Filter>
     </ClCompile>
     <ClCompile Include="physics_engine.cpp">
@@ -78,9 +87,6 @@
     <ClCompile Include="window_manager.cpp">
       <Filter>Source Files\window</Filter>
     </ClCompile>
-    <ClCompile Include="random_helper.cpp">
-      <Filter>Source Files\common</Filter>
-    </ClCompile>
     <ClCompile Include="graphic_engine_builders.cpp">
       <Filter>Source Files\graphic_engine</Filter>
     </ClCompile>
@@ -99,9 +105,6 @@
     <ClCompile Include="vulkan_buffer.cpp">
       <Filter>Source Files\graphic_engine</Filter>
     </ClCompile>
-    <ClCompile Include="vertex_source.cpp">
-      <Filter>Source Files\data_tools</Filter>
-    </ClCompile>
     <ClCompile Include="math_tools.cpp">
       <Filter>Source Files\common</Filter>
     </ClCompile>
@@ -113,9 +116,6 @@
     </ClCompile>
     <ClCompile Include="vulkan_vec.cpp">
       <Filter>Source Files\data_tools</Filter>
-    </ClCompile>
-    <ClCompile Include="color.cpp">
-      <Filter>Source Files\common</Filter>
     </ClCompile>
     <ClCompile Include="box.cpp">
       <Filter>Source Files\physics_engine\shapes</Filter>
@@ -131,15 +131,6 @@
     </ClCompile>
     <ClCompile Include="object.cpp">
       <Filter>Source Files\core</Filter>
-    </ClCompile>
-    <ClCompile Include="shape.cpp">
-      <Filter>Source Files\physics_engine\shapes</Filter>
-    </ClCompile>
-    <ClCompile Include="transform.cpp">
-      <Filter>Source Files\core</Filter>
-    </ClCompile>
-    <ClCompile Include="collision.cpp">
-      <Filter>Source Files\physics_engine\collisions</Filter>
     </ClCompile>
     <ClCompile Include="collision_resolver.cpp">
       <Filter>Source Files\physics_engine\collisions</Filter>
@@ -162,6 +153,21 @@
     <ClCompile Include="box_circle_tools.cpp">
       <Filter>Source Files\physics_engine\collisions</Filter>
     </ClCompile>
+    <ClCompile Include="vertex_source.hpp">
+      <Filter>Header Files\data_tools</Filter>
+    </ClCompile>
+    <ClCompile Include="shape.hpp">
+      <Filter>Header Files\physics_engine</Filter>
+    </ClCompile>
+    <ClCompile Include="transform.hpp">
+      <Filter>Header Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="random_helper.hpp">
+      <Filter>Header Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="color.hpp">
+      <Filter>Header Files\common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="frag.spv">
@@ -180,6 +186,12 @@
   <ItemGroup>
     <ClInclude Include="lodepng.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="collision.hpp">
+      <Filter>Header Files\physics_engine</Filter>
+    </ClInclude>
+    <ClInclude Include="vertex.hpp">
+      <Filter>Header Files\data_tools</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

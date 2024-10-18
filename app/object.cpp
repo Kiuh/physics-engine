@@ -1,7 +1,7 @@
 #pragma once
 
 #include "rigid_body.cpp"
-#include "shape.cpp"
+#include "shape.hpp"
 #include <memory>
 #include <type_traits>
 

@@ -5,7 +5,7 @@
 #include "graphic_engine_builders.cpp"
 #include "shader_manager.cpp"
 #include "validation_manager.cpp"
-#include "vertex.cpp"
+#include "vertex.hpp"
 #include "vulkan_device.cpp"
 #include "vulkan_swapchain.cpp"
 #include "window_manager.cpp"
@@ -458,7 +458,8 @@ class GraphicEngine
 		rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
 		rasterizer.depthClampEnable = VK_FALSE;
 		rasterizer.rasterizerDiscardEnable = VK_FALSE;
-		rasterizer.polygonMode = VK_POLYGON_MODE_LINE;
+		//rasterizer.polygonMode = VK_POLYGON_MODE_LINE;
+		rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
 		rasterizer.lineWidth = 1.0f;
 		rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
 		rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;

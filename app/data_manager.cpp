@@ -1,7 +1,7 @@
 #pragma once
 
-#include "vertex_source.cpp"
-#include "vertex.cpp"
+#include "vertex_source.hpp"
+#include "vertex.hpp"
 #include "window_manager.cpp"
 #include "box.cpp"
 #include "circle.cpp"
@@ -9,7 +9,7 @@
 #include <mutex>
 #include <vector>
 #include "vulkan_vec.cpp"
-#include "shape.cpp"
+#include "shape.hpp"
 
 constexpr uint32_t pixelsPerUnit = 50;
 

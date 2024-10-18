@@ -2,20 +2,17 @@
 
 #include "glm/glm.hpp"
 #include "glm/gtc/quaternion.hpp"
-#include "transform.cpp"
-#include "shape.cpp"
+#include "transform.hpp"
+#include "shape.hpp"
+#include "collision.hpp"
 
 struct RigidBody
 {
 	private:
 	Transform* transform;
 
-	glm::vec2 velocity{};
-
-	glm::vec2 forceAccumulator{};
-	glm::vec2 torqueAccumulator{};
-
 	public:
+	glm::vec2 speed{};
 	Shape* shape;
 
 	bool isStatic = false;
@@ -29,29 +26,24 @@ struct RigidBody
 
 	void update(float deltaTime)
 	{
-		if (isStatic)
-		{
-			return;
-		}
-
 		applyForces(deltaTime);
-		clearAccumulators();
 	}
 
-	void addForce(glm::vec2& force)
+	void addSpeed(glm::vec2& force)
 	{
-		forceAccumulator += force;
+		speed += force;
+	}
+
+	void moveToResolve(Contact cont)
+	{
+		if (isStatic) return;
+		transform->movePos(cont.normal * cont.penetration);
 	}
 
 	private:
 	void applyForces(float deltaTime)
 	{
-		transform->movePos(forceAccumulator * deltaTime);
-	}
-
-	void clearAccumulators()
-	{
-		forceAccumulator = { 0,0 };
-		torqueAccumulator = { 0,0 };
+		if (isStatic) return;
+		transform->movePos(speed * deltaTime);
 	}
 };

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "shape.cpp"
+#include "shape.hpp"
 #include "collision_resolver.cpp"
 
 #include "box_to_box_resolver.cpp"

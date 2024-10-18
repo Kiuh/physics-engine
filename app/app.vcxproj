@@ -224,10 +224,9 @@
     <ClCompile Include="circle.cpp" />
     <ClCompile Include="circle_to_box_resolver.cpp" />
     <ClCompile Include="circle_to_circle_resolver.cpp" />
-    <ClCompile Include="collision.cpp" />
     <ClCompile Include="collision_resolver.cpp" />
     <ClCompile Include="collision_resolver_builder.cpp" />
-    <ClCompile Include="color.cpp" />
+    <ClCompile Include="color.hpp" />
     <ClCompile Include="controller.cpp" />
     <ClCompile Include="graphic_engine_builders.cpp" />
     <ClCompile Include="lodepng.cpp" />
@@ -236,17 +235,16 @@
     <ClCompile Include="object.cpp" />
     <ClCompile Include="physics_engine.cpp" />
     <ClCompile Include="fps_counter.cpp" />
-    <ClCompile Include="random_helper.cpp" />
+    <ClCompile Include="random_helper.hpp" />
     <ClCompile Include="rigid_body.cpp" />
     <ClCompile Include="shader_manager.cpp" />
-    <ClCompile Include="shape.cpp" />
-    <ClCompile Include="transform.cpp" />
+    <ClCompile Include="shape.hpp" />
+    <ClCompile Include="transform.hpp" />
     <ClCompile Include="validation_manager.cpp" />
     <ClCompile Include="graphic_engine.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="vec2_tools.cpp" />
-    <ClCompile Include="vertex.cpp" />
-    <ClCompile Include="vertex_source.cpp" />
+    <ClCompile Include="vertex_source.hpp" />
     <ClCompile Include="vk_image_builder.cpp" />
     <ClCompile Include="vulkan_buffer.cpp" />
     <ClCompile Include="vulkan_device.cpp" />
@@ -283,7 +281,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="collision.hpp" />
     <ClInclude Include="lodepng.h" />
+    <ClInclude Include="vertex.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="icon.png">

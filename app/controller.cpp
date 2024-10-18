@@ -13,7 +13,7 @@ class Controller
 	PhysicsEngine* engine;
 
 	std::vector<Object*> objects{};
-	size_t initialBoxCount = 5;
+	size_t initialBoxCount = 15;
 	size_t initialCircleCount = 7;
 
 	public:

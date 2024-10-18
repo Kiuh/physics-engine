@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdexcept>
-#include "collision.cpp"
+#include "collision.hpp"
 
 class CollisionResolver
 {

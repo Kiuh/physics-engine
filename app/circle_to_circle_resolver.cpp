@@ -1,7 +1,7 @@
 #pragma once
 
 #include "circle.cpp"
-#include "collision.cpp"
+#include "collision.hpp"
 #include "collision_resolver.cpp"
 
 class CircleToCircleResolver : public CollisionResolver

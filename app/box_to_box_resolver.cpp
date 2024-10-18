@@ -1,7 +1,7 @@
 #pragma once
 
 #include "box.cpp"
-#include "collision.cpp"
+#include "collision.hpp"
 #include "collision_resolver.cpp"
 
 class BoxToBoxResolver : public CollisionResolver

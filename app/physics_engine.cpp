@@ -1,7 +1,7 @@
 #pragma once
 
 #include "data_manager.cpp"
-#include "random_helper.cpp"
+#include "random_helper.hpp"
 #include "window_manager.cpp"
 #include "object.cpp"
 #include "rigid_body.cpp"
@@ -11,7 +11,7 @@
 #include <iostream>
 #include <vector>
 
-static const float gravity_scale = 5.0f;
+static const glm::vec2 gravity = { 0, -9.8f };
 
 class PhysicsEngine
 {
@@ -26,8 +26,8 @@ class PhysicsEngine
 		// Gravity
 		for (auto rb : rigidBodies)
 		{
-			auto shift = glm::vec2{ 0,-1 } *gravity_scale * rb->mass;
-			rb->addForce(shift);
+			auto frameNewSpeed = gravity * deltaTime;
+			rb->addSpeed(frameNewSpeed);
 		}
 
 		// Collision
@@ -35,7 +35,7 @@ class PhysicsEngine
 		{
 			for (size_t j = i + 1; j < rigidBodies.size(); j++)
 			{
-				resolveCollision(rigidBodies[i], rigidBodies[j]);
+				resolveCollision(*rigidBodies[i], *rigidBodies[j]);
 			}
 		}
 
@@ -48,24 +48,31 @@ class PhysicsEngine
 		process_mutex.unlock();
 	}
 
-	void resolveCollision(RigidBody* rb1, RigidBody* rb2)
+	void resolveCollision(RigidBody& rb1, RigidBody& rb2)
 	{
-		auto resolver = createCollisionResolver(rb1->shape, rb2->shape);
+		auto resolver = createCollisionResolver(rb1.shape, rb2.shape);
 
 		if (!resolver->isOverlaps())
 		{
 			return;
 		}
 
-		applyCollisionForce(resolver->getForwardCollision(), rb1, rb2);
-		applyCollisionForce(resolver->getReverseCollision(), rb2, rb1);
+		auto fc = resolver->getForwardCollision();
+		auto rc = resolver->getReverseCollision();
+
+		applyCollisionForce(fc, rb1, rb2);
+		applyCollisionForce(rc, rb2, rb1);
 
 		delete resolver;
 	}
 
-	void applyCollisionForce(Collision col, RigidBody* rb1, RigidBody* rb2)
+	void applyCollisionForce(Collision col, RigidBody& rb1, RigidBody& rb2)
 	{
-		auto force = col.contact.penetration * col.contact.normal * rb2->mass;
-		rb1->addForce(force);
+		//auto force = col.contact.penetration * col.contact.normal * rb2->mass;
+		//rb1->addSpeed(force);
+
+
+		rb1.speed *= glm::abs(mt::rotate90(col.contact.normal));
+		rb1.moveToResolve(col.contact);
 	}
 };

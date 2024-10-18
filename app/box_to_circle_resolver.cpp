@@ -2,7 +2,7 @@
 
 #include "circle.cpp"
 #include "box.cpp"
-#include "collision.cpp"
+#include "collision.hpp"
 #include "collision_resolver.cpp"
 #include "box_circle_tools.cpp"
 

@@ -1,11 +1,11 @@
 #pragma once
 
 #include "glm/glm.hpp"
-#include "color.cpp"
+#include "color.hpp"
 #include "math_tools.cpp"
-#include "vertex_source.cpp"
+#include "vertex_source.hpp"
 #include "vec2_tools.cpp"
-#include "shape.cpp"
+#include "shape.hpp"
 
 struct Circle : public Shape
 {

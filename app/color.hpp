@@ -1,6 +1,6 @@
 #pragma once
 
-#include "random_helper.cpp"
+#include "random_helper.hpp"
 #include "glm/glm.hpp"
 
 struct Color
