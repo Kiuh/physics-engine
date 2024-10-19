@@ -1,7 +1,7 @@
 #pragma once
 
-#include "circle.cpp"
-#include "box.cpp"
+#include "circle.h"
+#include "box.hpp"
 #include "collision.hpp"
 #include "collision_resolver.cpp"
 #include "box_circle_tools.cpp"

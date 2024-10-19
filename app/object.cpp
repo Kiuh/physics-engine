@@ -1,7 +1,7 @@
 #pragma once
 
 #include "rigid_body.cpp"
-#include "shape.hpp"
+#include "shape.h"
 #include <memory>
 #include <type_traits>
 
@@ -14,8 +14,8 @@ class Object
 
 	Object(Shape* shapeRef)
 	{
-		transform = &shapeRef->transform;
+		transform = &shapeRef->tr;
 		shape = shapeRef;
-		rigidBody = new RigidBody(transform, shape);
+		rigidBody = new RigidBody(*transform, *shape);
 	}
 };

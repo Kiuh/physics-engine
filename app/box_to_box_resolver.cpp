@@ -1,6 +1,6 @@
 #pragma once
 
-#include "box.cpp"
+#include "box.hpp"
 #include "collision.hpp"
 #include "collision_resolver.cpp"
 

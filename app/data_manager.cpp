@@ -1,15 +1,15 @@
 #pragma once
 
-#include "vertex_source.hpp"
+#include "vertex_source.h"
 #include "vertex.hpp"
 #include "window_manager.cpp"
-#include "box.cpp"
-#include "circle.cpp"
+#include "box.hpp"
+#include "circle.h"
 #include <cstdint>
 #include <mutex>
 #include <vector>
 #include "vulkan_vec.cpp"
-#include "shape.hpp"
+#include "shape.h"
 
 constexpr uint32_t pixelsPerUnit = 50;
 

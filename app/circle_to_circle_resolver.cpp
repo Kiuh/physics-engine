@@ -1,6 +1,6 @@
 #pragma once
 
-#include "circle.cpp"
+#include "circle.h"
 #include "collision.hpp"
 #include "collision_resolver.cpp"
 
@@ -18,7 +18,7 @@ class CircleToCircleResolver : public CollisionResolver
 
 	bool isOverlaps()
 	{
-		auto dis = glm::distance(circle1->transform.pos(), circle2->transform.pos());
+		auto dis = glm::distance(circle1->tr.pos(), circle2->tr.pos());
 		return dis <= circle1->radius + circle2->radius;
 	}
 
@@ -48,7 +48,7 @@ class CircleToCircleResolver : public CollisionResolver
 
 	glm::vec2 overlap()
 	{
-		auto vec12 = circle1->transform.pos() - circle2->transform.pos();
+		auto vec12 = circle1->tr.pos() - circle2->tr.pos();
 		auto dist = glm::length(vec12);
 
 		auto extra = (dist - circle1->radius) + (dist - circle2->radius);

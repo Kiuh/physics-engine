@@ -28,17 +28,11 @@
     <Filter Include="Source Files\window">
       <UniqueIdentifier>{85bc2ad7-7f22-42d2-bdaf-6858d2ef4164}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\common">
-      <UniqueIdentifier>{f86dbedd-ec94-47b0-820a-f90e2ae5fa78}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Resource Files\shaders">
       <UniqueIdentifier>{a91c2471-148b-4717-abd3-4e5845e239cd}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\core">
       <UniqueIdentifier>{07ca5de9-7e5c-4412-aec7-f401beac6d51}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\physics_engine\shapes">
-      <UniqueIdentifier>{1ea89e09-8999-48c2-9b12-dbbed69e26b6}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\physics_engine\collisions">
       <UniqueIdentifier>{6af4a9a8-5745-4de7-ab8f-0bd8a6fd8d8c}</UniqueIdentifier>
@@ -54,6 +48,15 @@
     </Filter>
     <Filter Include="Header Files\common">
       <UniqueIdentifier>{7d9eac6e-ed9a-40a2-8040-631b80350034}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\physics_engine\shapes">
+      <UniqueIdentifier>{70a499cf-c5fa-4012-806e-c161ef9b905e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\physics_engine\collisions">
+      <UniqueIdentifier>{9871af27-2620-4968-a9aa-a77e23538d4d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\physics_engine\shapes">
+      <UniqueIdentifier>{e5daeaec-767a-4c6c-a197-ba20dfdc813b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -105,9 +108,6 @@
     <ClCompile Include="vulkan_buffer.cpp">
       <Filter>Source Files\graphic_engine</Filter>
     </ClCompile>
-    <ClCompile Include="math_tools.cpp">
-      <Filter>Source Files\common</Filter>
-    </ClCompile>
     <ClCompile Include="vk_image_builder.cpp">
       <Filter>Source Files\graphic_engine</Filter>
     </ClCompile>
@@ -116,15 +116,6 @@
     </ClCompile>
     <ClCompile Include="vulkan_vec.cpp">
       <Filter>Source Files\data_tools</Filter>
-    </ClCompile>
-    <ClCompile Include="box.cpp">
-      <Filter>Source Files\physics_engine\shapes</Filter>
-    </ClCompile>
-    <ClCompile Include="circle.cpp">
-      <Filter>Source Files\physics_engine\shapes</Filter>
-    </ClCompile>
-    <ClCompile Include="vec2_tools.cpp">
-      <Filter>Source Files\common</Filter>
     </ClCompile>
     <ClCompile Include="controller.cpp">
       <Filter>Source Files\core</Filter>
@@ -153,11 +144,8 @@
     <ClCompile Include="box_circle_tools.cpp">
       <Filter>Source Files\physics_engine\collisions</Filter>
     </ClCompile>
-    <ClCompile Include="vertex_source.hpp">
+    <ClCompile Include="vertex_source.h">
       <Filter>Header Files\data_tools</Filter>
-    </ClCompile>
-    <ClCompile Include="shape.hpp">
-      <Filter>Header Files\physics_engine</Filter>
     </ClCompile>
     <ClCompile Include="transform.hpp">
       <Filter>Header Files\core</Filter>
@@ -167,6 +155,27 @@
     </ClCompile>
     <ClCompile Include="color.hpp">
       <Filter>Header Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="math_tools.hpp">
+      <Filter>Header Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="vec2_tools.hpp">
+      <Filter>Header Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="box.hpp">
+      <Filter>Header Files\physics_engine\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="circle.h">
+      <Filter>Header Files\physics_engine\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="shape.h">
+      <Filter>Header Files\physics_engine\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="circle.cpp">
+      <Filter>Source Files\physics_engine\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="circle_circle_resolver.cpp">
+      <Filter>Source Files\physics_engine\collisions</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -192,6 +201,9 @@
     </ClInclude>
     <ClInclude Include="vertex.hpp">
       <Filter>Header Files\data_tools</Filter>
+    </ClInclude>
+    <ClInclude Include="circle_circle_resolver.h">
+      <Filter>Header Files\physics_engine\collisions</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

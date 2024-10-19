@@ -50,28 +50,20 @@ class PhysicsEngine
 
 	void resolveCollision(RigidBody& rb1, RigidBody& rb2)
 	{
-		auto resolver = createCollisionResolver(rb1.shape, rb2.shape);
-
-		if (!resolver->isOverlaps())
+		if (!rb1.shape.isCollide(rb2.shape))
 		{
 			return;
 		}
 
-		auto fc = resolver->getForwardCollision();
-		auto rc = resolver->getReverseCollision();
+		auto fc = rb1.shape.getCollision(rb2.shape);
+		auto rc = rb2.shape.getCollision(rb1.shape);
 
 		applyCollisionForce(fc, rb1, rb2);
 		applyCollisionForce(rc, rb2, rb1);
-
-		delete resolver;
 	}
 
 	void applyCollisionForce(Collision col, RigidBody& rb1, RigidBody& rb2)
 	{
-		//auto force = col.contact.penetration * col.contact.normal * rb2->mass;
-		//rb1->addSpeed(force);
-
-
 		rb1.speed *= glm::abs(mt::rotate90(col.contact.normal));
 		rb1.moveToResolve(col.contact);
 	}

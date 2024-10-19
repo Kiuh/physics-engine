@@ -9,8 +9,9 @@
 #include "glm/glm.hpp"
 #include <mutex>
 #include <vector>
-#include "shape.hpp"
+#include "shape.h"
 #include <glm/gtx/vector_angle.hpp>
+#include "circle.h"
 
 enum Corner
 {
@@ -40,12 +41,12 @@ struct Box : public Shape
 
 	glm::vec2 max() const
 	{
-		return transform.pos() + halfSize;
+		return tr.pos() + halfSize;
 	}
 
 	glm::vec2 min() const
 	{
-		return transform.pos() - halfSize;
+		return tr.pos() - halfSize;
 	}
 
 	glm::vec2 getPos(Corner corner) const
@@ -62,7 +63,7 @@ struct Box : public Shape
 
 	float getDegrees(Corner corner) const
 	{
-		auto vec = getPos(corner) - transform.pos();
+		auto vec = getPos(corner) - tr.pos();
 		auto angle = glm::orientedAngle(glm::vec2(1.0f, 0), glm::normalize(vec));
 		return glm::degrees(angle);
 	}
@@ -99,5 +100,15 @@ struct Box : public Shape
 	size_t getIndexesCount() const
 	{
 		return 6;
+	}
+
+	Collision getCollision(Shape& other) const
+	{
+		return {};
+	}
+
+	bool isCollide(Shape& other) const
+	{
+		return false;
 	}
 };

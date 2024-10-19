@@ -5,9 +5,9 @@
 #endif
 
 #include "glm/glm.hpp"
-#include "math_tools.cpp"
-#include "box.cpp"
-#include "circle.cpp"
+#include "math_tools.hpp"
+#include "box.hpp"
+#include "circle.h"
 #include "collision.hpp"
 #include <glm/gtx/vector_angle.hpp>
 #include <iostream>
@@ -20,16 +20,16 @@ struct BoxCircleTouchParams
 
 static BoxCircleTouchParams getParams(Box& box, Circle& circle)
 {
-	auto dir_vec = circle.transform.pos() - box.transform.pos();
+	auto dir_vec = circle.tr.pos() - box.tr.pos();
 	auto deg = glm::degrees(glm::orientedAngle(glm::vec2(1.0f, 0), glm::normalize(dir_vec)));
 
-	auto solve = [circle, box, dir_vec](Corner start, Corner end) -> BoxCircleTouchParams
+	auto solve = [&circle, &box, dir_vec](Corner start, Corner end) -> BoxCircleTouchParams
 		{
-			auto l1 = mt::Line(circle.transform.pos(), box.transform.pos());
+			auto l1 = mt::Line(circle.tr.pos(), box.tr.pos());
 			auto l2 = mt::Line(box.getPos(start), box.getPos(end));
 
 			auto p = intersection(l1, l2);
-			auto boxPosToPoint = glm::distance(box.transform.pos(), p.value());
+			auto boxPosToPoint = glm::distance(box.tr.pos(), p.value());
 
 			return {
 				boxPosToPoint,
@@ -75,7 +75,7 @@ static bool isTouchBoxCircle(Box& box, Circle& circle)
 
 static Collision getBoxCircleCollision(Box& box, Circle& circle)
 {
-	auto vec = box.transform.pos() - circle.transform.pos();
+	auto vec = box.tr.pos() - circle.tr.pos();
 	auto params = getParams(box, circle);
 	glm::vec2 norm{ 0,0 };
 	if (fabs(vec.x) > fabs(vec.y))

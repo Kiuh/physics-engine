@@ -3,25 +3,23 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/quaternion.hpp"
 #include "transform.hpp"
-#include "shape.hpp"
+#include "shape.h"
 #include "collision.hpp"
 
 struct RigidBody
 {
 	private:
-	Transform* transform;
+	Transform& transform;
 
 	public:
 	glm::vec2 speed{};
-	Shape* shape;
+	Shape& shape;
 
 	bool isStatic = false;
 	float mass = 1.0f;
 
-	RigidBody(Transform* tr, Shape* shape)
+	RigidBody(Transform& tr, Shape& shape) : transform(tr), shape(shape)
 	{
-		this->transform = tr;
-		this->shape = shape;
 	}
 
 	void update(float deltaTime)
@@ -37,13 +35,13 @@ struct RigidBody
 	void moveToResolve(Contact cont)
 	{
 		if (isStatic) return;
-		transform->movePos(cont.normal * cont.penetration);
+		transform.movePos(cont.normal * cont.penetration);
 	}
 
 	private:
 	void applyForces(float deltaTime)
 	{
 		if (isStatic) return;
-		transform->movePos(speed * deltaTime);
+		transform.movePos(speed * deltaTime);
 	}
 };
