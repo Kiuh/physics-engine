@@ -140,4 +140,46 @@ namespace mt
 
 		return { { ans1,ans2 } };
 	}
+
+	static float getSegmentOverlap(float a1, float b1, float a2, float b2)
+	{
+		float len1 = b1 - a1;
+		float len2 = b2 - a2;
+
+		float m1 = a1 + len1 / 2.0f; // middle of 1 seg
+		float m2 = a2 + len2 / 2.0f; // middle of 2 seg
+
+		if (a1 >= a2 && b1 <= b2) // fully inside
+		{
+			if (m1 > m2)
+			{
+				return len1;
+			}
+			else
+			{
+				return -len1;
+			}
+		}
+
+		if (a1 <= a2 && b1 >= a1 && b1 <= b2) // overlaps only left point
+		{
+			return -(b1 - a2);
+		}
+
+		if (a1 >= a2 && a1 <= b2 && b1 >= b2) // overlaps only right point
+		{
+			return b2 - a1;
+		}
+
+		// fully overlaps
+		if (m1 > m2)
+		{
+			return len2;
+		}
+		else
+		{
+			return -len2;
+		}
+	}
+
 }

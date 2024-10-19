@@ -1,24 +1,6 @@
-#pragma once
+#include "box_circle_tools.h"
 
-#ifndef GLM_ENABLE_EXPERIMENTAL
-#define GLM_ENABLE_EXPERIMENTAL
-#endif
-
-#include "glm/glm.hpp"
-#include "math_tools.hpp"
-#include "box.hpp"
-#include "circle.h"
-#include "collision.hpp"
-#include <glm/gtx/vector_angle.hpp>
-#include <iostream>
-
-struct BoxCircleTouchParams
-{
-	float boxSide;
-	float distance;
-};
-
-static BoxCircleTouchParams getParams(Box& box, Circle& circle)
+BoxCircleTouchParams getParams(const Box& box, const Circle& circle)
 {
 	auto dir_vec = circle.tr.pos() - box.tr.pos();
 	auto deg = glm::degrees(glm::orientedAngle(glm::vec2(1.0f, 0), glm::normalize(dir_vec)));
@@ -67,13 +49,13 @@ static BoxCircleTouchParams getParams(Box& box, Circle& circle)
 	return solve(LeftUp, LeftDown);
 }
 
-static bool isTouchBoxCircle(Box& box, Circle& circle)
+bool isTouchBoxCircle(const Box& box, const Circle& circle)
 {
 	auto params = getParams(box, circle);
 	return params.boxSide + circle.radius >= params.distance;
 }
 
-static Collision getBoxCircleCollision(Box& box, Circle& circle)
+Collision getBoxCircleCollision(const Box& box, const Circle& circle)
 {
 	auto vec = box.tr.pos() - circle.tr.pos();
 	auto params = getParams(box, circle);

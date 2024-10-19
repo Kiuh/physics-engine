@@ -1,5 +1,6 @@
 #include "circle.h"
-#include "circle_circle_resolver.h"
+#include "detectors.h"
+#include "resolvers.h"
 
 Circle::Circle(Transform& tr) : Shape(tr)
 {
@@ -44,20 +45,4 @@ std::vector<size_t> Circle::getIndexes() const
 size_t Circle::getIndexesCount() const
 {
 	return static_cast<size_t>(3 * circle_tris);
-}
-
-Collision Circle::getCollision(Shape& other) const
-{
-	if (auto circ = dynamic_cast<Circle*>(&other); circ != nullptr)
-		return _getCollision(*this, *circ);
-
-	return {};
-}
-
-bool Circle::isCollide(Shape& other) const
-{
-	if (auto circ = dynamic_cast<Circle*>(&other); circ != nullptr)
-		return _isCollide(*this, *circ);
-
-	return {};
 }

@@ -123,27 +123,6 @@
     <ClCompile Include="object.cpp">
       <Filter>Source Files\core</Filter>
     </ClCompile>
-    <ClCompile Include="collision_resolver.cpp">
-      <Filter>Source Files\physics_engine\collisions</Filter>
-    </ClCompile>
-    <ClCompile Include="box_to_box_resolver.cpp">
-      <Filter>Source Files\physics_engine\collisions</Filter>
-    </ClCompile>
-    <ClCompile Include="collision_resolver_builder.cpp">
-      <Filter>Source Files\physics_engine\collisions</Filter>
-    </ClCompile>
-    <ClCompile Include="circle_to_circle_resolver.cpp">
-      <Filter>Source Files\physics_engine\collisions</Filter>
-    </ClCompile>
-    <ClCompile Include="circle_to_box_resolver.cpp">
-      <Filter>Source Files\physics_engine\collisions</Filter>
-    </ClCompile>
-    <ClCompile Include="box_to_circle_resolver.cpp">
-      <Filter>Source Files\physics_engine\collisions</Filter>
-    </ClCompile>
-    <ClCompile Include="box_circle_tools.cpp">
-      <Filter>Source Files\physics_engine\collisions</Filter>
-    </ClCompile>
     <ClCompile Include="vertex_source.h">
       <Filter>Header Files\data_tools</Filter>
     </ClCompile>
@@ -162,7 +141,7 @@
     <ClCompile Include="vec2_tools.hpp">
       <Filter>Header Files\common</Filter>
     </ClCompile>
-    <ClCompile Include="box.hpp">
+    <ClCompile Include="box.h">
       <Filter>Header Files\physics_engine\shapes</Filter>
     </ClCompile>
     <ClCompile Include="circle.h">
@@ -174,7 +153,19 @@
     <ClCompile Include="circle.cpp">
       <Filter>Source Files\physics_engine\shapes</Filter>
     </ClCompile>
-    <ClCompile Include="circle_circle_resolver.cpp">
+    <ClCompile Include="box.cpp">
+      <Filter>Source Files\physics_engine\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="box_circle_tools.cpp">
+      <Filter>Source Files\physics_engine\collisions</Filter>
+    </ClCompile>
+    <ClCompile Include="shape.cpp">
+      <Filter>Source Files\physics_engine\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="detectors.cpp">
+      <Filter>Source Files\physics_engine\collisions</Filter>
+    </ClCompile>
+    <ClCompile Include="resolvers.cpp">
       <Filter>Source Files\physics_engine\collisions</Filter>
     </ClCompile>
   </ItemGroup>
@@ -202,7 +193,13 @@
     <ClInclude Include="vertex.hpp">
       <Filter>Header Files\data_tools</Filter>
     </ClInclude>
-    <ClInclude Include="circle_circle_resolver.h">
+    <ClInclude Include="detectors.h">
+      <Filter>Header Files\physics_engine\collisions</Filter>
+    </ClInclude>
+    <ClInclude Include="resolvers.h">
+      <Filter>Header Files\physics_engine\collisions</Filter>
+    </ClInclude>
+    <ClInclude Include="box_circle_tools.h">
       <Filter>Header Files\physics_engine\collisions</Filter>
     </ClInclude>
   </ItemGroup>

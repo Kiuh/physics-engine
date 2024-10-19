@@ -23,7 +23,4 @@ class Circle : public Shape
 	size_t getVertexesCount() const;
 	std::vector<size_t> getIndexes() const;
 	size_t getIndexesCount() const;
-
-	Collision getCollision(Shape& other) const;
-	bool isCollide(Shape& other) const;
 };

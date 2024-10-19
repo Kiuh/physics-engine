@@ -5,7 +5,8 @@
 #include "window_manager.cpp"
 #include "object.cpp"
 #include "rigid_body.cpp"
-#include "collision_resolver_builder.cpp"
+#include "detectors.h"
+#include "resolvers.h"
 
 #include <boost/bind/bind.hpp>
 #include <iostream>
@@ -48,21 +49,21 @@ class PhysicsEngine
 		process_mutex.unlock();
 	}
 
-	void resolveCollision(RigidBody& rb1, RigidBody& rb2)
+	void resolveCollision(RigidBody& rb1, RigidBody& rb2) const
 	{
-		if (!rb1.shape.isCollide(rb2.shape))
+		if (!detectCollision(rb1.shape, rb2.shape))
 		{
 			return;
 		}
 
-		auto fc = rb1.shape.getCollision(rb2.shape);
-		auto rc = rb2.shape.getCollision(rb1.shape);
+		auto fc = createCollision(rb1.shape, rb2.shape);
+		auto rc = createCollision(rb2.shape, rb1.shape);
 
 		applyCollisionForce(fc, rb1, rb2);
 		applyCollisionForce(rc, rb2, rb1);
 	}
 
-	void applyCollisionForce(Collision col, RigidBody& rb1, RigidBody& rb2)
+	void applyCollisionForce(Collision col, RigidBody& rb1, RigidBody& rb2) const
 	{
 		rb1.speed *= glm::abs(mt::rotate90(col.contact.normal));
 		rb1.moveToResolve(col.contact);
