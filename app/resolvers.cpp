@@ -33,50 +33,62 @@ Collision createCollision(const Shape& sh1, const Shape& sh2)
 
 Collision createCollisionBB(const Box& box1, const Box& box2)
 {
-	auto col = Collision{};
-
 	// Resulting vector moves box1
 	float x_overlap = mt::getSegmentOverlap(box1.min().x, box1.max().x, box2.min().x, box2.max().x);
 	float y_overlap = mt::getSegmentOverlap(box1.min().y, box1.max().y, box2.min().y, box2.max().y);
 
 	if (glm::abs(x_overlap) < glm::abs(y_overlap))
 	{
-		col.contact.normal = glm::vec2(1, 0);
-		col.contact.penetration = x_overlap;
+		return {
+			glm::vec2(0,0),
+			glm::vec2(mt::clamp_m11(1 * x_overlap), 0),
+			glm::abs(x_overlap),
+		};
 	}
-	else
-	{
-		col.contact.normal = glm::vec2(0, 1);
-		col.contact.penetration = y_overlap;
-	}
-	return col;
+
+	return {
+		glm::vec2(0,0),
+		glm::vec2(0, mt::clamp_m11(1 * y_overlap)),
+		glm::abs(y_overlap),
+	};
 }
 
 Collision createCollisionCC(const Circle& c1, const Circle& c2)
 {
-	auto vec12 = c1.tr.pos() - c2.tr.pos();
-	auto dist = glm::length(vec12);
+	auto vec21 = c1.tr.pos() - c2.tr.pos();
+	auto dist = glm::length(vec21);
 
-	auto extra = (dist - c1.radius) + (dist - c2.radius);
-	auto overlapVec = vec12 - (glm::normalize(vec12) * extra);
+	auto overlap = c1.radius + c2.radius - dist;
+	auto norm = glm::normalize(vec21);
 
 	return Collision{
-		Contact{
-			glm::vec2{0,0},
-			glm::normalize(overlapVec),
-			glm::length(overlapVec),
-		}
+		c1.tr.pos() + norm * c1.radius,
+		norm,
+		overlap,
 	};
 }
 
-Collision createCollisionBC(const Box& b, const Circle& c)
+Collision createCollisionBC(const Box& b, const Circle& circle)
 {
-	return getBoxCircleCollision(b, c);
+	auto inters = getIntersectionsPoints(b, circle);
+
+	if (inters.size() == 1)
+	{
+		return {
+			inters[0],
+			circle.tr.pos() - inters[0],
+			0
+		};
+	}
+
+	return {};
+
+	throw std::runtime_error("Unexcepted collision count");
 }
 
 Collision createCollisionCB(const Circle& c, const Box& b)
 {
-	auto result = getBoxCircleCollision(b, c);
-	result.contact.normal *= -1;
-	return result;
+	return {};
+
+	throw std::runtime_error("Unexcepted collision count");
 }

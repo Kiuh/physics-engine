@@ -65,7 +65,8 @@ class PhysicsEngine
 
 	void applyCollisionForce(Collision col, RigidBody& rb1, RigidBody& rb2) const
 	{
-		rb1.speed *= glm::abs(mt::rotate90(col.contact.normal));
-		rb1.moveToResolve(col.contact);
+		if (rb2.isStatic) rb1.speed *= glm::abs(mt::rotate90(col.normal));
+
+		rb1.moveToResolve(col);
 	}
 };

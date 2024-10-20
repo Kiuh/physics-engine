@@ -33,7 +33,8 @@ bool detectCollisionCC(const Circle& c1, const Circle& c2)
 	return dis <= c1.radius + c2.radius;
 }
 
-bool detectCollisionBC(const Box& b, const Circle& c)
+bool detectCollisionBC(const Box& box, const Circle& circle)
 {
-	return isTouchBoxCircle(b, c);
+	auto inters = getIntersectionsPoints(box, circle);
+	return inters.size() != 0;
 }

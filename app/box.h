@@ -4,6 +4,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #endif
 
+#include <stdexcept>
 #include "color.hpp"
 #include "vertex.hpp"
 #include "glm/glm.hpp"
@@ -32,6 +33,7 @@ class Box : public Shape
 	glm::vec2 getPos(Corner corner) const;
 	float getDegrees(Corner corner) const;
 	glm::vec2 size() const;
+	std::vector<glm::vec2> getPoints() const;
 
 	std::vector<Vertex> getVertexes() const;
 	size_t getVertexesCount() const;

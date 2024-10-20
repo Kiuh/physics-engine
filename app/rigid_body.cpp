@@ -32,10 +32,10 @@ struct RigidBody
 		speed += force;
 	}
 
-	void moveToResolve(Contact cont)
+	void moveToResolve(Collision col)
 	{
 		if (isStatic) return;
-		transform.movePos(cont.normal * cont.penetration);
+		transform.movePos(col.normal * col.penetration);
 	}
 
 	private:

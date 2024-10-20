@@ -14,7 +14,7 @@ class Controller
 
 	std::vector<Object*> objects{};
 	size_t initialBoxCount = 8;
-	size_t initialCircleCount = 0;
+	size_t initialCircleCount = 7;
 
 	public:
 	Controller(WindowManager* win, DataManager* data, PhysicsEngine* engine)

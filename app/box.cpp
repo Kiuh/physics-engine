@@ -45,6 +45,11 @@ glm::vec2 Box::size() const
 	return halfSize * 2.0f;
 }
 
+std::vector<glm::vec2> Box::getPoints() const
+{
+	return { getPos(LeftDown), getPos(LeftUp), getPos(RightUp), getPos(RightDown) };
+}
+
 std::vector<Vertex> Box::getVertexes() const
 {
 	std::vector<Vertex> vertices(4);
