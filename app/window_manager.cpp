@@ -12,10 +12,12 @@
 #include <string>
 #include <vector>
 #include <vulkan/vulkan_core.h>
+#include "math_tools.hpp"
 
 enum KeyCode
 {
 	Undefined,
+	ESC,
 	R,
 };
 
@@ -27,8 +29,14 @@ class WindowManager
 	GLFWwindow* window = nullptr;
 
 	public:
+	glm::vec2 mousePos{};
+	bool leftMousePressed;
+	glm::vec2 lastMousePos;
+
 	boost::signals2::signal<void()> windowResized{};
 	boost::signals2::signal<void(KeyCode)> keyPressed{};
+	boost::signals2::signal<void(float)> mouseScroll{};
+	boost::signals2::signal<void(glm::vec2)> pressedMouseMoved{};
 
 	WindowManager(glm::ivec2 size, std::string title)
 	{
@@ -41,12 +49,21 @@ class WindowManager
 		glfwSetWindowUserPointer(window, this);
 		glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
 		glfwSetKeyCallback(window, keyCallback);
+		glfwSetCursorPosCallback(window, mousePosCallback);
+		glfwSetScrollCallback(window, scrollCallback);
+		glfwSetMouseButtonCallback(window, mouseButtonCallback);
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 		setIcon();
 	}
 
 	glm::ivec2 getSize() const
 	{
 		return size;
+	}
+
+	glm::vec2 getMousePos() const
+	{
+		return mousePos;
 	}
 
 	void poolEvents()
@@ -111,8 +128,54 @@ class WindowManager
 				case GLFW_KEY_R:
 					code = KeyCode::R;
 					break;
+				case GLFW_KEY_ESCAPE:
+					code = KeyCode::ESC;
+					break;
 			}
 			window_provider->keyPressed(code);
+		}
+	}
+
+	static void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+	{
+		auto& wm = *reinterpret_cast<WindowManager*>(glfwGetWindowUserPointer(window));
+		if (button == GLFW_MOUSE_BUTTON_LEFT)
+		{
+			if (GLFW_PRESS == action)
+			{
+				wm.leftMousePressed = true;
+			}
+			else if (GLFW_RELEASE == action)
+			{
+				wm.leftMousePressed = false;
+			}
+		}
+	}
+
+	static void mousePosCallback(GLFWwindow* window, double x_pos, double y_pos)
+	{
+		auto& wm = *reinterpret_cast<WindowManager*>(glfwGetWindowUserPointer(window));
+
+		glm::vec2 newPos = {
+			static_cast<float>(x_pos),
+			static_cast<float>(y_pos),
+		};
+
+		if (wm.leftMousePressed)
+		{
+			wm.pressedMouseMoved(wm.mousePos - newPos);
+		}
+
+		wm.mousePos = { newPos };
+	}
+
+	static void scrollCallback(GLFWwindow* window, double x_offset, double y_offset)
+	{
+		auto window_provider = reinterpret_cast<WindowManager*>(glfwGetWindowUserPointer(window));
+		float y_off = static_cast<float>(y_offset);
+		if (!mt::is0_f(y_off))
+		{
+			window_provider->mouseScroll(y_off);
 		}
 	}
 
@@ -121,7 +184,7 @@ class WindowManager
 		std::string filename = "icon.png";
 		std::vector<unsigned char> buffer;
 		std::vector<unsigned char> image;
-		unsigned w, h;
+		unsigned int w, h;
 
 		lodepng::load_file(buffer, filename);
 

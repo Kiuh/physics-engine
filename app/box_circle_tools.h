@@ -3,4 +3,10 @@
 #include "box.h"
 #include "circle.h"
 
-std::vector<glm::vec2> getIntersectionsPoints(const Box& box, const Circle& circle);
+struct SectionWithPoints
+{
+	mt::Section section;
+	std::vector<glm::vec2> points;
+};
+
+std::vector<SectionWithPoints> getIntersectionsPoints(const Box& box, const Circle& circle);

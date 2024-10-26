@@ -72,23 +72,48 @@ Collision createCollisionBC(const Box& b, const Circle& circle)
 {
 	auto inters = getIntersectionsPoints(b, circle);
 
+	// If circle overlap with only one side of box
 	if (inters.size() == 1)
 	{
-		return {
-			inters[0],
-			circle.tr.pos() - inters[0],
-			0
-		};
+		auto& sec = inters[0];
+
+		// And it have only 1 contact point
+		if (sec.points.size() == 1)
+		{
+			return {
+				sec.points[0],
+				glm::normalize(sec.points[0] - circle.tr.pos()),
+				0
+			};
+		}
+
+		// And it have 2 contact points
+		if (sec.points.size() == 2)
+		{
+			auto dot = (sec.points[0] + sec.points[1]) / 2.0f;
+			glm::vec2 vec{};
+			if (mt::intersection(sec.section, mt::Section(b.tr.pos(), circle.tr.pos())).has_value())
+			{
+				// Circle outside box
+				vec = dot - circle.tr.pos();
+			}
+			else
+			{
+				// Circle inside box
+				vec = circle.tr.pos() - dot;
+			}
+			return {
+				dot,
+				glm::normalize(vec),
+				glm::length(vec)
+			};
+		}
 	}
 
 	return {};
-
-	throw std::runtime_error("Unexcepted collision count");
 }
 
 Collision createCollisionCB(const Circle& c, const Box& b)
 {
 	return {};
-
-	throw std::runtime_error("Unexcepted collision count");
 }

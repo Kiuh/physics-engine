@@ -36,5 +36,10 @@ bool detectCollisionCC(const Circle& c1, const Circle& c2)
 bool detectCollisionBC(const Box& box, const Circle& circle)
 {
 	auto inters = getIntersectionsPoints(box, circle);
-	return inters.size() != 0;
+	size_t points = 0;
+	for (auto& inter : inters)
+	{
+		points += inter.points.size();
+	}
+	return points != 0 && points <= 2;
 }

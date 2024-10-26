@@ -11,12 +11,16 @@
 #include "vulkan_vec.cpp"
 #include "shape.h"
 
-constexpr uint32_t pixelsPerUnit = 50;
+constexpr float MIN_PIXELS_PER_UNIT = 10;
+constexpr float MAX_PIXELS_PER_UNIT = 400;
+constexpr float MOUSE_SENSETIVE = 0.04f;
 
 class DataManager
 {
 	private:
-	WindowManager* window = nullptr;
+	WindowManager& window;
+	float pixelsPerUnit = 50;
+	glm::vec2 zeroShift{};
 
 	public:
 	std::vector<VertexSource*> dataSources{};
@@ -25,11 +29,27 @@ class DataManager
 	std::mutex data_mutex{};
 	boost::signals2::signal<void()> dataStructureChanged{};
 
-	DataManager(WindowManager* window)
+	DataManager(WindowManager& window) : window(window)
 	{
-		this->window = window;
 		vertices = vulkan_vec<Vertex>{ std::vector<Vertex>{{}} };
 		indexes = vulkan_vec<uint16_t>{ std::vector<uint16_t>{0,1,2} };
+		window.mouseScroll.connect(boost::bind(&DataManager::handleMouseScroll, this, boost::placeholders::_1));
+		window.pressedMouseMoved.connect(boost::bind(&DataManager::handlePressedMouseMove, this, boost::placeholders::_1));
+	}
+
+	void setPixelPerUnit(float ppu)
+	{
+		pixelsPerUnit = glm::clamp(ppu, MIN_PIXELS_PER_UNIT, MAX_PIXELS_PER_UNIT);
+	}
+
+	void handleMouseScroll(float value)
+	{
+		setPixelPerUnit(pixelsPerUnit + value);
+	}
+
+	void handlePressedMouseMove(glm::vec2 delta)
+	{
+		zeroShift -= delta * MOUSE_SENSETIVE;
 	}
 
 	void notifyStructureChanging()
@@ -84,10 +104,11 @@ class DataManager
 	}
 
 	private:
-	void worldToScreen(Vertex& vert, WindowManager* wp, uint32_t pixelsPerUnit)
+	void worldToScreen(Vertex& vert, WindowManager& wp, float pixelsPerUnit) const
 	{
-		auto screen = wp->getSize();
+		auto screen = wp.getSize();
 		screen /= 2.0f;
+		vert.pos += zeroShift * glm::vec2{ 1,-1 };
 		vert.pos *= pixelsPerUnit;
 		vert.pos /= screen;
 

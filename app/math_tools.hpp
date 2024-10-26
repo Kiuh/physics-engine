@@ -45,6 +45,16 @@ namespace mt
 		return vec;
 	}
 
+	static inline bool in_range(float val, float a, float b)
+	{
+		return val >= fmin(a, b) - glm::epsilon<float>() && val <= fmax(a, b) + glm::epsilon<float>();
+	}
+
+	static inline bool in_range(glm::vec2 val, glm::vec2 a, glm::vec2 b)
+	{
+		return in_range(val.x, a.x, b.x) && in_range(val.y, a.y, b.y);
+	}
+
 	static inline bool greater(glm::vec2 source, glm::vec2 comparison)
 	{
 		return source.x >= comparison.x && source.y >= comparison.y;
@@ -54,6 +64,23 @@ namespace mt
 	{
 		return source.x <= comparison.x && source.y <= comparison.y;
 	}
+
+	struct Section
+	{
+		glm::vec2 p1;
+		glm::vec2 p2;
+
+		Section(glm::vec2 p1, glm::vec2 p2) : p1{ p1 }, p2{ p2 }
+		{
+		}
+
+		bool isSectionPoint(const glm::vec2 dot) const
+		{
+			return
+				isParallel(p2 - p1, p2 - dot)
+				&& in_range(dot, p1, p2);
+		}
+	};
 
 	struct Line
 	{
@@ -65,6 +92,11 @@ namespace mt
 			p = p1;
 			n = p2 - p1;
 			n = rotate90(n);
+		}
+
+		Line(Section s) : Line(s.p1, s.p2)
+		{
+
 		}
 
 		std::optional<float> getX(float y) const
@@ -101,35 +133,9 @@ namespace mt
 		}
 	};
 
-	struct Section
-	{
-		glm::vec2 p1;
-		glm::vec2 p2;
 
-		Section(glm::vec2 p1, glm::vec2 p2) : p1{ p1 }, p2{ p2 }
-		{
-		}
 
-		const glm::vec2 min() const
-		{
-			return { glm::min(p1.x, p2.x) ,glm::min(p1.y, p2.y) };
-		}
-
-		const glm::vec2 max() const
-		{
-			return { glm::max(p1.x, p2.x) ,glm::max(p1.y, p2.y) };
-		}
-
-		bool isSectionPoint(const glm::vec2 dot) const
-		{
-			return
-				isParallel(p2 - p1, p2 - dot)
-				&& lesser(dot, max())
-				&& greater(dot, min());
-		}
-	};
-
-	static std::optional<glm::vec2> intersection(Line l1, Line l2)
+	static std::optional<glm::vec2> intersection(const Line l1, const Line l2)
 	{
 		if (isParallel(l1.n, l2.n))
 		{
@@ -168,7 +174,7 @@ namespace mt
 		return glm::distance(p, p2.value());
 	}
 
-	static std::vector<glm::vec2> intersection(Circle c, Line l)
+	static std::vector<glm::vec2> intersection(const Circle c, const Line l)
 	{
 		// Find line normal to current via circle center
 		auto l_n = Line(c.p, c.p + l.n);
@@ -192,11 +198,11 @@ namespace mt
 		if (d > c.r) return {};
 
 		// Two intersections => find angle and rotate normal vector
-		float alfa = glm::degrees(glm::acos(d / c.r));
-		auto t_v = glm::normalize(p2 - c.p) * c.r;
+		float shift = glm::sqrt(c.r * c.r - d * d);
+		auto sh_dir = rotate90(l.n);
 
-		auto ans1 = c.p + glm::rotate(t_v, alfa);
-		auto ans2 = c.p + glm::rotate(t_v, -alfa);
+		auto ans1 = p2 + sh_dir * shift;
+		auto ans2 = p2 + -sh_dir * shift;
 
 		return  { ans1, ans2 };
 	}
@@ -204,7 +210,7 @@ namespace mt
 	static std::vector<glm::vec2> intersection(const Circle c, const Section s)
 	{
 		std::vector<glm::vec2> result{};
-		auto ans = intersection(c, Line(s.p1, s.p2));
+		auto ans = intersection(c, Line(s));
 		for (auto& v : ans)
 		{
 			if (s.isSectionPoint(v))
@@ -213,6 +219,13 @@ namespace mt
 			}
 		}
 		return result;
+	}
+
+	static std::optional<glm::vec2> intersection(const Section s1, const Section s2)
+	{
+		auto inters = intersection(Line(s1), Line(s2));
+		if (inters.has_value() && !s1.isSectionPoint(inters.value())) return {};
+		return inters;
 	}
 
 	static float getSegmentOverlap(float a1, float b1, float a2, float b2)

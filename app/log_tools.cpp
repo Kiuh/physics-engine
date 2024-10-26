@@ -16,7 +16,7 @@ static void logDeviceProperties(VkPhysicalDevice& device)
 
 static void logQueueFamilyProperties(VkQueueFamilyProperties queueProps)
 {
-	constexpr auto queueFlags = magic_enum::enum_values<VkQueueFlagBits>();
+	constexpr auto& queueFlags = magic_enum::enum_values<VkQueueFlagBits>();
 
 	std::cerr << "QueueCount: " << queueProps.queueCount << std::endl;
 	std::cerr << "Flags:" << std::endl;

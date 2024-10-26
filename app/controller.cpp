@@ -13,8 +13,8 @@ class Controller
 	PhysicsEngine* engine;
 
 	std::vector<Object*> objects{};
-	size_t initialBoxCount = 8;
-	size_t initialCircleCount = 7;
+	size_t initialBoxCount = 5;
+	size_t initialCircleCount = 5;
 
 	public:
 	Controller(WindowManager* win, DataManager* data, PhysicsEngine* engine)

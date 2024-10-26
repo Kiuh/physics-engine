@@ -52,7 +52,7 @@ class App
 		graphicsEngineConfig.maxFramesInFlight = 2;
 
 		this->windowManager = std::make_unique<WindowManager>(size, title);
-		this->dataManager = std::make_unique<DataManager>(windowManager.get());
+		this->dataManager = std::make_unique<DataManager>(*windowManager.get());
 
 		this->physicsEngine = std::make_unique<PhysicsEngine>();
 		this->graphicsEngine = std::make_unique<GraphicEngine>(windowManager.get(), dataManager.get(), graphicsEngineConfig);
