@@ -71,7 +71,12 @@ class Controller
 			auto tr = new Transform();
 			auto boxShape = new Box(*tr);
 			auto box = new Object(boxShape);
-			box->transform->setPos(getRandomPos());
+			do
+			{
+				box->transform->setPos(getRandomPos());
+			}
+			while (!isNoIntersections(*box));
+
 			objects.push_back(box);
 		}
 	}
@@ -83,9 +88,26 @@ class Controller
 			auto tr = new Transform();
 			auto circleShape = new Circle(*tr);
 			auto circle = new Object(circleShape);
-			circle->transform->setPos(getRandomPos());
+			do
+			{
+				circle->transform->setPos(getRandomPos());
+			}
+			while (!isNoIntersections(*circle));
 			objects.push_back(circle);
 		}
+	}
+
+	bool isNoIntersections(Object& obj)
+	{
+		for (auto ob : objects)
+		{
+			if (detectCollision(*obj.shape, *ob->shape))
+			{
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	void fillRepresentations()

@@ -51,16 +51,18 @@ class App
 #endif
 		graphicsEngineConfig.maxFramesInFlight = 2;
 
-		this->windowManager = std::make_unique<WindowManager>(size, title);
-		this->dataManager = std::make_unique<DataManager>(*windowManager.get());
+		windowManager = std::make_unique<WindowManager>(size, title);
+		dataManager = std::make_unique<DataManager>(*windowManager.get());
 
-		this->physicsEngine = std::make_unique<PhysicsEngine>();
-		this->graphicsEngine = std::make_unique<GraphicEngine>(windowManager.get(), dataManager.get(), graphicsEngineConfig);
+		physicsEngine = std::make_unique<PhysicsEngine>();
+		graphicsEngine = std::make_unique<GraphicEngine>(windowManager.get(), dataManager.get(), graphicsEngineConfig);
 
-		this->controller = std::make_unique<Controller>(windowManager.get(), dataManager.get(), physicsEngine.get());
+		controller = std::make_unique<Controller>(windowManager.get(), dataManager.get(), physicsEngine.get());
 
-		this->graphicFrameCounter = std::make_unique<FpsCounter>("Graphic FPS");
-		this->physicFrameCounter = std::make_unique<FpsCounter>("Physics FPS");
+		graphicFrameCounter = std::make_unique<FpsCounter>("Graphic FPS");
+		physicFrameCounter = std::make_unique<FpsCounter>("Physics FPS");
+
+		windowManager->keyPressed.connect(boost::bind(&App::processKeyPress, this, boost::placeholders::_1));
 	}
 
 	void run()
@@ -73,17 +75,27 @@ class App
 		graphicThread = std::make_unique<std::thread>(&App::graphicThreadFunc, this);
 		physicsThread = std::make_unique<std::thread>(&App::physicsThreadFunc, this);
 
-		while (!windowManager->isShouldClose())
+		while (!windowManager->isShouldClose() && isRunning)
 		{
 			windowManager->poolEvents();
 		}
 		isRunning = false;
 
+		graphicFrameCounter->stop();
+		physicFrameCounter->stop();
 		physicsThread->join();
 		graphicThread->join();
 	}
 
 	private:
+	void processKeyPress(KeyCode key)
+	{
+		if (key == ESC)
+		{
+			isRunning = false;
+		}
+	}
+
 	void graphicThreadFunc()
 	{
 		while (isRunning)

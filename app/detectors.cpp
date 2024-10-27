@@ -41,5 +41,5 @@ bool detectCollisionBC(const Box& box, const Circle& circle)
 	{
 		points += inter.points.size();
 	}
-	return points != 0 && points <= 2;
+	return points == 1 || points == 2;
 }

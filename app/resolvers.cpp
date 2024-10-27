@@ -110,10 +110,39 @@ Collision createCollisionBC(const Box& b, const Circle& circle)
 		}
 	}
 
-	return {};
+	if (inters.size() == 2)
+	{
+		return {};
+	}
+
+	throw new std::runtime_error("Cannot resolve collision in this situation.");
 }
 
-Collision createCollisionCB(const Circle& c, const Box& b)
+Collision createCollisionCB(const Circle& circle, const Box& b)
 {
-	return {};
+	auto inters = getIntersectionsPoints(b, circle);
+
+	if (inters.size() == 1)
+	{
+		auto& sec = inters[0];
+
+		// And it have only 1 contact point
+		if (sec.points.size() == 1)
+		{
+			return {
+				sec.points[0],
+				glm::normalize(sec.points[0] - circle.tr.pos()),
+				0
+			};
+		}
+
+		return {};
+	}
+
+	if (inters.size() == 2)
+	{
+		return {};
+	}
+
+	throw new std::runtime_error("Cannot resolve collision in this situation.");
 }

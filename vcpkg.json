@@ -5,7 +5,6 @@
     "glfw3",
     "glm",
     "magic-enum",
-    "vulkan-headers",
-    "vulkan-loader"
+    "vulkan"
   ]
 }

@@ -26,7 +26,7 @@ class WindowManager
 	private:
 	glm::ivec2 size{};
 	std::string title{};
-	GLFWwindow* window = nullptr;
+	GLFWwindow* window;
 
 	public:
 	glm::vec2 mousePos{};
@@ -43,9 +43,11 @@ class WindowManager
 		this->size = size;
 		this->title = title;
 
+		glfwSetErrorCallback(glfw_error_callback);
 		glfwInit();
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		window = glfwCreateWindow(size.x, size.y, title.data(), nullptr, nullptr);
+		glfwMakeContextCurrent(window);
 		glfwSetWindowUserPointer(window, this);
 		glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
 		glfwSetKeyCallback(window, keyCallback);
@@ -54,6 +56,11 @@ class WindowManager
 		glfwSetMouseButtonCallback(window, mouseButtonCallback);
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 		setIcon();
+	}
+
+	static void glfw_error_callback(int error, const char* description)
+	{
+		fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 	}
 
 	glm::ivec2 getSize() const
