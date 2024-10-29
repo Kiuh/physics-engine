@@ -1,7 +1,7 @@
 #pragma once
 
 #include "data_manager.cpp"
-#include "random_helper.hpp"
+#include "random_helper.h"
 #include "window_manager.cpp"
 #include "object.cpp"
 #include "rigid_body.cpp"

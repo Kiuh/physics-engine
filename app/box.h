@@ -5,7 +5,7 @@
 #endif
 
 #include <stdexcept>
-#include "color.hpp"
+#include "color.h"
 #include "vertex.hpp"
 #include "glm/glm.hpp"
 #include <vector>

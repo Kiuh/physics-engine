@@ -35,7 +35,7 @@ class FpsCounter
 		fpsThread = new std::thread(&FpsCounter::printInInterval, this);
 	}
 
-	inline void stop()
+	void stop()
 	{
 		isRunning = false;
 		fpsThread->join();

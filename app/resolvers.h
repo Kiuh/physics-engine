@@ -1,7 +1,7 @@
 #pragma once
 
 #include "glm/glm.hpp"
-#include "math_tools.hpp"
+#include "math_tools.h"
 #include "box.h"
 #include "circle.h"
 #include "collision.hpp"

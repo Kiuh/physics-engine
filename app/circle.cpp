@@ -5,7 +5,7 @@
 Circle::Circle(Transform& tr) : Shape(tr)
 {
 	radius = 1;
-	color = Color::randomColor();
+	color = randomColor();
 }
 
 std::vector<Vertex> Circle::getVertexes() const

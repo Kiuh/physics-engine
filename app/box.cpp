@@ -3,7 +3,7 @@
 Box::Box(Transform& tr) : Shape(tr)
 {
 	halfSize = glm::vec2{ 1.0f,1.0f };
-	color = Color::randomColor();
+	color = randomColor();
 }
 
 void Box::setHalfSize(glm::vec2 halfSize)

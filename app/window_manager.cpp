@@ -12,7 +12,7 @@
 #include <string>
 #include <vector>
 #include <vulkan/vulkan_core.h>
-#include "math_tools.hpp"
+#include "math_tools.h"
 
 enum KeyCode
 {

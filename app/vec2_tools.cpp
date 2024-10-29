@@ -1,8 +1,6 @@
-#pragma once
+#include "vec2_tools.h"
 
-#include "glm/glm.hpp"
-
-static void rotateVec2(glm::vec2& v, float angle)
+void rotateVec2(glm::vec2& v, float angle)
 {
 	float rad = glm::radians(angle);
 	glm::mat2 rotationMatrix = glm::mat2(

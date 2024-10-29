@@ -1,10 +1,10 @@
 #pragma once
 
 #include "glm/glm.hpp"
-#include "color.hpp"
-#include "math_tools.hpp"
+#include "color.h"
+#include "math_tools.h"
 #include "vertex_source.h"
-#include "vec2_tools.hpp"
+#include "vec2_tools.h"
 #include "shape.h"
 
 class Circle : public Shape

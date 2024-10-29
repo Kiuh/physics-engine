@@ -58,6 +58,9 @@
     <Filter Include="Source Files\physics_engine\shapes">
       <UniqueIdentifier>{e5daeaec-767a-4c6c-a197-ba20dfdc813b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\common">
+      <UniqueIdentifier>{015513e2-1c59-414d-bf63-c2e26c7897f6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -129,16 +132,16 @@
     <ClCompile Include="transform.hpp">
       <Filter>Header Files\core</Filter>
     </ClCompile>
-    <ClCompile Include="random_helper.hpp">
+    <ClCompile Include="random_helper.h">
       <Filter>Header Files\common</Filter>
     </ClCompile>
-    <ClCompile Include="color.hpp">
+    <ClCompile Include="color.h">
       <Filter>Header Files\common</Filter>
     </ClCompile>
-    <ClCompile Include="math_tools.hpp">
+    <ClCompile Include="math_tools.h">
       <Filter>Header Files\common</Filter>
     </ClCompile>
-    <ClCompile Include="vec2_tools.hpp">
+    <ClCompile Include="vec2_tools.h">
       <Filter>Header Files\common</Filter>
     </ClCompile>
     <ClCompile Include="box.h">
@@ -167,6 +170,18 @@
     </ClCompile>
     <ClCompile Include="resolvers.cpp">
       <Filter>Source Files\physics_engine\collisions</Filter>
+    </ClCompile>
+    <ClCompile Include="color.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="vec2_tools.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="random_helper.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="math_tools.cpp">
+      <Filter>Source Files\common</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -1,43 +1,29 @@
-#pragma once
-
-#ifndef GLM_ENABLE_EXPERIMENTAL
-#define GLM_ENABLE_EXPERIMENTAL
-#endif
-
-#include <stdexcept>
-#include <optional>
-#include <vector>
-#include <cmath>
-#include "glm/glm.hpp"
-#include <glm/gtc/epsilon.hpp>
-#include <glm/gtx/rotate_vector.hpp>
-#include <glm/ext/scalar_constants.hpp>
-#include <glm/gtx/vector_angle.hpp>
+#include "math_tools.h"
 
 namespace mt
 {
-	static inline bool is_eq_f(float f1, float f2)
+	bool is_eq_f(float f1, float f2)
 	{
 		return glm::epsilonEqual(f1, f2, glm::epsilon<float>());
 	}
 
-	static inline bool is0_f(float f)
+	bool is0_f(float f)
 	{
 		return is_eq_f(f, 0.0f);
 	}
 
-	static inline float clamp_m11(float f)
+	float clamp_m11(float f)
 	{
 		return glm::clamp(f, -1.0f, 1.0f);
 	}
 
-	static inline bool isParallel(glm::vec2 vec1, glm::vec2 vec2)
+	bool isParallel(glm::vec2 vec1, glm::vec2 vec2)
 	{
 		auto angle = glm::degrees(glm::angle(vec1, vec2));
 		return is0_f(angle) || is0_f(angle - 180.0f);
 	}
 
-	static inline glm::vec2 rotate90(glm::vec2 vec)
+	glm::vec2 rotate90(glm::vec2 vec)
 	{
 		auto x = vec.x;
 		vec.x = -vec.y;
@@ -45,97 +31,77 @@ namespace mt
 		return vec;
 	}
 
-	static inline bool in_range(float val, float a, float b)
+	bool in_range(float val, float a, float b)
 	{
 		return val >= fmin(a, b) - glm::epsilon<float>() && val <= fmax(a, b) + glm::epsilon<float>();
 	}
 
-	static inline bool in_range(glm::vec2 val, glm::vec2 a, glm::vec2 b)
+	bool in_range(glm::vec2 val, glm::vec2 a, glm::vec2 b)
 	{
 		return in_range(val.x, a.x, b.x) && in_range(val.y, a.y, b.y);
 	}
 
-	static inline bool greater(glm::vec2 source, glm::vec2 comparison)
+	bool greater(glm::vec2 source, glm::vec2 comparison)
 	{
 		return source.x >= comparison.x && source.y >= comparison.y;
 	}
 
-	static inline bool lesser(glm::vec2 source, glm::vec2 comparison)
+	bool lesser(glm::vec2 source, glm::vec2 comparison)
 	{
 		return source.x <= comparison.x && source.y <= comparison.y;
 	}
 
-	struct Section
+
+	Section::Section(glm::vec2 p1, glm::vec2 p2) : p1{ p1 }, p2{ p2 }
 	{
-		glm::vec2 p1;
-		glm::vec2 p2;
+	}
 
-		Section(glm::vec2 p1, glm::vec2 p2) : p1{ p1 }, p2{ p2 }
-		{
-		}
-
-		bool isSectionPoint(const glm::vec2 dot) const
-		{
-			return
-				isParallel(p2 - p1, p2 - dot)
-				&& in_range(dot, p1, p2);
-		}
-	};
-
-	struct Line
+	bool Section::isSectionPoint(const glm::vec2 dot) const
 	{
-		glm::vec2 p;
-		glm::vec2 n;
+		return
+			isParallel(p2 - p1, p2 - dot)
+			&& in_range(dot, p1, p2);
+	}
 
-		Line(glm::vec2 p1, glm::vec2 p2)
-		{
-			p = p1;
-			n = p2 - p1;
-			n = rotate90(n);
-		}
-
-		Line(Section s) : Line(s.p1, s.p2)
-		{
-
-		}
-
-		std::optional<float> getX(float y) const
-		{
-			if (is0_f(n.x)) return {};
-			return (-n.y * (y - p.y) / n.x) + p.x;
-		}
-
-		std::optional<float> getY(float x) const
-		{
-			if (is0_f(n.y)) return {};
-			return (-n.x * (x - p.x) / n.y) + p.y;
-		}
-
-		glm::vec2 getNormDirVec() const
-		{
-			return glm::normalize(rotate90(n));
-		}
-	};
-
-	struct Circle
+	Line::Line(glm::vec2 p1, glm::vec2 p2)
 	{
-		glm::vec2 p;
-		float r;
+		p = p1;
+		n = p2 - p1;
+		n = rotate90(n);
+	}
 
-		Circle(glm::vec2 p, float r) : p{ p }, r{ r }
-		{
-		}
+	Line::Line(Section s) : Line(s.p1, s.p2)
+	{
+	}
 
-		bool isInside(const glm::vec2 dot) const
-		{
-			auto vec = dot - p;
-			return abs(vec.x * vec.x + vec.y * vec.y) <= r * r + glm::epsilon<float>();
-		}
-	};
+	std::optional<float> Line::getX(float y) const
+	{
+		if (is0_f(n.x)) return {};
+		return (-n.y * (y - p.y) / n.x) + p.x;
+	}
 
+	std::optional<float> Line::getY(float x) const
+	{
+		if (is0_f(n.y)) return {};
+		return (-n.x * (x - p.x) / n.y) + p.y;
+	}
 
+	glm::vec2 Line::getNormDirVec() const
+	{
+		return glm::normalize(rotate90(n));
+	}
 
-	static std::optional<glm::vec2> intersection(const Line l1, const Line l2)
+	Circle::Circle(glm::vec2 p, float r) : p{ p }, r{ r }
+	{
+	}
+
+	bool Circle::isInside(const glm::vec2 dot) const
+	{
+		auto vec = dot - p;
+		return abs(vec.x * vec.x + vec.y * vec.y) <= r * r + glm::epsilon<float>();
+	}
+
+	std::optional<glm::vec2> intersection(const Line l1, const Line l2)
 	{
 		if (isParallel(l1.n, l2.n))
 		{
@@ -167,14 +133,14 @@ namespace mt
 		};
 	}
 
-	static float distance(Line l, glm::vec2 p)
+	float distance(Line l, glm::vec2 p)
 	{
 		auto l_n = Line(p, p + rotate90(l.n));
 		auto p2 = intersection(l, l_n);
 		return glm::distance(p, p2.value());
 	}
 
-	static std::vector<glm::vec2> intersection(const Circle c, const Line l)
+	std::vector<glm::vec2> intersection(const Circle c, const Line l)
 	{
 		// Find line normal to current via circle center
 		auto l_n = Line(c.p, c.p + l.n);
@@ -207,7 +173,7 @@ namespace mt
 		return  { ans1, ans2 };
 	}
 
-	static std::vector<glm::vec2> intersection(const Circle c, const Section s)
+	std::vector<glm::vec2> intersection(const Circle c, const Section s)
 	{
 		std::vector<glm::vec2> result{};
 		auto ans = intersection(c, Line(s));
@@ -221,14 +187,14 @@ namespace mt
 		return result;
 	}
 
-	static std::optional<glm::vec2> intersection(const Section s1, const Section s2)
+	std::optional<glm::vec2> intersection(const Section s1, const Section s2)
 	{
 		auto inters = intersection(Line(s1), Line(s2));
 		if (inters.has_value() && !s1.isSectionPoint(inters.value())) return {};
 		return inters;
 	}
 
-	static float getSegmentOverlap(float a1, float b1, float a2, float b2)
+	float getSegmentOverlap(float a1, float b1, float a2, float b2)
 	{
 		float len1 = b1 - a1;
 		float len2 = b2 - a2;
