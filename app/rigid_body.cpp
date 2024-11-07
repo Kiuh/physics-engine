@@ -1,47 +1,27 @@
-#pragma once
+#include "rigid_body.h"
 
-#include "glm/glm.hpp"
-#include "glm/gtc/quaternion.hpp"
-#include "transform.hpp"
-#include "shape.h"
-#include "collision.hpp"
-
-struct RigidBody
+RigidBody::RigidBody(Transform& tr, Shape& shape) : transform(tr), shape(shape)
 {
-	private:
-	Transform& transform;
+}
 
-	public:
-	glm::vec2 speed{};
-	Shape& shape;
+void RigidBody::update(float deltaTime)
+{
+	applyForces(deltaTime);
+}
 
-	bool isStatic = false;
-	float mass = 1.0f;
+void RigidBody::addSpeed(glm::vec2& force)
+{
+	speed += force;
+}
 
-	RigidBody(Transform& tr, Shape& shape) : transform(tr), shape(shape)
-	{
-	}
+void RigidBody::moveToResolve(Collision col)
+{
+	if (isStatic) return;
+	transform.movePos(col.normal * col.penetration);
+}
 
-	void update(float deltaTime)
-	{
-		applyForces(deltaTime);
-	}
-
-	void addSpeed(glm::vec2& force)
-	{
-		speed += force;
-	}
-
-	void moveToResolve(Collision col)
-	{
-		if (isStatic) return;
-		transform.movePos(col.normal * col.penetration);
-	}
-
-	private:
-	void applyForces(float deltaTime)
-	{
-		if (isStatic) return;
-		transform.movePos(speed * deltaTime);
-	}
-};
+void RigidBody::applyForces(float deltaTime)
+{
+	if (isStatic) return;
+	transform.movePos(speed * deltaTime);
+}

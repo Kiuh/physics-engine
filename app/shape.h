@@ -1,7 +1,7 @@
 #pragma once
 
-#include "collision.hpp"
-#include "transform.hpp"
+#include "collision.h"
+#include "transform.h"
 #include "vertex_source.h"
 
 class Shape : public VertexSource

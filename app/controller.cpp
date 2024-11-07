@@ -2,7 +2,7 @@
 
 #include "data_manager.cpp"
 #include "physics_engine.cpp"
-#include "object.cpp"
+#include "object.h"
 #include <limits>
 
 class Controller

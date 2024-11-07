@@ -3,8 +3,8 @@
 #include "data_manager.cpp"
 #include "random_helper.h"
 #include "window_manager.cpp"
-#include "object.cpp"
-#include "rigid_body.cpp"
+#include "object.h"
+#include "rigid_body.h"
 #include "detectors.h"
 #include "resolvers.h"
 

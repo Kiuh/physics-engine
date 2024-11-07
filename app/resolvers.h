@@ -4,7 +4,7 @@
 #include "math_tools.h"
 #include "box.h"
 #include "circle.h"
-#include "collision.hpp"
+#include "collision.h"
 #include "box_circle_tools.h"
 
 #include <glm/gtx/vector_angle.hpp>

@@ -123,13 +123,10 @@
     <ClCompile Include="controller.cpp">
       <Filter>Source Files\core</Filter>
     </ClCompile>
-    <ClCompile Include="object.cpp">
-      <Filter>Source Files\core</Filter>
-    </ClCompile>
     <ClCompile Include="vertex_source.h">
       <Filter>Header Files\data_tools</Filter>
     </ClCompile>
-    <ClCompile Include="transform.hpp">
+    <ClCompile Include="transform.h">
       <Filter>Header Files\core</Filter>
     </ClCompile>
     <ClCompile Include="random_helper.h">
@@ -183,6 +180,18 @@
     <ClCompile Include="math_tools.cpp">
       <Filter>Source Files\common</Filter>
     </ClCompile>
+    <ClCompile Include="transform.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="object.h">
+      <Filter>Header Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="object.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="vertex.cpp">
+      <Filter>Source Files\data_tools</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="frag.spv">
@@ -202,10 +211,10 @@
     <ClInclude Include="lodepng.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="collision.hpp">
+    <ClInclude Include="collision.h">
       <Filter>Header Files\physics_engine</Filter>
     </ClInclude>
-    <ClInclude Include="vertex.hpp">
+    <ClInclude Include="vertex.h">
       <Filter>Header Files\data_tools</Filter>
     </ClInclude>
     <ClInclude Include="detectors.h">
@@ -216,6 +225,12 @@
     </ClInclude>
     <ClInclude Include="box_circle_tools.h">
       <Filter>Header Files\physics_engine\collisions</Filter>
+    </ClInclude>
+    <ClInclude Include="rigid_body.h">
+      <Filter>Header Files\physics_engine</Filter>
+    </ClInclude>
+    <ClInclude Include="vulkan_vec.h">
+      <Filter>Header Files\data_tools</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -232,6 +232,7 @@
     <ClCompile Include="math_tools.cpp" />
     <ClCompile Include="math_tools.h" />
     <ClCompile Include="object.cpp" />
+    <ClCompile Include="object.h" />
     <ClCompile Include="physics_engine.cpp" />
     <ClCompile Include="fps_counter.cpp" />
     <ClCompile Include="random_helper.cpp" />
@@ -241,12 +242,14 @@
     <ClCompile Include="shader_manager.cpp" />
     <ClCompile Include="shape.cpp" />
     <ClCompile Include="shape.h" />
-    <ClCompile Include="transform.hpp" />
+    <ClCompile Include="transform.cpp" />
+    <ClCompile Include="transform.h" />
     <ClCompile Include="validation_manager.cpp" />
     <ClCompile Include="graphic_engine.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="vec2_tools.cpp" />
     <ClCompile Include="vec2_tools.h" />
+    <ClCompile Include="vertex.cpp" />
     <ClCompile Include="vertex_source.h" />
     <ClCompile Include="vk_image_builder.cpp" />
     <ClCompile Include="vulkan_buffer.cpp" />
@@ -285,11 +288,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="box_circle_tools.h" />
-    <ClInclude Include="collision.hpp" />
+    <ClInclude Include="collision.h" />
     <ClInclude Include="detectors.h" />
     <ClInclude Include="lodepng.h" />
     <ClInclude Include="resolvers.h" />
-    <ClInclude Include="vertex.hpp" />
+    <ClInclude Include="rigid_body.h" />
+    <ClInclude Include="vertex.h" />
+    <ClInclude Include="vulkan_vec.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="icon.png">
