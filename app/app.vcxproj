@@ -286,17 +286,28 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="app.h" />
     <ClInclude Include="box_circle_tools.h" />
     <ClInclude Include="collision.h" />
     <ClInclude Include="controller.h" />
     <ClInclude Include="data_manager.h" />
     <ClInclude Include="detectors.h" />
     <ClInclude Include="fps_counter.h" />
+    <ClInclude Include="graphic_engine.h" />
+    <ClInclude Include="graphic_engine_builders.h" />
     <ClInclude Include="lodepng.h" />
+    <ClInclude Include="log_tools.h" />
     <ClInclude Include="physics_engine.h" />
     <ClInclude Include="resolvers.h" />
     <ClInclude Include="rigid_body.h" />
+    <ClInclude Include="shader_manager.h" />
+    <ClInclude Include="validation_manager.h" />
     <ClInclude Include="vertex.h" />
+    <ClInclude Include="vk_image_builder.h" />
+    <ClInclude Include="vulkan_buffer.h" />
+    <ClInclude Include="vulkan_device.h" />
+    <ClInclude Include="vulkan_swapchain.h" />
+    <ClInclude Include="vulkan_tools.h" />
     <ClInclude Include="vulkan_vec.h" />
     <ClInclude Include="window_manager.h" />
   </ItemGroup>

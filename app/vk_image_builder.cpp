@@ -1,10 +1,6 @@
-#pragma once
+#include "vk_image_builder.h"
 
-#include "vulkan_device.cpp"
-#include "vulkan_buffer.cpp"
-#include <vulkan/vulkan_core.h>
-
-static VkImageView createImageView(
+VkImageView createImageView(
 	VulkanDevice* device,
 	VkImage image,
 	VkFormat format,
@@ -29,7 +25,7 @@ static VkImageView createImageView(
 	return imageView;
 }
 
-static void createImage(
+void createImage(
 	VulkanDevice* device,
 	uint32_t width,
 	uint32_t height,

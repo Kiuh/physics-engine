@@ -1,11 +1,6 @@
-#pragma once
+#include "log_tools.h"
 
-#include <vector>
-#include <iostream>
-#include <magic_enum.hpp>
-#include <vulkan/vulkan_core.h>
-
-static void logDeviceProperties(VkPhysicalDevice& device)
+void logDeviceProperties(VkPhysicalDevice& device)
 {
 	VkPhysicalDeviceProperties prop{};
 	vkGetPhysicalDeviceProperties(device, &prop);
@@ -14,7 +9,7 @@ static void logDeviceProperties(VkPhysicalDevice& device)
 	std::cerr << "Driver version: " << prop.driverVersion << std::endl;
 }
 
-static void logQueueFamilyProperties(VkQueueFamilyProperties queueProps)
+void logQueueFamilyProperties(VkQueueFamilyProperties queueProps)
 {
 	constexpr auto& queueFlags = magic_enum::enum_values<VkQueueFlagBits>();
 
@@ -30,7 +25,7 @@ static void logQueueFamilyProperties(VkQueueFamilyProperties queueProps)
 	std::cerr << std::endl;
 }
 
-static void logDeviceQueueFamilies(VkPhysicalDevice device)
+void logDeviceQueueFamilies(VkPhysicalDevice device)
 {
 	uint32_t queueFamilyCount = 0;
 	vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
@@ -48,7 +43,7 @@ static void logDeviceQueueFamilies(VkPhysicalDevice device)
 	std::cerr << std::endl;
 }
 
-static void logAllVkPhysicalDevices(std::vector<VkPhysicalDevice> devices)
+void logAllVkPhysicalDevices(std::vector<VkPhysicalDevice> devices)
 {
 	std::cerr << "Number of physical devices available: " << devices.size() << std::endl;
 	for (auto& device : devices)
