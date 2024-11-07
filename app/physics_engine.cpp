@@ -1,71 +1,50 @@
-#pragma once
+#include "physics_engine.h"
 
-#include "data_manager.cpp"
-#include "random_helper.h"
-#include "window_manager.cpp"
-#include "object.h"
-#include "rigid_body.h"
-#include "detectors.h"
-#include "resolvers.h"
-
-#include <boost/bind/bind.hpp>
-#include <iostream>
-#include <vector>
-
-static const glm::vec2 gravity = { 0, -9.8f };
-
-class PhysicsEngine
+void PhysicsEngine::update(float deltaTime)
 {
-	public:
-	std::vector<RigidBody*> rigidBodies;
-	std::mutex process_mutex;
+	process_mutex.lock();
 
-	void update(float deltaTime)
+	// Gravity
+	for (auto rb : rigidBodies)
 	{
-		process_mutex.lock();
-
-		// Gravity
-		for (auto rb : rigidBodies)
-		{
-			auto frameNewSpeed = gravity * deltaTime;
-			rb->addSpeed(frameNewSpeed);
-		}
-
-		// Collision
-		for (size_t i = 0; i < rigidBodies.size(); i++)
-		{
-			for (size_t j = i + 1; j < rigidBodies.size(); j++)
-			{
-				resolveCollision(*rigidBodies[i], *rigidBodies[j]);
-			}
-		}
-
-		// Apply
-		for (auto rb : rigidBodies)
-		{
-			rb->update(deltaTime);
-		}
-
-		process_mutex.unlock();
+		auto frameNewSpeed = gravity * deltaTime;
+		rb->addSpeed(frameNewSpeed);
 	}
 
-	void resolveCollision(RigidBody& rb1, RigidBody& rb2) const
+	// Collision
+	for (size_t i = 0; i < rigidBodies.size(); i++)
 	{
-		if (!detectCollision(rb1.shape, rb2.shape))
+		for (size_t j = i + 1; j < rigidBodies.size(); j++)
 		{
-			return;
+			resolveCollision(*rigidBodies[i], *rigidBodies[j]);
 		}
-
-		auto fc = createCollision(rb1.shape, rb2.shape);
-		auto rc = createCollision(rb2.shape, rb1.shape);
-
-		applyCollisionForce(fc, rb1, rb2);
-		applyCollisionForce(rc, rb2, rb1);
 	}
 
-	void applyCollisionForce(Collision col, RigidBody& rb1, RigidBody& rb2) const
+	// Apply
+	for (auto rb : rigidBodies)
 	{
-		rb1.speed *= glm::abs(mt::rotate90(col.normal));
-		rb1.moveToResolve(col);
+		rb->update(deltaTime);
 	}
-};
+
+	process_mutex.unlock();
+}
+
+void PhysicsEngine::resolveCollision(RigidBody& rb1, RigidBody& rb2) const
+{
+	if (!detectCollision(rb1.shape, rb2.shape))
+	{
+		return;
+	}
+
+	auto fc = createCollision(rb1.shape, rb2.shape);
+	auto rc = createCollision(rb2.shape, rb1.shape);
+
+	applyCollisionForce(fc, rb1, rb2);
+	applyCollisionForce(rc, rb2, rb1);
+}
+
+void PhysicsEngine::applyCollisionForce(Collision col, RigidBody& rb1, RigidBody& rb2) const
+{
+	rb1.speed *= glm::abs(mt::rotate90(col.normal));
+	rb1.moveToResolve(col);
+}

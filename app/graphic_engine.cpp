@@ -1,14 +1,14 @@
 #pragma once
 
 #include "vulkan_tools.cpp"
-#include "data_manager.cpp"
+#include "data_manager.h"
 #include "graphic_engine_builders.cpp"
 #include "shader_manager.cpp"
 #include "validation_manager.cpp"
-#include "vertex.hpp"
+#include "vertex.h"
 #include "vulkan_device.cpp"
 #include "vulkan_swapchain.cpp"
-#include "window_manager.cpp"
+#include "window_manager.h"
 #include "vulkan_buffer.cpp"
 
 #include <algorithm>

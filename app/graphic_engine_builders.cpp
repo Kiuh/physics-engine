@@ -2,7 +2,7 @@
 
 #include "validation_manager.cpp"
 #include "vulkan_tools.cpp"
-#include "window_manager.cpp"
+#include "window_manager.h"
 #include <vulkan/vulkan_core.h>
 
 struct InstanceBuilder

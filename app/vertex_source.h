@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include "vertex.hpp"
+#include "vertex.h"
 
 class VertexSource
 {

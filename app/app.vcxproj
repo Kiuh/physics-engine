@@ -256,7 +256,6 @@
     <ClCompile Include="vulkan_device.cpp" />
     <ClCompile Include="vulkan_swapchain.cpp" />
     <ClCompile Include="vulkan_tools.cpp" />
-    <ClCompile Include="vulkan_vec.cpp" />
     <ClCompile Include="window_manager.cpp" />
     <ClCompile Include="data_manager.cpp" />
   </ItemGroup>
@@ -289,12 +288,17 @@
   <ItemGroup>
     <ClInclude Include="box_circle_tools.h" />
     <ClInclude Include="collision.h" />
+    <ClInclude Include="controller.h" />
+    <ClInclude Include="data_manager.h" />
     <ClInclude Include="detectors.h" />
+    <ClInclude Include="fps_counter.h" />
     <ClInclude Include="lodepng.h" />
+    <ClInclude Include="physics_engine.h" />
     <ClInclude Include="resolvers.h" />
     <ClInclude Include="rigid_body.h" />
     <ClInclude Include="vertex.h" />
     <ClInclude Include="vulkan_vec.h" />
+    <ClInclude Include="window_manager.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="icon.png">

@@ -2,7 +2,7 @@
 
 #include "vulkan_device.cpp"
 #include "vulkan_tools.cpp"
-#include "window_manager.cpp"
+#include "window_manager.h"
 #include <algorithm>
 #include <cstdint>
 #include <cstring>

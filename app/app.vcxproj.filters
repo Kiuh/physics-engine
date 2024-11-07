@@ -25,9 +25,6 @@
     <Filter Include="Source Files\data_tools">
       <UniqueIdentifier>{12e0c025-99ff-46aa-8fce-ae860425fded}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\window">
-      <UniqueIdentifier>{85bc2ad7-7f22-42d2-bdaf-6858d2ef4164}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Resource Files\shaders">
       <UniqueIdentifier>{a91c2471-148b-4717-abd3-4e5845e239cd}</UniqueIdentifier>
     </Filter>
@@ -90,9 +87,6 @@
     <ClCompile Include="fps_counter.cpp">
       <Filter>Source Files\core</Filter>
     </ClCompile>
-    <ClCompile Include="window_manager.cpp">
-      <Filter>Source Files\window</Filter>
-    </ClCompile>
     <ClCompile Include="graphic_engine_builders.cpp">
       <Filter>Source Files\graphic_engine</Filter>
     </ClCompile>
@@ -116,9 +110,6 @@
     </ClCompile>
     <ClCompile Include="rigid_body.cpp">
       <Filter>Source Files\physics_engine</Filter>
-    </ClCompile>
-    <ClCompile Include="vulkan_vec.cpp">
-      <Filter>Source Files\data_tools</Filter>
     </ClCompile>
     <ClCompile Include="controller.cpp">
       <Filter>Source Files\core</Filter>
@@ -192,6 +183,9 @@
     <ClCompile Include="vertex.cpp">
       <Filter>Source Files\data_tools</Filter>
     </ClCompile>
+    <ClCompile Include="window_manager.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="frag.spv">
@@ -231,6 +225,21 @@
     </ClInclude>
     <ClInclude Include="vulkan_vec.h">
       <Filter>Header Files\data_tools</Filter>
+    </ClInclude>
+    <ClInclude Include="window_manager.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="data_manager.h">
+      <Filter>Header Files\data_tools</Filter>
+    </ClInclude>
+    <ClInclude Include="physics_engine.h">
+      <Filter>Header Files\physics_engine</Filter>
+    </ClInclude>
+    <ClInclude Include="controller.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="fps_counter.h">
+      <Filter>Header Files\core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

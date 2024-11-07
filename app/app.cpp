@@ -1,11 +1,11 @@
 #pragma once
 
-#include "data_manager.cpp"
-#include "fps_counter.cpp"
+#include "data_manager.h"
+#include "fps_counter.h"
 #include "graphic_engine.cpp"
-#include "physics_engine.cpp"
-#include "window_manager.cpp"
-#include "controller.cpp"
+#include "physics_engine.h"
+#include "window_manager.h"
+#include "controller.h"
 
 #include <cstdint>
 #include <exception>

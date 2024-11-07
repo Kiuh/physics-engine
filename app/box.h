@@ -6,7 +6,7 @@
 
 #include <stdexcept>
 #include "color.h"
-#include "vertex.hpp"
+#include "vertex.h"
 #include "glm/glm.hpp"
 #include <vector>
 #include "shape.h"
