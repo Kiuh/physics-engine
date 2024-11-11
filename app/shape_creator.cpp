@@ -1,0 +1,35 @@
+#include "shape_creator.h"
+
+Shape& createBoxShape(Transform& tr, const glm::vec2& extends)
+{
+	auto shape = new Shape(tr);
+
+	std::vector<glm::vec2> points{};
+	points.push_back(extends * glm::vec2{ -1, -1 });
+	points.push_back(extends * glm::vec2{ -1, 1 });
+	points.push_back(extends * glm::vec2{ 1, 1 });
+	points.push_back(extends * glm::vec2{ 1, -1 });
+	shape->localPoints = points;
+
+	return *shape;
+}
+
+static constexpr size_t circle_segment_splits = 4;
+static constexpr size_t circle_points = 4 * (1 + circle_segment_splits);
+static constexpr float one_seg_deg = 360.0f / circle_points;
+
+Shape& createCircleShape(Transform& tr, const float& radius)
+{
+	auto shape = new Shape(tr);
+
+	std::vector<glm::vec2> points{};
+	auto shift = glm::vec2(-radius, 0);
+	for (size_t i = 0; i < circle_points; i++)
+	{
+		points.push_back(shift);
+		rotateVec2(shift, one_seg_deg);
+	}
+	shape->localPoints = points;
+
+	return *shape;
+}

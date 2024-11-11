@@ -16,7 +16,7 @@ void PhysicsEngine::update(float deltaTime)
 	{
 		for (size_t j = i + 1; j < rigidBodies.size(); j++)
 		{
-			resolveCollision(*rigidBodies[i], *rigidBodies[j]);
+			resolveImpulseCollision(*rigidBodies[i], *rigidBodies[j]);
 		}
 	}
 
@@ -29,15 +29,15 @@ void PhysicsEngine::update(float deltaTime)
 	process_mutex.unlock();
 }
 
-void PhysicsEngine::resolveCollision(RigidBody& rb1, RigidBody& rb2) const
+void PhysicsEngine::resolveImpulseCollision(RigidBody& rb1, RigidBody& rb2) const
 {
 	if (!detectCollision(rb1.shape, rb2.shape))
 	{
 		return;
 	}
 
-	auto fc = createCollision(rb1.shape, rb2.shape);
-	auto rc = createCollision(rb2.shape, rb1.shape);
+	auto fc = resolveCollision(rb1.shape, rb2.shape);
+	auto rc = resolveCollision(rb2.shape, rb1.shape);
 
 	applyCollisionForce(fc, rb1, rb2);
 	applyCollisionForce(rc, rb2, rb1);

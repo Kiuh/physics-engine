@@ -21,6 +21,6 @@ class PhysicsEngine
 	std::mutex process_mutex;
 
 	void update(float deltaTime);
-	void resolveCollision(RigidBody& rb1, RigidBody& rb2) const;
+	void resolveImpulseCollision(RigidBody& rb1, RigidBody& rb2) const;
 	void applyCollisionForce(Collision col, RigidBody& rb1, RigidBody& rb2) const;
 };

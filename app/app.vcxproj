@@ -217,11 +217,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="app.cpp" />
-    <ClCompile Include="box.cpp" />
-    <ClCompile Include="box.h" />
-    <ClCompile Include="box_circle_tools.cpp" />
-    <ClCompile Include="circle.cpp" />
-    <ClCompile Include="circle.h" />
     <ClCompile Include="color.cpp" />
     <ClCompile Include="color.h" />
     <ClCompile Include="controller.cpp" />
@@ -242,6 +237,7 @@
     <ClCompile Include="shader_manager.cpp" />
     <ClCompile Include="shape.cpp" />
     <ClCompile Include="shape.h" />
+    <ClCompile Include="shape_creator.cpp" />
     <ClCompile Include="transform.cpp" />
     <ClCompile Include="transform.h" />
     <ClCompile Include="validation_manager.cpp" />
@@ -287,7 +283,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="app.h" />
-    <ClInclude Include="box_circle_tools.h" />
     <ClInclude Include="collision.h" />
     <ClInclude Include="controller.h" />
     <ClInclude Include="data_manager.h" />
@@ -301,6 +296,7 @@
     <ClInclude Include="resolvers.h" />
     <ClInclude Include="rigid_body.h" />
     <ClInclude Include="shader_manager.h" />
+    <ClInclude Include="shape_creator.h" />
     <ClInclude Include="validation_manager.h" />
     <ClInclude Include="vertex.h" />
     <ClInclude Include="vk_image_builder.h" />

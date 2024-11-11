@@ -138,26 +138,8 @@
     <ClCompile Include="vec2_tools.h">
       <Filter>Header Files\common</Filter>
     </ClCompile>
-    <ClCompile Include="box.h">
-      <Filter>Header Files\physics_engine\shapes</Filter>
-    </ClCompile>
-    <ClCompile Include="circle.h">
-      <Filter>Header Files\physics_engine\shapes</Filter>
-    </ClCompile>
     <ClCompile Include="shape.h">
       <Filter>Header Files\physics_engine\shapes</Filter>
-    </ClCompile>
-    <ClCompile Include="circle.cpp">
-      <Filter>Source Files\physics_engine\shapes</Filter>
-    </ClCompile>
-    <ClCompile Include="box.cpp">
-      <Filter>Source Files\physics_engine\shapes</Filter>
-    </ClCompile>
-    <ClCompile Include="box_circle_tools.cpp">
-      <Filter>Source Files\physics_engine\collisions</Filter>
-    </ClCompile>
-    <ClCompile Include="shape.cpp">
-      <Filter>Source Files\physics_engine\shapes</Filter>
     </ClCompile>
     <ClCompile Include="detectors.cpp">
       <Filter>Source Files\physics_engine\collisions</Filter>
@@ -192,6 +174,12 @@
     <ClCompile Include="window_manager.cpp">
       <Filter>Source Files\core</Filter>
     </ClCompile>
+    <ClCompile Include="shape_creator.cpp">
+      <Filter>Source Files\physics_engine\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="shape.cpp">
+      <Filter>Source Files\physics_engine\shapes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="frag.spv">
@@ -208,9 +196,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="collision.h">
-      <Filter>Header Files\physics_engine</Filter>
-    </ClInclude>
     <ClInclude Include="vertex.h">
       <Filter>Header Files\data_tools</Filter>
     </ClInclude>
@@ -218,9 +203,6 @@
       <Filter>Header Files\physics_engine\collisions</Filter>
     </ClInclude>
     <ClInclude Include="resolvers.h">
-      <Filter>Header Files\physics_engine\collisions</Filter>
-    </ClInclude>
-    <ClInclude Include="box_circle_tools.h">
       <Filter>Header Files\physics_engine\collisions</Filter>
     </ClInclude>
     <ClInclude Include="rigid_body.h">
@@ -279,6 +261,12 @@
     </ClInclude>
     <ClInclude Include="lodepng.h">
       <Filter>Header Files\external</Filter>
+    </ClInclude>
+    <ClInclude Include="collision.h">
+      <Filter>Header Files\physics_engine\collisions</Filter>
+    </ClInclude>
+    <ClInclude Include="shape_creator.h">
+      <Filter>Header Files\physics_engine\shapes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

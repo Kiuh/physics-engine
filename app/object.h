@@ -12,5 +12,5 @@ class Object
 	Shape* shape;
 	RigidBody* rigidBody;
 
-	Object(Shape* shapeRef);
+	Object(Shape& shapeRef);
 };

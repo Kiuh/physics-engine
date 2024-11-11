@@ -3,8 +3,6 @@
 #include "vertex_source.h"
 #include "vertex.h"
 #include "window_manager.h"
-#include "box.h"
-#include "circle.h"
 #include <cstdint>
 #include <mutex>
 #include <vector>

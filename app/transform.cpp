@@ -2,9 +2,8 @@
 
 Transform::Transform()
 {
-	orientation = 0;
+	rotation = 0;
 	position = { 0,0 };
-	rotation = { 0,0 };
 }
 
 glm::vec2 Transform::pos() const
@@ -19,5 +18,21 @@ void Transform::setPos(glm::vec2 position)
 
 void Transform::movePos(glm::vec2 shift)
 {
-	this->position += shift;
+	position += shift;
+}
+
+float Transform::rot() const
+{
+	return rotation;
+}
+
+void Transform::setRot(float rot)
+{
+	rotation = rot;
+}
+
+void Transform::rotate(float shift)
+{
+	rotation += shift;
+	rotation = std::fmodf(rotation, 360.0f);
 }

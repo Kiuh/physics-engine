@@ -26,8 +26,7 @@ void Controller::setup()
 void Controller::createGround()
 {
 	auto tr = new Transform();
-	auto plateShape = new Box(*tr);
-	plateShape->setHalfSize({ 10, 1.5f });
+	auto& plateShape = createBoxShape(*tr, { 10, 1.5f });
 
 	auto plate = new Object(plateShape);
 	plate->transform->setPos({ 0, -5.0f });
@@ -51,7 +50,7 @@ void Controller::createBoxes()
 	for (size_t i = 0; i < initialBoxCount; i++)
 	{
 		auto tr = new Transform();
-		auto boxShape = new Box(*tr);
+		auto& boxShape = createBoxShape(*tr, { 1.0f, 1.0f });
 		auto box = new Object(boxShape);
 		do
 		{
@@ -68,7 +67,7 @@ void Controller::createCircles()
 	for (size_t i = 0; i < initialCircleCount; i++)
 	{
 		auto tr = new Transform();
-		auto circleShape = new Circle(*tr);
+		auto& circleShape = createCircleShape(*tr, 1.0f);
 		auto circle = new Object(circleShape);
 		do
 		{

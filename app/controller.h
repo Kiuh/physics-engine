@@ -2,6 +2,7 @@
 
 #include "data_manager.h"
 #include "physics_engine.h"
+#include "shape_creator.h"
 #include "object.h"
 #include <limits>
 
