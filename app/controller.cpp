@@ -19,6 +19,7 @@ void Controller::setup()
 	createGround();
 	createBoxes();
 	createCircles();
+	createPolygons();
 
 	fillRepresentations();
 }
@@ -51,14 +52,10 @@ void Controller::createBoxes()
 	{
 		auto tr = new Transform();
 		auto& boxShape = createBoxShape(*tr, { 1.0f, 1.0f });
-		auto box = new Object(boxShape);
-		do
-		{
-			box->transform->setPos(getRandomPos());
-		}
-		while (!isNoIntersections(*box));
-
-		objects.push_back(box);
+		auto obj = new Object(boxShape);
+		obj->transform->setPos(getRandomPos());
+		obj->transform->setRot(randomFloat(0, 360));
+		objects.push_back(obj);
 	}
 }
 
@@ -68,27 +65,24 @@ void Controller::createCircles()
 	{
 		auto tr = new Transform();
 		auto& circleShape = createCircleShape(*tr, 1.0f);
-		auto circle = new Object(circleShape);
-		do
-		{
-			circle->transform->setPos(getRandomPos());
-		}
-		while (!isNoIntersections(*circle));
-		objects.push_back(circle);
+		auto obj = new Object(circleShape);
+		obj->transform->setPos(getRandomPos());
+		obj->transform->setRot(randomFloat(0, 360));
+		objects.push_back(obj);
 	}
 }
 
-bool Controller::isNoIntersections(Object& obj)
+void Controller::createPolygons()
 {
-	for (auto ob : objects)
+	for (size_t i = 0; i < initialPolygonsCount; i++)
 	{
-		if (detectCollision(*obj.shape, *ob->shape))
-		{
-			return false;
-		}
+		auto tr = new Transform();
+		auto& shape = createRandomPolygonShape(*tr, 5, 1.5f);
+		auto obj = new Object(shape);
+		obj->transform->setPos(getRandomPos());
+		obj->transform->setRot(randomFloat(0, 360));
+		objects.push_back(obj);
 	}
-
-	return true;
 }
 
 void Controller::fillRepresentations()

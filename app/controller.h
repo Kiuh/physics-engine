@@ -14,8 +14,10 @@ class Controller
 	PhysicsEngine* engine;
 
 	std::vector<Object*> objects{};
-	size_t initialBoxCount = 5;
-	size_t initialCircleCount = 5;
+	std::vector<Shape*> gizmo{};
+	size_t initialBoxCount = 2;
+	size_t initialCircleCount = 2;
+	size_t initialPolygonsCount = 2;
 
 	public:
 	Controller(WindowManager* win, DataManager* data, PhysicsEngine* engine);
@@ -27,7 +29,7 @@ class Controller
 	const glm::vec2 getRandomPos();
 	void createBoxes();
 	void createCircles();
-	bool isNoIntersections(Object& obj);
+	void createPolygons();
 	void fillRepresentations();
 	void cleanup();
 	void processKeyPress(KeyCode key);

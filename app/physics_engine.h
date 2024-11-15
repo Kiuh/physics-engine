@@ -11,8 +11,7 @@
 #include <boost/bind/bind.hpp>
 #include <iostream>
 #include <vector>
-
-static const glm::vec2 gravity = { 0, -9.8f };
+#include <set>
 
 class PhysicsEngine
 {
@@ -21,6 +20,4 @@ class PhysicsEngine
 	std::mutex process_mutex;
 
 	void update(float deltaTime);
-	void resolveImpulseCollision(RigidBody& rb1, RigidBody& rb2) const;
-	void applyCollisionForce(Collision col, RigidBody& rb1, RigidBody& rb2) const;
 };

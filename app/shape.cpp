@@ -8,7 +8,7 @@ std::vector<glm::vec2> Shape::getWorldPoints() const
 	for (auto& p : localPoints)
 	{
 		glm::vec2 point{ p };
-		rotateVec2(point, glm::radians(tr.rot()));
+		rotateVec2(point, tr.rot());
 		result.push_back(point + tr.pos());
 	}
 	return result;

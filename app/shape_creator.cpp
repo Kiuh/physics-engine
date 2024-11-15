@@ -33,3 +33,22 @@ Shape& createCircleShape(Transform& tr, const float& radius)
 
 	return *shape;
 }
+
+Shape& createPolygonShape(Transform& tr, std::vector<glm::vec2> points)
+{
+	auto shape = new Shape(tr);
+	shape->localPoints = points;
+	return *shape;
+}
+
+Shape& createRandomPolygonShape(Transform& tr, const long& count, const float& radius)
+{
+	std::vector<glm::vec2> points{};
+	auto shift = glm::vec2(-radius, 0);
+	for (size_t i = 0; i < count; i++)
+	{
+		points.push_back(shift);
+		rotateVec2(shift, 360.0f / count);
+	}
+	return createPolygonShape(tr, points);
+}
