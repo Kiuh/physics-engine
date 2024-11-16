@@ -221,6 +221,7 @@
     <ClCompile Include="color.h" />
     <ClCompile Include="controller.cpp" />
     <ClCompile Include="detectors.cpp" />
+    <ClCompile Include="GJK2D.cpp" />
     <ClCompile Include="graphic_engine_builders.cpp" />
     <ClCompile Include="lodepng.cpp" />
     <ClCompile Include="log_tools.cpp" />
@@ -288,6 +289,7 @@
     <ClInclude Include="data_manager.h" />
     <ClInclude Include="detectors.h" />
     <ClInclude Include="fps_counter.h" />
+    <ClInclude Include="GJK2D.h" />
     <ClInclude Include="graphic_engine.h" />
     <ClInclude Include="graphic_engine_builders.h" />
     <ClInclude Include="lodepng.h" />

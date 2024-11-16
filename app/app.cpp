@@ -69,7 +69,7 @@ void App::physicsThreadFunc()
 	const auto target_delta_time = duration_cast<std::chrono::microseconds>(std::chrono::seconds{ 1 }) / targetPhysicsFps;
 	auto deltaTime = std::chrono::duration<float>{ 0.0f };
 
-	const std::chrono::duration<float> delay = std::chrono::duration<float>{ 0.04f };
+	const std::chrono::duration<float> delay = std::chrono::duration<float>{ 0.00f };
 
 	while (isRunning)
 	{

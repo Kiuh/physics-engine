@@ -1,6 +1,6 @@
 #pragma once
 
 #include "shape.h"
-#include "math_tools.h"
+#include "GJK2D.h"
 
-bool detectCollision(const Shape& sh1, const Shape& sh2);
+bool detectCollision(Shape& sh1, Shape& sh2);
