@@ -36,6 +36,7 @@ class WindowManager
 	boost::signals2::signal<void()> windowResized{};
 	boost::signals2::signal<void(KeyCode)> keyPressed{};
 	boost::signals2::signal<void(float)> mouseScroll{};
+	boost::signals2::signal<void()> leftMouseButtonPressed{};
 	boost::signals2::signal<void(glm::vec2)> pressedMouseMoved{};
 
 	WindowManager(glm::ivec2 size, std::string title);

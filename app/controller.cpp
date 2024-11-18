@@ -4,6 +4,7 @@ Controller::Controller(WindowManager* win, DataManager* data, PhysicsEngine* eng
 {
 	this->win = win;
 	win->keyPressed.connect(boost::bind(&Controller::processKeyPress, this, boost::placeholders::_1));
+	win->leftMouseButtonPressed.connect(boost::bind(&Controller::mouseLeftButtonPressed, this));
 	this->data = data;
 	this->engine = engine;
 	setup();
@@ -22,6 +23,18 @@ void Controller::setup()
 	createPolygons();
 
 	fillRepresentations();
+}
+
+bool Controller::isNoIntersections(Object& obj)
+{
+	for (auto ob : objects)
+	{
+		if (isOverlaps(*obj.shape, *ob->shape))
+		{
+			return false;
+		}
+	}
+	return true;
 }
 
 void Controller::createGround()
@@ -53,7 +66,11 @@ void Controller::createBoxes()
 		auto tr = new Transform();
 		auto& boxShape = createBoxShape(*tr, { 1.0f, 1.0f });
 		auto obj = new Object(boxShape);
-		obj->transform->setPos(getRandomPos());
+		do
+		{
+			obj->transform->setPos(getRandomPos());
+		}
+		while (!isNoIntersections(*obj));
 		obj->transform->setRot(randomFloat(0, 360));
 		objects.push_back(obj);
 	}
@@ -66,7 +83,11 @@ void Controller::createCircles()
 		auto tr = new Transform();
 		auto& circleShape = createCircleShape(*tr, 1.0f);
 		auto obj = new Object(circleShape);
-		obj->transform->setPos(getRandomPos());
+		do
+		{
+			obj->transform->setPos(getRandomPos());
+		}
+		while (!isNoIntersections(*obj));
 		obj->transform->setRot(randomFloat(0, 360));
 		objects.push_back(obj);
 	}
@@ -79,7 +100,11 @@ void Controller::createPolygons()
 		auto tr = new Transform();
 		auto& shape = createRandomPolygonShape(*tr, 5, 1.5f);
 		auto obj = new Object(shape);
-		obj->transform->setPos(getRandomPos());
+		do
+		{
+			obj->transform->setPos(getRandomPos());
+		}
+		while (!isNoIntersections(*obj));
 		obj->transform->setRot(randomFloat(0, 360));
 		objects.push_back(obj);
 	}
@@ -120,4 +145,29 @@ void Controller::processKeyPress(KeyCode key)
 		cleanup();
 		setup();
 	}
+}
+
+void Controller::mouseLeftButtonPressed()
+{
+	data->data_mutex.lock();
+	engine->process_mutex.lock();
+
+	auto tr = new Transform();
+	auto& shape = createRandomPolygonShape(*tr, 5, 1.5f);
+	auto obj = new Object(shape);
+	do
+	{
+		obj->transform->setPos(getRandomPos());
+	}
+	while (!isNoIntersections(*obj));
+	obj->transform->setRot(randomFloat(0, 360));
+	objects.push_back(obj);
+
+	data->dataSources.push_back(static_cast<VertexSource*>(obj->shape));
+	engine->rigidBodies.push_back(obj->rigidBody);
+
+	engine->process_mutex.unlock();
+	data->data_mutex.unlock();
+
+	data->notifyStructureChanging();
 }

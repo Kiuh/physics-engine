@@ -5,8 +5,8 @@
 #include "window_manager.h"
 #include "object.h"
 #include "rigid_body.h"
-#include "detectors.h"
-#include "resolvers.h"
+#include "collision.h"
+#include "collision_tools.h"
 
 #include <boost/bind/bind.hpp>
 #include <iostream>

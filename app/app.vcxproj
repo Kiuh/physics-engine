@@ -217,10 +217,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="app.cpp" />
+    <ClCompile Include="collision_tools.h" />
     <ClCompile Include="color.cpp" />
     <ClCompile Include="color.h" />
     <ClCompile Include="controller.cpp" />
-    <ClCompile Include="detectors.cpp" />
+    <ClCompile Include="collision_tools.cpp" />
     <ClCompile Include="GJK2D.cpp" />
     <ClCompile Include="graphic_engine_builders.cpp" />
     <ClCompile Include="lodepng.cpp" />
@@ -233,7 +234,6 @@
     <ClCompile Include="fps_counter.cpp" />
     <ClCompile Include="random_helper.cpp" />
     <ClCompile Include="random_helper.h" />
-    <ClCompile Include="resolvers.cpp" />
     <ClCompile Include="rigid_body.cpp" />
     <ClCompile Include="shader_manager.cpp" />
     <ClCompile Include="shape.cpp" />
@@ -287,7 +287,6 @@
     <ClInclude Include="collision.h" />
     <ClInclude Include="controller.h" />
     <ClInclude Include="data_manager.h" />
-    <ClInclude Include="detectors.h" />
     <ClInclude Include="fps_counter.h" />
     <ClInclude Include="GJK2D.h" />
     <ClInclude Include="graphic_engine.h" />
@@ -295,7 +294,6 @@
     <ClInclude Include="lodepng.h" />
     <ClInclude Include="log_tools.h" />
     <ClInclude Include="physics_engine.h" />
-    <ClInclude Include="resolvers.h" />
     <ClInclude Include="rigid_body.h" />
     <ClInclude Include="shader_manager.h" />
     <ClInclude Include="shape_creator.h" />

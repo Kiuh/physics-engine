@@ -20,8 +20,8 @@ struct RigidBody
 
 	RigidBody(Transform& tr, Shape& shape);
 	void update(float deltaTime);
-	void addSpeed(glm::vec2& force);
-	void moveToResolve(Collision col);
+	void addSpeed(glm::vec2 force);
+	void moveToResolve(glm::vec2 vec);
 
 	private:
 	void applyForces(float deltaTime);

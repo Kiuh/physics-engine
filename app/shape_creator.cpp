@@ -27,7 +27,7 @@ Shape& createCircleShape(Transform& tr, const float& radius)
 	for (size_t i = 0; i < circle_points; i++)
 	{
 		points.push_back(shift);
-		rotateVec2(shift, one_seg_deg);
+		vt::rotateVec2(shift, one_seg_deg);
 	}
 	shape->localPoints = points;
 
@@ -48,7 +48,7 @@ Shape& createRandomPolygonShape(Transform& tr, const long& count, const float& r
 	for (size_t i = 0; i < count; i++)
 	{
 		points.push_back(shift);
-		rotateVec2(shift, 360.0f / count);
+		vt::rotateVec2(shift, 360.0f / count);
 	}
 	return createPolygonShape(tr, points);
 }

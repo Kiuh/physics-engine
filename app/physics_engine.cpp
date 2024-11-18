@@ -20,14 +20,28 @@ void PhysicsEngine::update(float deltaTime)
 	{
 		for (size_t j = i + 1; j < rigidBodies.size(); j++)
 		{
-			if (detectCollision(rigidBodies[i]->shape, rigidBodies[j]->shape))
-			{
-				to_color.insert(&rigidBodies[i]->shape);
-			}
+			auto& rb1 = *rigidBodies[i];
+			auto& rb2 = *rigidBodies[j];
 
-			if (detectCollision(rigidBodies[j]->shape, rigidBodies[i]->shape))
+			if (isOverlaps(rb1.shape, rb2.shape))
 			{
-				to_color.insert(&rigidBodies[j]->shape);
+				to_color.insert(&rb1.shape);
+				to_color.insert(&rb2.shape);
+
+				auto res1 = intersection(rb1.shape, rb2.shape);
+				auto res2 = intersection(rb2.shape, rb1.shape);
+
+				if (res1.has_value())
+				{
+					auto& col = res1.value();
+					rb1.moveToResolve(-col.normal * col.penetration / 2.0f);
+				}
+
+				if (res2.has_value())
+				{
+					auto& col = res2.value();
+					rb2.moveToResolve(-col.normal * col.penetration / 2.0f);
+				}
 			}
 		}
 	}

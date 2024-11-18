@@ -285,9 +285,9 @@ void GraphicEngine::createBuffer(size_t idx)
 	VulkanBufferBuilder vertexBuilder{};
 	vertexBuilder.device = &device;
 	vertexBuilder.usageFlags = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-	vertexBuilder.bufferSize = dataManager->vertices.getVkSize();
+	vertexBuilder.bufferSize = dataManager->simplex_points.getVkSize();
 	vertexBuilder.data_mutex = &dataManager->data_mutex;
-	vertexBuilder.sourceData = dataManager->vertices.getDataPointer();
+	vertexBuilder.sourceData = dataManager->simplex_points.getDataPointer();
 	vertexBuffers[idx] = vertexBuilder.build();
 
 	VulkanBufferBuilder indexBuilder{};

@@ -2,7 +2,7 @@
 
 DataManager::DataManager(WindowManager& window) : window(window)
 {
-	vertices = vulkan_vec<Vertex>{ std::vector<Vertex>{{}} };
+	simplex_points = vulkan_vec<Vertex>{ std::vector<Vertex>{{}} };
 	indexes = vulkan_vec<uint16_t>{ std::vector<uint16_t>{0,1,2} };
 	window.mouseScroll.connect(boost::bind(&DataManager::handleMouseScroll, this, boost::placeholders::_1));
 	window.pressedMouseMoved.connect(boost::bind(&DataManager::handlePressedMouseMove, this, boost::placeholders::_1));
@@ -41,7 +41,7 @@ void DataManager::createDataSpace()
 		indexes_count += dataSources[i]->getIndexesCount();
 	}
 
-	vertices.vector.resize(vertices_count);
+	simplex_points.vector.resize(vertices_count);
 	indexes.vector.resize(indexes_count, 0);
 
 	size_t start_space = 0;
@@ -66,8 +66,8 @@ void DataManager::recalculateVertexes()
 	{
 		for (auto& vert : source->getVertexes())
 		{
-			vertices.vector[vert_iter] = vert;
-			worldToScreen(vertices.vector[vert_iter], window, pixelsPerUnit);
+			simplex_points.vector[vert_iter] = vert;
+			worldToScreen(simplex_points.vector[vert_iter], window, pixelsPerUnit);
 			vert_iter++;
 		}
 	}

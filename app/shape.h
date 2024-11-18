@@ -5,7 +5,6 @@
 #endif
 
 #include "color.h"
-#include "collision.h"
 #include "transform.h"
 #include "vertex_source.h"
 #include "vec2_tools.h"

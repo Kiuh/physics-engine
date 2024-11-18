@@ -9,15 +9,15 @@ void RigidBody::update(float deltaTime)
 	applyForces(deltaTime);
 }
 
-void RigidBody::addSpeed(glm::vec2& force)
+void RigidBody::addSpeed(glm::vec2 force)
 {
 	speed += force;
 }
 
-void RigidBody::moveToResolve(Collision col)
+void RigidBody::moveToResolve(glm::vec2 vec)
 {
 	if (isStatic) return;
-	transform.movePos(col.normal * col.penetration);
+	transform.movePos(vec);
 }
 
 void RigidBody::applyForces(float deltaTime)

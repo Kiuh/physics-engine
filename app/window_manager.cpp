@@ -142,6 +142,7 @@ static void mouseButtonCallback(GLFWwindow* window, int button, int action, int 
 		if (GLFW_PRESS == action)
 		{
 			wm.leftMousePressed = true;
+			wm.leftMouseButtonPressed();
 		}
 		else if (GLFW_RELEASE == action)
 		{

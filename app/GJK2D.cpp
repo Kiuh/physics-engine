@@ -2,12 +2,13 @@
 
 GJK2D::GJK2D() : shapeA(nullptr), shapeB(nullptr) {}
 
-glm::vec2 GJK2D::getSupport(Shape* shape, glm::vec2 dir)
+
+static glm::vec2 getSupport(std::vector<glm::vec2> dots, glm::vec2 dir)
 {
 	float furthestDistance = -std::numeric_limits<float>::infinity();
 	glm::vec2 furthestVertex{};
 
-	for (glm::vec2& v : shape->getWorldPoints())
+	for (glm::vec2& v : dots)
 	{
 		float distance = glm::dot(v, dir);
 		if (distance > furthestDistance)
@@ -20,93 +21,151 @@ glm::vec2 GJK2D::getSupport(Shape* shape, glm::vec2 dir)
 	return furthestVertex;
 }
 
+static glm::vec2 calculateSupport(Shape* shapeA, Shape* shapeB, const glm::vec2& direction) {
+	glm::vec2 newVertex = getSupport(shapeA->getWorldPoints(), direction);
+	newVertex -= getSupport(shapeB->getWorldPoints(), -direction);
+	return newVertex;
+}
+
+
 bool GJK2D::addSupport(const glm::vec2& dir)
 {
-	glm::vec2 newVertex = getSupport(shapeA, dir) - getSupport(shapeB, -dir);
-	vertices.push_back(newVertex);
+	auto sup_a = getSupport(shapeA->getWorldPoints(), dir);
+	auto sup_b = getSupport(shapeB->getWorldPoints(), -dir);
+	glm::vec2 newVertex = sup_a - sup_b;
+	simplex_points.push_back(newVertex);
 	return glm::dot(dir, newVertex) > 0;
 }
 
-glm::vec2 GJK2D::tripleProduct(const glm::vec2& a, const glm::vec2& b, const glm::vec2& c)
+Edge GJK2D::findClosestEdge(PolygonWinding winding)
 {
-	glm::vec3 A(a.x, a.y, 0);
-	glm::vec3 B(b.x, b.y, 0);
-	glm::vec3 C(c.x, c.y, 0);
+	float closestDistance = std::numeric_limits<float>::infinity();
+	glm::vec2 closestNormal{};
+	int closestIndex = 0;
+	glm::vec2 line;
 
-	glm::vec3 first = glm::cross(A, B);
-	glm::vec3 second = glm::cross(first, C);
-
-	return glm::vec2(second.x, second.y);
-}
-
-EvolveResult GJK2D::evolveSimplex()
-{
-	switch (vertices.size())
+	for (size_t i = 0; i < simplex_points.size(); ++i)
 	{
-		case 0:
-			direction = shapeB->tr.pos() - shapeA->tr.pos();
-			break;
-		case 1:
-			direction *= -1;
-			break;
-		case 2:
-			{
-				glm::vec2 b = vertices[1];
-				glm::vec2 c = vertices[0];
+		size_t j = i + 1;
+		if (j >= simplex_points.size())
+		{
+			j = 0;
+		}
 
-				glm::vec2 cb = b - c;
-				glm::vec2 c0 = -c;
+		line = simplex_points[j] - simplex_points[i];
 
-				direction = tripleProduct(cb, c0, cb);
-				break;
-			}
-		case 3:
-			{
-				glm::vec2 a = vertices[2];
-				glm::vec2 b = vertices[1];
-				glm::vec2 c = vertices[0];
+		glm::vec2 norm;
+		if (winding == PolygonWinding::Clockwise)
+		{
+			norm = glm::vec2(line.y, -line.x);
+		}
+		else
+		{
+			norm = glm::vec2(-line.y, line.x);
+		}
+		norm = glm::normalize(norm);
 
-				glm::vec2 a0 = -a;
-				glm::vec2 ab = b - a;
-				glm::vec2 ac = c - a;
-
-				glm::vec2 abPerp = tripleProduct(ac, ab, ab);
-				glm::vec2 acPerp = tripleProduct(ab, ac, ac);
-
-				if (glm::dot(abPerp, a0) > 0)
-				{
-					vertices.erase(vertices.begin() + 2); // Remove vertex c
-					direction = abPerp;
-				}
-				else if (glm::dot(acPerp, a0) > 0)
-				{
-					vertices.erase(vertices.begin() + 1); // Remove vertex b
-					direction = acPerp;
-				}
-				else
-				{
-					return FoundIntersection;
-				}
-				break;
-			}
-		default:
-			throw std::runtime_error("Can't have simplex with more than 3 vertices!");
+		// Calculate how far the edge is from the origin
+		float dist = glm::dot(norm, simplex_points[i]);
+		if (dist < closestDistance)
+		{
+			closestDistance = dist;
+			closestNormal = norm;
+			closestIndex = static_cast<int>(j);
+		}
 	}
 
-	return addSupport(direction) ? StillEvolving : NoIntersection;
+	return Edge{ closestDistance, closestNormal, closestIndex };
 }
 
 bool GJK2D::test(Shape* shapeA, Shape* shapeB)
 {
-	this->vertices.clear();
+	this->simplex_points.clear();
 	this->shapeA = shapeA;
 	this->shapeB = shapeB;
 
-	EvolveResult result = StillEvolving;
-	while (result == StillEvolving)
+	// Create first simplex
+	direction = shapeB->tr.pos() - shapeA->tr.pos();
+	addSupport(direction);
+
+	direction *= -1;
+	addSupport(direction);
+
+	glm::vec2 b = simplex_points[1];
+	glm::vec2 c = simplex_points[0];
+
+	glm::vec2 cb = b - c;
+	glm::vec2 c0 = -c;
+	direction = vt::triple_product(cb, c0, cb);
+	addSupport(direction);
+
+	// Try simplexes while they exist
+	do
 	{
-		result = evolveSimplex();
+		glm::vec2 a = simplex_points[2];
+		glm::vec2 b = simplex_points[1];
+		glm::vec2 c = simplex_points[0];
+
+		glm::vec2 a0 = -a;
+		glm::vec2 ab = b - a;
+		glm::vec2 ac = c - a;
+
+		glm::vec2 abPerp = vt::triple_product(ac, ab, ab);
+		glm::vec2 acPerp = vt::triple_product(ab, ac, ac);
+
+		if (glm::dot(abPerp, a0) > 0)
+		{
+			simplex_points.erase(simplex_points.begin() + 2); // Remove vertex c
+			direction = abPerp;
+		}
+		else if (glm::dot(acPerp, a0) > 0)
+		{
+			simplex_points.erase(simplex_points.begin() + 1); // Remove vertex b
+			direction = acPerp;
+		}
+		else
+		{
+			return true;
+		}
+	}
+	while (addSupport(direction));
+	return false;
+}
+
+std::optional<Collision> GJK2D::intersect(Shape* shapeA, Shape* shapeB)
+{
+	if (!test(shapeA, shapeB))
+	{
+		return {};
 	}
 
-	return result == FoundIntersection;
+	float e0 = (simplex_points[1].x - simplex_points[0].x) * (simplex_points[1].y + simplex_points[0].y);
+	float e1 = (simplex_points[2].x - simplex_points[1].x) * (simplex_points[2].y + simplex_points[1].y);
+	float e2 = (simplex_points[0].x - simplex_points[2].x) * (simplex_points[0].y + simplex_points[2].y);
+
+	PolygonWinding winding = (e0 + e1 + e2 >= 0) ? PolygonWinding::Clockwise : PolygonWinding::CounterClockwise;
+
+	Edge edge{};
+	for (int i = 0; i < MAX_INTERSECTION_ITERATIONS; i++)
+	{
+		edge = findClosestEdge(winding);
+		glm::vec2 support = calculateSupport(shapeA, shapeB, edge.normal);
+		float distance = glm::dot(support, edge.normal);
+
+		if (!mt::is0_f(distance - edge.distance))
+		{
+			simplex_points.insert(simplex_points.begin() + edge.index, support);
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	return {
+		Collision{
+			.normal = edge.normal,
+			.penetration = edge.distance
+		}
+	};
 }

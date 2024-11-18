@@ -22,7 +22,7 @@ class DataManager
 
 	public:
 	std::vector<VertexSource*> dataSources{};
-	vulkan_vec<Vertex> vertices{ };
+	vulkan_vec<Vertex> simplex_points{ };
 	vulkan_vec<uint16_t> indexes{ };
 	std::mutex data_mutex{};
 	boost::signals2::signal<void()> dataStructureChanged{};

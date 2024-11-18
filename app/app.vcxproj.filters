@@ -141,10 +141,7 @@
     <ClCompile Include="shape.h">
       <Filter>Header Files\physics_engine\shapes</Filter>
     </ClCompile>
-    <ClCompile Include="detectors.cpp">
-      <Filter>Source Files\physics_engine\collisions</Filter>
-    </ClCompile>
-    <ClCompile Include="resolvers.cpp">
+    <ClCompile Include="collision_tools.cpp">
       <Filter>Source Files\physics_engine\collisions</Filter>
     </ClCompile>
     <ClCompile Include="color.cpp">
@@ -183,6 +180,9 @@
     <ClCompile Include="GJK2D.cpp">
       <Filter>Source Files\physics_engine\collisions</Filter>
     </ClCompile>
+    <ClCompile Include="collision_tools.h">
+      <Filter>Header Files\physics_engine\collisions</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="frag.spv">
@@ -201,12 +201,6 @@
   <ItemGroup>
     <ClInclude Include="vertex.h">
       <Filter>Header Files\data_tools</Filter>
-    </ClInclude>
-    <ClInclude Include="detectors.h">
-      <Filter>Header Files\physics_engine\collisions</Filter>
-    </ClInclude>
-    <ClInclude Include="resolvers.h">
-      <Filter>Header Files\physics_engine\collisions</Filter>
     </ClInclude>
     <ClInclude Include="rigid_body.h">
       <Filter>Header Files\physics_engine</Filter>
