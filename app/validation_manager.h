@@ -3,12 +3,12 @@
 #include "vulkan_tools.h"
 #include <cstdint>
 #include <iostream>
+#include <magic_enum.hpp>
 #include <stdexcept>
 #include <string.h>
 #include <vector>
 #include <vulkan/vk_platform.h>
 #include <vulkan/vulkan_core.h>
-#include <magic_enum.hpp>
 
 bool replace(std::string& str, const std::string& from, const std::string& to);
 VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(

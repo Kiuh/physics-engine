@@ -1,8 +1,8 @@
 #pragma once
 
 #include "vulkan_device.h"
-#include <vector>
 #include <mutex>
+#include <vector>
 #include <vulkan/vulkan_core.h>
 
 uint32_t findMemoryType(

@@ -1,13 +1,13 @@
 #pragma once
 
-#include "vertex_source.h"
+#include "shape.h"
 #include "vertex.h"
+#include "vertex_source.h"
+#include "vulkan_vec.h"
 #include "window_manager.h"
 #include <cstdint>
 #include <mutex>
 #include <vector>
-#include "vulkan_vec.h"
-#include "shape.h"
 
 constexpr float MIN_PIXELS_PER_UNIT = 10;
 constexpr float MAX_PIXELS_PER_UNIT = 400;
@@ -30,7 +30,7 @@ class DataManager
 	DataManager(WindowManager& window);
 	void setPixelPerUnit(float ppu);
 	void handleMouseScroll(float value);
-	void handlePressedMouseMove(glm::vec2 delta);
+	void handleRightMouseButtonMove(glm::vec2 delta);
 	void notifyStructureChanging();
 	void createDataSpace();
 	void recalculateVertexes();

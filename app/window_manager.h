@@ -1,6 +1,9 @@
 #pragma once
 
 #define GLFW_INCLUDE_VULKAN
+#include "glm/glm.hpp"
+#include "lodepng.h"
+#include "math_tools.h"
 #include <GLFW/glfw3.h>
 #include <boost/signals2.hpp>
 #include <cstdint>
@@ -10,9 +13,6 @@
 #include <string>
 #include <vector>
 #include <vulkan/vulkan_core.h>
-#include "lodepng.h"
-#include "glm/glm.hpp"
-#include "math_tools.h"
 
 enum KeyCode
 {
@@ -31,13 +31,14 @@ class WindowManager
 	public:
 	glm::vec2 mousePos{};
 	bool leftMousePressed;
+	bool rightMousePressed;
 	glm::vec2 lastMousePos;
 
 	boost::signals2::signal<void()> windowResized{};
 	boost::signals2::signal<void(KeyCode)> keyPressed{};
 	boost::signals2::signal<void(float)> mouseScroll{};
 	boost::signals2::signal<void()> leftMouseButtonPressed{};
-	boost::signals2::signal<void(glm::vec2)> pressedMouseMoved{};
+	boost::signals2::signal<void(glm::vec2)> pressedRightMouseButtonMoved{};
 
 	WindowManager(glm::ivec2 size, std::string title);
 

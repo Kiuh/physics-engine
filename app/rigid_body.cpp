@@ -6,22 +6,27 @@ RigidBody::RigidBody(Transform& tr, Shape& shape) : transform(tr), shape(shape)
 
 void RigidBody::update(float deltaTime)
 {
-	applyForces(deltaTime);
-}
-
-void RigidBody::addSpeed(glm::vec2 force)
-{
-	speed += force;
-}
-
-void RigidBody::moveToResolve(glm::vec2 vec)
-{
 	if (isStatic) return;
-	transform.movePos(vec);
+
+	acceleration = force / mass;
+	linearVelocity += acceleration * deltaTime;
+	transform.movePos(linearVelocity * deltaTime);
+	transform.rotate(rotationVelocity * deltaTime);
+
+	force = { 0.0f, 0.0f };
 }
 
-void RigidBody::applyForces(float deltaTime)
+void RigidBody::addForce(glm::vec2 amount)
 {
-	if (isStatic) return;
-	transform.movePos(speed * deltaTime);
+	force += amount;
+}
+
+void RigidBody::move(glm::vec2 amount)
+{
+	transform.movePos(amount);
+}
+
+float RigidBody::invMass() const
+{
+	return isStatic ? 0.0f : 1.0f / mass;
 }

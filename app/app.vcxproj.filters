@@ -58,11 +58,11 @@
     <Filter Include="Source Files\common">
       <UniqueIdentifier>{015513e2-1c59-414d-bf63-c2e26c7897f6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\graphics_engine">
-      <UniqueIdentifier>{ffa2106b-c624-4e8d-b510-928b2858504f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\external">
       <UniqueIdentifier>{325c7c81-42ca-40a6-a598-42a5360ef595}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\external\graphics_engine">
+      <UniqueIdentifier>{ffa2106b-c624-4e8d-b510-928b2858504f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -224,34 +224,34 @@
       <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="log_tools.h">
-      <Filter>Header Files\graphics_engine</Filter>
+      <Filter>Header Files\external\graphics_engine</Filter>
     </ClInclude>
     <ClInclude Include="vulkan_tools.h">
-      <Filter>Header Files\graphics_engine</Filter>
+      <Filter>Header Files\external\graphics_engine</Filter>
     </ClInclude>
     <ClInclude Include="validation_manager.h">
-      <Filter>Header Files\graphics_engine</Filter>
+      <Filter>Header Files\external\graphics_engine</Filter>
     </ClInclude>
     <ClInclude Include="vulkan_device.h">
-      <Filter>Header Files\graphics_engine</Filter>
+      <Filter>Header Files\external\graphics_engine</Filter>
     </ClInclude>
     <ClInclude Include="vulkan_buffer.h">
-      <Filter>Header Files\graphics_engine</Filter>
+      <Filter>Header Files\external\graphics_engine</Filter>
     </ClInclude>
     <ClInclude Include="vk_image_builder.h">
-      <Filter>Header Files\graphics_engine</Filter>
+      <Filter>Header Files\external\graphics_engine</Filter>
     </ClInclude>
     <ClInclude Include="vulkan_swapchain.h">
-      <Filter>Header Files\graphics_engine</Filter>
+      <Filter>Header Files\external\graphics_engine</Filter>
     </ClInclude>
     <ClInclude Include="shader_manager.h">
-      <Filter>Header Files\graphics_engine</Filter>
+      <Filter>Header Files\external\graphics_engine</Filter>
     </ClInclude>
     <ClInclude Include="graphic_engine_builders.h">
-      <Filter>Header Files\graphics_engine</Filter>
+      <Filter>Header Files\external\graphics_engine</Filter>
     </ClInclude>
     <ClInclude Include="graphic_engine.h">
-      <Filter>Header Files\graphics_engine</Filter>
+      <Filter>Header Files\external\graphics_engine</Filter>
     </ClInclude>
     <ClInclude Include="app.h">
       <Filter>Header Files\core</Filter>

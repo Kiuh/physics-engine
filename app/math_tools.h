@@ -4,15 +4,15 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #endif
 
-#include <stdexcept>
-#include <optional>
-#include <vector>
-#include <cmath>
 #include "glm/glm.hpp"
+#include <cmath>
+#include <glm/ext/scalar_constants.hpp>
 #include <glm/gtc/epsilon.hpp>
 #include <glm/gtx/rotate_vector.hpp>
-#include <glm/ext/scalar_constants.hpp>
 #include <glm/gtx/vector_angle.hpp>
+#include <optional>
+#include <stdexcept>
+#include <vector>
 
 namespace mt
 {

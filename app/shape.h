@@ -6,8 +6,8 @@
 
 #include "color.h"
 #include "transform.h"
-#include "vertex_source.h"
 #include "vec2_tools.h"
+#include "vertex_source.h"
 
 struct Shape : public VertexSource
 {

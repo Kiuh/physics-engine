@@ -1,5 +1,6 @@
 #pragma once
 
+#include "vk_image_builder.h"
 #include "vulkan_device.h"
 #include "vulkan_tools.h"
 #include "window_manager.h"
@@ -14,7 +15,6 @@
 #include <string>
 #include <vector>
 #include <vulkan/vulkan_core.h>
-#include "vk_image_builder.h"
 
 struct VulkanSwapchain
 {

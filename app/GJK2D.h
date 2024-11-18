@@ -1,7 +1,7 @@
 #pragma once
 
-#include "shape.h"
 #include "collision.h"
+#include "shape.h"
 #include <optional>
 #include <stdexcept>
 

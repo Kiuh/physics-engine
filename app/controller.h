@@ -1,11 +1,13 @@
 #pragma once
 
 #include "data_manager.h"
-#include "physics_engine.h"
-#include "shape_creator.h"
 #include "object.h"
-#include "collision_tools.h"
-#include <limits>
+#include "physics_engine.h"
+#include "shape.h"
+#include "shape_creator.h"
+#include "window_manager.h"
+#include <glm/fwd.hpp>
+#include <vector>
 
 class Controller
 {

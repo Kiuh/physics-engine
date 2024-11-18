@@ -1,15 +1,15 @@
 #pragma once
 
+#include "controller.h"
 #include "data_manager.h"
 #include "fps_counter.h"
 #include "graphic_engine.h"
 #include "physics_engine.h"
 #include "window_manager.h"
-#include "controller.h"
 
+#include "glm/glm.hpp"
 #include <cstdint>
 #include <exception>
-#include "glm/glm.hpp"
 #include <iostream>
 #include <ostream>
 #include <stdlib.h>

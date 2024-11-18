@@ -1,8 +1,8 @@
 #pragma once
 
-#include <vector>
 #include <iostream>
 #include <magic_enum.hpp>
+#include <vector>
 #include <vulkan/vulkan_core.h>
 
 void logDeviceProperties(VkPhysicalDevice& device);

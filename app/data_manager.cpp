@@ -5,7 +5,7 @@ DataManager::DataManager(WindowManager& window) : window(window)
 	simplex_points = vulkan_vec<Vertex>{ std::vector<Vertex>{{}} };
 	indexes = vulkan_vec<uint16_t>{ std::vector<uint16_t>{0,1,2} };
 	window.mouseScroll.connect(boost::bind(&DataManager::handleMouseScroll, this, boost::placeholders::_1));
-	window.pressedMouseMoved.connect(boost::bind(&DataManager::handlePressedMouseMove, this, boost::placeholders::_1));
+	window.pressedRightMouseButtonMoved.connect(boost::bind(&DataManager::handleRightMouseButtonMove, this, boost::placeholders::_1));
 }
 
 void DataManager::setPixelPerUnit(float ppu)
@@ -18,7 +18,7 @@ void DataManager::handleMouseScroll(float value)
 	setPixelPerUnit(pixelsPerUnit + value);
 }
 
-void DataManager::handlePressedMouseMove(glm::vec2 delta)
+void DataManager::handleRightMouseButtonMove(glm::vec2 delta)
 {
 	zeroShift -= delta * MOUSE_SENSETIVE;
 }

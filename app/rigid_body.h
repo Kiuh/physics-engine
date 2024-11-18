@@ -1,10 +1,9 @@
 #pragma once
 
-#include "glm/glm.hpp"
-#include "glm/gtc/quaternion.hpp"
-#include "transform.h"
-#include "shape.h"
 #include "collision.h"
+#include "glm/glm.hpp"
+#include "shape.h"
+#include "transform.h"
 
 struct RigidBody
 {
@@ -12,17 +11,23 @@ struct RigidBody
 	Transform& transform;
 
 	public:
-	glm::vec2 speed{};
 	Shape& shape;
+
+	glm::vec2 linearVelocity{};
+	glm::vec2 acceleration{};
+	float rotationVelocity = 0;
+
+	glm::vec2 force{};
 
 	bool isStatic = false;
 	float mass = 1.0f;
+	float restitution = 0.6f;
+	float density = 2.0f;
 
 	RigidBody(Transform& tr, Shape& shape);
 	void update(float deltaTime);
-	void addSpeed(glm::vec2 force);
-	void moveToResolve(glm::vec2 vec);
+	void addForce(glm::vec2 amount);
+	void move(glm::vec2 amount);
 
-	private:
-	void applyForces(float deltaTime);
+	float invMass() const;
 };

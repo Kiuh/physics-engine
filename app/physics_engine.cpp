@@ -9,8 +9,12 @@ void PhysicsEngine::update(float deltaTime)
 	// Gravity
 	for (auto rb : rigidBodies)
 	{
-		auto frameNewSpeed = gravity * deltaTime;
-		rb->addSpeed(frameNewSpeed);
+		rb->addForce(gravity);
+	}
+
+	for (auto rb : rigidBodies)
+	{
+		rb->update(deltaTime);
 	}
 
 	std::set<Shape*> to_color{};
@@ -23,24 +27,33 @@ void PhysicsEngine::update(float deltaTime)
 			auto& rb1 = *rigidBodies[i];
 			auto& rb2 = *rigidBodies[j];
 
+			if (rb1.isStatic && rb2.isStatic) continue;
+
 			if (isOverlaps(rb1.shape, rb2.shape))
 			{
 				to_color.insert(&rb1.shape);
 				to_color.insert(&rb2.shape);
 
 				auto res1 = intersection(rb1.shape, rb2.shape);
-				auto res2 = intersection(rb2.shape, rb1.shape);
 
 				if (res1.has_value())
 				{
 					auto& col = res1.value();
-					rb1.moveToResolve(-col.normal * col.penetration / 2.0f);
-				}
+					if (rb1.isStatic)
+					{
+						rb2.move(col.normal * col.penetration);
+					}
+					else if (rb2.isStatic)
+					{
+						rb1.move(-col.normal * col.penetration);
+					}
+					else
+					{
+						rb1.move(-col.normal * col.penetration / 2.0f);
+						rb2.move(col.normal * col.penetration / 2.0f);
+					}
 
-				if (res2.has_value())
-				{
-					auto& col = res2.value();
-					rb2.moveToResolve(-col.normal * col.penetration / 2.0f);
+					resolveCollision(rb1, rb2, col);
 				}
 			}
 		}
@@ -56,11 +69,25 @@ void PhysicsEngine::update(float deltaTime)
 		sh->color = Color::red();
 	}
 
-	// Apply
-	for (auto rb : rigidBodies)
+	process_mutex.unlock();
+}
+
+void PhysicsEngine::resolveCollision(RigidBody& rb1, RigidBody& rb2, Collision col)
+{
+	auto relativeVelocity = rb2.linearVelocity - rb1.linearVelocity;
+
+	if (glm::dot(relativeVelocity, col.normal) > 0.001f)
 	{
-		rb->update(deltaTime);
+		return;
 	}
 
-	process_mutex.unlock();
+	float e = std::fmin(rb1.restitution, rb2.restitution);
+
+	float j = -(1.0f + e) * glm::dot(relativeVelocity, col.normal);
+	j /= rb1.invMass() + rb2.invMass();
+
+	auto impulse = j * col.normal;
+
+	rb1.linearVelocity -= impulse * rb1.invMass();
+	rb2.linearVelocity += impulse * rb2.invMass();
 }

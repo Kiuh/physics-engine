@@ -1,15 +1,15 @@
 #pragma once
 
-#include "vulkan_tools.h"
 #include "data_manager.h"
 #include "graphic_engine_builders.h"
 #include "shader_manager.h"
 #include "validation_manager.h"
 #include "vertex.h"
+#include "vulkan_buffer.h"
 #include "vulkan_device.h"
 #include "vulkan_swapchain.h"
+#include "vulkan_tools.h"
 #include "window_manager.h"
-#include "vulkan_buffer.h"
 
 #include <algorithm>
 #include <boost/bind/bind.hpp>

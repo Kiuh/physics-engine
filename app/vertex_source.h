@@ -1,7 +1,7 @@
 #pragma once
 
-#include <vector>
 #include "vertex.h"
+#include <vector>
 
 struct VertexSource
 {

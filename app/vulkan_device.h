@@ -1,8 +1,8 @@
 #pragma once
 
+#include "log_tools.h"
 #include "validation_manager.h"
 #include "vulkan_tools.h"
-#include "log_tools.h"
 #include <cstdint>
 #include <optional>
 #include <set>

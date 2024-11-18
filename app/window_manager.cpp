@@ -149,6 +149,18 @@ static void mouseButtonCallback(GLFWwindow* window, int button, int action, int 
 			wm.leftMousePressed = false;
 		}
 	}
+
+	if (button == GLFW_MOUSE_BUTTON_RIGHT)
+	{
+		if (GLFW_PRESS == action)
+		{
+			wm.rightMousePressed = true;
+		}
+		else if (GLFW_RELEASE == action)
+		{
+			wm.rightMousePressed = false;
+		}
+	}
 }
 
 static void mousePosCallback(GLFWwindow* window, double x_pos, double y_pos)
@@ -160,9 +172,9 @@ static void mousePosCallback(GLFWwindow* window, double x_pos, double y_pos)
 		static_cast<float>(y_pos),
 	};
 
-	if (wm.leftMousePressed)
+	if (wm.rightMousePressed)
 	{
-		wm.pressedMouseMoved(wm.mousePos - newPos);
+		wm.pressedRightMouseButtonMoved(wm.mousePos - newPos);
 	}
 
 	wm.mousePos = { newPos };

@@ -5,11 +5,11 @@
 #endif
 
 #include "glm/glm.hpp"
+#include "math_tools.h"
+#include <glm/ext/scalar_constants.hpp>
 #include <glm/gtc/epsilon.hpp>
 #include <glm/gtx/rotate_vector.hpp>
-#include <glm/ext/scalar_constants.hpp>
 #include <glm/gtx/vector_angle.hpp>
-#include "math_tools.h"
 
 namespace vt
 {
