@@ -1,8 +1,8 @@
 #pragma once
 
-#include <magic_enum.hpp>
 #include <stdexcept>
 #include <string>
+#include <vulkan/vk_enum_string_helper.h>
 #include <vulkan/vulkan_core.h>
 
 struct GraphicsEngineConfig

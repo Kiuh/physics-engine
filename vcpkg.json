@@ -5,6 +5,8 @@
     "glfw3",
     "glm",
     "magic-enum",
-    "vulkan"
+    "vulkan",
+    "vulkan-memory-allocator",
+    "vulkan-utility-libraries"
   ]
 }
