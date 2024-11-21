@@ -249,6 +249,7 @@
     <ClCompile Include="vertex.cpp" />
     <ClCompile Include="vertex_source.h" />
     <ClCompile Include="vk_image_builder.cpp" />
+    <ClCompile Include="vma_usage.cpp" />
     <ClCompile Include="vulkan_buffer.cpp" />
     <ClCompile Include="vulkan_device.cpp" />
     <ClCompile Include="vulkan_swapchain.cpp" />
@@ -300,6 +301,7 @@
     <ClInclude Include="validation_manager.h" />
     <ClInclude Include="vertex.h" />
     <ClInclude Include="vk_image_builder.h" />
+    <ClInclude Include="vma_usage.h" />
     <ClInclude Include="vulkan_buffer.h" />
     <ClInclude Include="vulkan_device.h" />
     <ClInclude Include="vulkan_swapchain.h" />

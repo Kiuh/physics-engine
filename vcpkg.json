@@ -7,6 +7,12 @@
     "magic-enum",
     "vulkan",
     "vulkan-memory-allocator",
-    "vulkan-utility-libraries"
+    "vulkan-utility-libraries",
+    {
+      "name": "imgui",
+      "features": [
+        "vulkan-binding"
+      ]
+    }
   ]
 }

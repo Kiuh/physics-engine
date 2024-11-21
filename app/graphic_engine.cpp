@@ -58,7 +58,14 @@ void GraphicEngine::initVulkan()
 	device.config = config;
 	device.init();
 
+	VmaAllocatorCreateInfo vma_create_info{};
+	vma_create_info.instance = instance;
+	vma_create_info.device = device.logicalDevice;
+	vma_create_info.physicalDevice = device.physicalDevice;
+	VK_CHECK(vmaCreateAllocator(&vma_create_info, &vmaAllocator));
+
 	// VkSwapchainKHR
+	swapchain.vmaAllocator = &vmaAllocator;
 	swapchain.surface = surface;
 	swapchain.device = &device;
 	swapchain.windowManager = windowManager;
@@ -108,6 +115,8 @@ void GraphicEngine::cleanup()
 		vkDestroySemaphore(device.logicalDevice, imageAvailableSemaphores[i], nullptr);
 		vkDestroyFence(device.logicalDevice, inFlightFences[i], nullptr);
 	}
+
+	vmaDestroyAllocator(vmaAllocator);
 
 	device.cleanup();
 	validationManager.cleanup(instance);
@@ -283,6 +292,7 @@ void GraphicEngine::createBuffers()
 void GraphicEngine::createBuffer(size_t idx)
 {
 	VulkanBufferBuilder vertexBuilder{};
+	vertexBuilder.vmaAllocator = &vmaAllocator;
 	vertexBuilder.device = &device;
 	vertexBuilder.usageFlags = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
 	vertexBuilder.bufferSize = dataManager->simplex_points.getVkSize();
@@ -291,6 +301,7 @@ void GraphicEngine::createBuffer(size_t idx)
 	vertexBuffers[idx] = vertexBuilder.build();
 
 	VulkanBufferBuilder indexBuilder{};
+	indexBuilder.vmaAllocator = &vmaAllocator;
 	indexBuilder.device = &device;
 	indexBuilder.usageFlags = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
 	indexBuilder.bufferSize = dataManager->indexes.getVkSize();

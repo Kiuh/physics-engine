@@ -5,6 +5,7 @@
 #include "shader_manager.h"
 #include "validation_manager.h"
 #include "vertex.h"
+#include "vma_usage.h"
 #include "vulkan_buffer.h"
 #include "vulkan_device.h"
 #include "vulkan_swapchain.h"
@@ -38,6 +39,7 @@ class GraphicEngine
 
 	VulkanDevice device;
 	VulkanSwapchain swapchain;
+	VmaAllocator vmaAllocator;
 
 	ShaderManager shaderManager;
 

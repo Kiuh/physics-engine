@@ -25,8 +25,7 @@ void VulkanSwapchain::recreate()
 void VulkanSwapchain::cleanup() const
 {
 	vkDestroyImageView(device->logicalDevice, colorImageView, nullptr);
-	vkDestroyImage(device->logicalDevice, colorImage, nullptr);
-	vkFreeMemory(device->logicalDevice, colorImageMemory, nullptr);
+	vmaDestroyImage(*vmaAllocator, colorImage, colorImageAllocation);
 
 	for (size_t i = 0; i < framebuffers.size(); i++)
 	{
@@ -104,18 +103,26 @@ void VulkanSwapchain::createSwapChain()
 
 void VulkanSwapchain::createColorResources()
 {
-	createImage(
-		device,
-		extent.width,
-		extent.height,
-		1,
-		imageFormat,
-		VK_IMAGE_TILING_OPTIMAL,
-		VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-		colorImage,
-		colorImageMemory
-	);
+	VkImageCreateInfo imageInfo{};
+	imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+	imageInfo.imageType = VK_IMAGE_TYPE_2D;
+	imageInfo.extent.width = extent.width;
+	imageInfo.extent.height = extent.height;
+	imageInfo.extent.depth = 1;
+	imageInfo.mipLevels = 1;
+	imageInfo.arrayLayers = 1;
+	imageInfo.format = imageFormat;
+	imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+	imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	imageInfo.usage = VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+	imageInfo.samples = device->msaaSamples;
+	imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+	VmaAllocationCreateInfo vmaAllocInfo{};
+	vmaAllocInfo.usage = VMA_MEMORY_USAGE_AUTO;
+
+	vmaCreateImage(*vmaAllocator, &imageInfo, &vmaAllocInfo, &colorImage, &colorImageAllocation, nullptr);
+
 	colorImageView = createImageView(device, colorImage, imageFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
 }
 

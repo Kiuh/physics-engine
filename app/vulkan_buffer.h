@@ -1,5 +1,6 @@
 #pragma once
 
+#include "vma_usage.h"
 #include "vulkan_device.h"
 #include <mutex>
 #include <vector>
@@ -15,9 +16,10 @@ struct VulkanBuffer
 {
 	private:
 	VkBuffer stagingBuffer{};
-	VkDeviceMemory stagingBufferMemory{};
+	VmaAllocation stagingBufferAllocation;
 
 	public:
+	VmaAllocator* vmaAllocator;
 	VulkanDevice* device = nullptr;
 	VkBufferUsageFlags usageFlags{};
 	VkDeviceSize bufferSize{};
@@ -26,7 +28,7 @@ struct VulkanBuffer
 
 	// Exposed
 	VkBuffer buffer{};
-	VkDeviceMemory bufferMemory{};
+	VmaAllocation bufferAllocation{};
 
 	void create();
 	void cleanup() const;
@@ -35,13 +37,6 @@ struct VulkanBuffer
 	private:
 	void createPrimaryBuffer();
 	void createStagingBuffer();
-	void createBuffer(
-		VulkanDevice device,
-		VkBufferCreateInfo createInfo,
-		VkMemoryPropertyFlags properties,
-		VkBuffer& buffer,
-		VkDeviceMemory& bufferMemory
-	) const;
 	void copyBuffer(
 		VulkanDevice device,
 		VkBuffer srcBuffer,
@@ -52,6 +47,7 @@ struct VulkanBuffer
 
 struct VulkanBufferBuilder
 {
+	VmaAllocator* vmaAllocator;
 	VulkanDevice* device;
 	VkBufferUsageFlags usageFlags;
 	VkDeviceSize bufferSize;

@@ -1,9 +1,11 @@
 #pragma once
 
 #include "vk_image_builder.h"
+#include "vma_usage.h"
 #include "vulkan_device.h"
 #include "vulkan_tools.h"
 #include "window_manager.h"
+
 #include <algorithm>
 #include <cstdint>
 #include <cstring>
@@ -20,23 +22,24 @@ struct VulkanSwapchain
 {
 	public:
 	// Required
+	VmaAllocator* vmaAllocator;
 	VulkanDevice* device;
-	VkSurfaceKHR surface;
+	VkSurfaceKHR surface{};
 	WindowManager* windowManager;
 
 	// Exposed
-	VkSwapchainKHR instance;
-	std::vector<VkImage> images;
-	VkFormat imageFormat;
-	VkExtent2D extent;
+	VkSwapchainKHR instance{};
+	std::vector<VkImage> images{};
+	VkFormat imageFormat{};
+	VkExtent2D extent{};
 
-	std::vector<VkImageView> imageViews;
-	std::vector<VkFramebuffer> framebuffers;
+	std::vector<VkImageView> imageViews{};
+	std::vector<VkFramebuffer> framebuffers{};
 
 	// For MSAA
-	VkImage colorImage;
-	VkDeviceMemory colorImageMemory;
-	VkImageView colorImageView;
+	VkImage colorImage{};
+	VmaAllocation colorImageAllocation{};
+	VkImageView colorImageView{};
 
 	private:
 	VkRenderPass* renderPass;

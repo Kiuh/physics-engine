@@ -9,7 +9,6 @@ WindowManager::WindowManager(glm::ivec2 size, std::string title)
 	glfwInit();
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 	window = glfwCreateWindow(size.x, size.y, title.data(), nullptr, nullptr);
-	glfwMakeContextCurrent(window);
 	glfwSetWindowUserPointer(window, this);
 	glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
 	glfwSetKeyCallback(window, keyCallback);
