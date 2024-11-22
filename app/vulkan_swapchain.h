@@ -35,6 +35,7 @@ struct VulkanSwapchain
 
 	std::vector<VkImageView> imageViews{};
 	std::vector<VkFramebuffer> framebuffers{};
+	std::vector<VkFramebuffer> uiFramebuffers{};
 
 	// For MSAA
 	VkImage colorImage{};
@@ -43,10 +44,12 @@ struct VulkanSwapchain
 
 	private:
 	VkRenderPass* renderPass;
+	VkRenderPass* uiRenderPass;
 
 	public:
 	void create();
 	void addFrameBuffers(VkRenderPass* renderPass);
+	void addUIFrameBuffers(VkRenderPass* uiRenderPass);
 	void recreate();
 	void cleanup() const;
 
@@ -55,6 +58,7 @@ struct VulkanSwapchain
 	void createColorResources();
 	void createImageViews();
 	void createFramebuffers();
+	void createUIFramebuffers();
 	VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) const;
 	VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) const;
 	VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) const;

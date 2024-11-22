@@ -17,6 +17,9 @@
 #include <cstdint>
 #include <cstring>
 #include <fstream>
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_vulkan.h>
 #include <iosfwd>
 #include <limits>
 #include <optional>
@@ -51,6 +54,9 @@ class GraphicEngine
 	std::vector<VkSemaphore> renderFinishedSemaphores;
 	std::vector<VkFence> inFlightFences;
 
+	VkDescriptorPool uiDescriptorPool{};
+	VkRenderPass uiRenderPass{};
+
 	uint32_t currentFrame = 0;
 	bool swapChainRecreationPending = false;
 	std::vector<bool> bufferRecreationPending{};
@@ -63,18 +69,27 @@ class GraphicEngine
 	~GraphicEngine();
 
 	private:
-	void pendSwapChainRecreation();
-	void pendBuffersRecreation();
 	void initManagers();
+
 	void initVulkan();
-	void waitAndRecreateSwapChain();
-	void cleanupBuffer(size_t idx);
-	void cleanup();
-	void drawFrame();
 	void createSyncObjects();
-	void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
 	void createBuffers();
 	void createBuffer(size_t idx);
 	void createRenderPass();
 	void createGraphicsPipeline();
+
+	void initUI();
+	void buildUI();
+	void createUIDescriptorPool();
+	void createUIRenderPass();
+	void recordUICommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
+	void cleanupUI() const;
+
+	void drawFrame();
+	void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
+	void waitAndRecreateSwapChain();
+	void cleanupBuffer(size_t idx);
+	void pendSwapChainRecreation();
+	void pendBuffersRecreation();
+	void cleanup();
 };

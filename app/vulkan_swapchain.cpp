@@ -13,6 +13,12 @@ void VulkanSwapchain::addFrameBuffers(VkRenderPass* renderPass)
 	createFramebuffers();
 }
 
+void VulkanSwapchain::addUIFrameBuffers(VkRenderPass* uiRenderPass)
+{
+	this->uiRenderPass = uiRenderPass;
+	createUIFramebuffers();
+}
+
 void VulkanSwapchain::recreate()
 {
 	cleanup();
@@ -20,6 +26,7 @@ void VulkanSwapchain::recreate()
 	createColorResources();
 	createImageViews();
 	createFramebuffers();
+	createUIFramebuffers();
 }
 
 void VulkanSwapchain::cleanup() const
@@ -27,9 +34,11 @@ void VulkanSwapchain::cleanup() const
 	vkDestroyImageView(device->logicalDevice, colorImageView, nullptr);
 	vmaDestroyImage(*vmaAllocator, colorImage, colorImageAllocation);
 
+
 	for (size_t i = 0; i < framebuffers.size(); i++)
 	{
 		vkDestroyFramebuffer(device->logicalDevice, framebuffers[i], nullptr);
+		vkDestroyFramebuffer(device->logicalDevice, uiFramebuffers[i], nullptr);
 	}
 
 	for (size_t i = 0; i < imageViews.size(); i++)
@@ -157,6 +166,29 @@ void VulkanSwapchain::createFramebuffers()
 		framebufferInfo.layers = 1;
 
 		VK_CHECK(vkCreateFramebuffer(device->logicalDevice, &framebufferInfo, nullptr, &framebuffers[i]));
+	}
+}
+
+void VulkanSwapchain::createUIFramebuffers()
+{
+	uiFramebuffers.resize(imageViews.size());
+
+	for (size_t i = 0; i < imageViews.size(); i++)
+	{
+		std::array<VkImageView, 1> attachments = {
+			imageViews[i]
+		};
+
+		VkFramebufferCreateInfo framebufferInfo{};
+		framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+		framebufferInfo.renderPass = *uiRenderPass;
+		framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+		framebufferInfo.pAttachments = attachments.data();
+		framebufferInfo.width = extent.width;
+		framebufferInfo.height = extent.height;
+		framebufferInfo.layers = 1;
+
+		VK_CHECK(vkCreateFramebuffer(device->logicalDevice, &framebufferInfo, nullptr, &uiFramebuffers[i]));
 	}
 }
 

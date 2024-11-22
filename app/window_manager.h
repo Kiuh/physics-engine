@@ -26,9 +26,10 @@ class WindowManager
 	private:
 	glm::ivec2 size{};
 	std::string title{};
-	GLFWwindow* window;
 
 	public:
+	GLFWwindow* window;
+
 	glm::vec2 mousePos{};
 	bool leftMousePressed;
 	bool rightMousePressed;

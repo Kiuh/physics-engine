@@ -14,6 +14,7 @@ void VulkanDevice::init()
 	queueFamilyIndices = findQueueFamilies(physicalDevice);
 	createCommandPools();
 	createCommandBuffers();
+	createUICommandBuffers();
 
 	if (config.logging)
 	{
@@ -56,6 +57,19 @@ void VulkanDevice::createCommandBuffers()
 	allocInfo.commandBufferCount = (uint32_t)commandBuffers.size();
 
 	VK_CHECK(vkAllocateCommandBuffers(logicalDevice, &allocInfo, commandBuffers.data()));
+}
+
+void VulkanDevice::createUICommandBuffers()
+{
+	uiCommandBuffers.resize(config.maxFramesInFlight);
+
+	VkCommandBufferAllocateInfo allocInfo{};
+	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+	allocInfo.commandPool = graphicsCommandPool;
+	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+	allocInfo.commandBufferCount = (uint32_t)uiCommandBuffers.size();
+
+	VK_CHECK(vkAllocateCommandBuffers(logicalDevice, &allocInfo, uiCommandBuffers.data()));
 }
 
 void VulkanDevice::createCommandPools()

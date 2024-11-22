@@ -7,10 +7,12 @@ GraphicEngine::GraphicEngine(WindowManager* windowManager, DataManager* dataMana
 	this->dataManager = dataManager;
 	initManagers();
 	initVulkan();
+	initUI();
 }
 
 void GraphicEngine::draw()
 {
+	buildUI();
 	drawFrame();
 }
 
@@ -82,6 +84,169 @@ void GraphicEngine::initVulkan()
 	createSyncObjects();
 }
 
+void GraphicEngine::initUI()
+{
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+
+	ImGui::StyleColorsClassic();
+
+	ImGui_ImplGlfw_InitForVulkan(windowManager->window, true);
+
+	createUIDescriptorPool();
+	createUIRenderPass();
+
+	ImGui_ImplVulkan_InitInfo init_info = {};
+	init_info.Instance = instance;
+	init_info.PhysicalDevice = device.physicalDevice;
+	init_info.Device = device.logicalDevice;
+	init_info.QueueFamily = device.queueFamilyIndices.graphicsFamily.value();
+	init_info.Queue = device.graphicsQueue;
+	init_info.DescriptorPool = uiDescriptorPool;
+	init_info.MinImageCount = (uint32_t)swapchain.images.size();
+	init_info.ImageCount = (uint32_t)swapchain.images.size();
+	init_info.CheckVkResultFn = VK_CHECK;
+	init_info.RenderPass = uiRenderPass;
+
+	ImGui_ImplVulkan_Init(&init_info);
+
+	ImGui_ImplVulkan_CreateFontsTexture();
+
+	swapchain.addUIFrameBuffers(&uiRenderPass);
+}
+
+void GraphicEngine::buildUI()
+{
+	ImGui_ImplVulkan_NewFrame();
+	ImGui_ImplGlfw_NewFrame();
+
+	ImGui::NewFrame();
+	ImGui::SetNextWindowPos({ 10.0f, 10.0f }, ImGuiCond_Always);
+	ImGui::Begin(
+		"TextOverlay",
+		nullptr,
+		ImGuiWindowFlags_NoTitleBar |
+		ImGuiWindowFlags_NoResize |
+		ImGuiWindowFlags_AlwaysAutoResize |
+		ImGuiWindowFlags_NoBackground |
+		ImGuiWindowFlags_NoMove |
+		ImGuiWindowFlags_NoScrollbar
+	);
+	ImGui::Text("Hello, Top Left Corner!");
+	ImGui::End();
+	ImGui::EndFrame();
+
+	ImGui::Render();
+}
+
+void GraphicEngine::createUIDescriptorPool()
+{
+	VkDescriptorPoolSize pool_sizes[] =
+	{
+		{ VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
+		{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
+		{ VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
+		{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000 },
+		{ VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
+		{ VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
+		{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
+		{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
+		{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
+		{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
+		{ VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 }
+	};
+
+	VkDescriptorPoolCreateInfo pool_info = {};
+	pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+	pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+	pool_info.maxSets = 1;
+	pool_info.poolSizeCount = (uint32_t)IM_ARRAYSIZE(pool_sizes);
+	pool_info.pPoolSizes = pool_sizes;
+
+	VK_CHECK(vkCreateDescriptorPool(device.logicalDevice, &pool_info, nullptr, &uiDescriptorPool));
+}
+
+void GraphicEngine::createUIRenderPass()
+{
+	VkAttachmentDescription attachment = {};
+	attachment.format = swapchain.imageFormat;
+	attachment.samples = VK_SAMPLE_COUNT_1_BIT;
+	attachment.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
+	attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+	attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	attachment.initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+	attachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+	VkAttachmentReference color_attachment = {};
+	color_attachment.attachment = 0;
+	color_attachment.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+	VkSubpassDescription subpass = {};
+	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+	subpass.colorAttachmentCount = 1;
+	subpass.pColorAttachments = &color_attachment;
+
+	VkSubpassDependency dependency = {};
+	dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+	dependency.dstSubpass = 0;
+	dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	dependency.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+	dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+	VkRenderPassCreateInfo info = {};
+	info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+	info.attachmentCount = 1;
+	info.pAttachments = &attachment;
+	info.subpassCount = 1;
+	info.pSubpasses = &subpass;
+	info.dependencyCount = 1;
+	info.pDependencies = &dependency;
+
+	VK_CHECK(vkCreateRenderPass(device.logicalDevice, &info, nullptr, &uiRenderPass));
+}
+
+void GraphicEngine::recordUICommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
+{
+	VkCommandBufferBeginInfo beginInfo{};
+	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	beginInfo.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+	VK_CHECK(vkBeginCommandBuffer(commandBuffer, &beginInfo));
+
+	VkClearValue clearColor = { {{0.01f, 0.01f, 0.01f, 1.0f}} };
+
+	VkRenderPassBeginInfo renderPassInfo{};
+	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	renderPassInfo.renderPass = uiRenderPass;
+	renderPassInfo.framebuffer = swapchain.uiFramebuffers[imageIndex];
+	renderPassInfo.renderArea.offset = { 0, 0 };
+	renderPassInfo.renderArea.extent = swapchain.extent;
+	renderPassInfo.clearValueCount = 1;
+	renderPassInfo.pClearValues = &clearColor;
+
+	vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+	ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
+
+	vkCmdEndRenderPass(commandBuffer);
+
+	VK_CHECK(vkEndCommandBuffer(commandBuffer));
+}
+
+void GraphicEngine::cleanupUI() const
+{
+	vkDestroyRenderPass(device.logicalDevice, uiRenderPass, nullptr);
+
+	ImGui_ImplVulkan_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
+	vkDestroyDescriptorPool(device.logicalDevice, uiDescriptorPool, nullptr);
+}
+
 void GraphicEngine::waitAndRecreateSwapChain()
 {
 	windowManager->waitForNoZero();
@@ -98,6 +263,8 @@ void GraphicEngine::cleanupBuffer(size_t idx)
 void GraphicEngine::cleanup()
 {
 	swapchain.cleanup();
+
+	cleanupUI();
 
 	for (size_t i = 0; i < config.maxFramesInFlight; i++)
 	{
@@ -163,17 +330,26 @@ void GraphicEngine::drawFrame()
 	vkResetCommandBuffer(device.commandBuffers[currentFrame], 0);
 	recordCommandBuffer(device.commandBuffers[currentFrame], imageIndex);
 
+	vkResetCommandBuffer(device.uiCommandBuffers[currentFrame], 0);
+	recordUICommandBuffer(device.uiCommandBuffers[currentFrame], imageIndex);
+
 	VkSemaphore waitSemaphores[] = { imageAvailableSemaphores[currentFrame] };
 	VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 	VkSemaphore signalSemaphores[] = { renderFinishedSemaphores[currentFrame] };
+
+	std::array<VkCommandBuffer, 2> submitCommandBuffers =
+	{
+		device.commandBuffers[currentFrame],
+		device.uiCommandBuffers[currentFrame]
+	};
 
 	VkSubmitInfo submitInfo{};
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 	submitInfo.waitSemaphoreCount = 1;
 	submitInfo.pWaitSemaphores = waitSemaphores;
 	submitInfo.pWaitDstStageMask = waitStages;
-	submitInfo.commandBufferCount = 1;
-	submitInfo.pCommandBuffers = &device.commandBuffers[currentFrame];
+	submitInfo.commandBufferCount = static_cast<uint32_t>(submitCommandBuffers.size());
+	submitInfo.pCommandBuffers = submitCommandBuffers.data();
 	submitInfo.signalSemaphoreCount = 1;
 	submitInfo.pSignalSemaphores = signalSemaphores;
 

@@ -52,6 +52,7 @@ struct VulkanDevice
 	VkCommandPool graphicsCommandPool{};
 	VkCommandPool transferCommandPool{};
 	std::vector<VkCommandBuffer> commandBuffers{};
+	std::vector<VkCommandBuffer> uiCommandBuffers{};
 
 	void init();
 	void waitIdle() const;
@@ -60,6 +61,7 @@ struct VulkanDevice
 
 	private:
 	void createCommandBuffers();
+	void createUICommandBuffers();
 	void createCommandPools();
 	void createLogicalDevice();
 	void pickPhysicalDevice();
