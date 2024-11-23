@@ -122,6 +122,8 @@ void Controller::fillRepresentations()
 	{
 		data->dataSources.push_back(static_cast<VertexSource*>(objects[i]->shape));
 		engine->rigidBodies.push_back(objects[i]->rigidBody);
+		objects[i]->rigidBody->restitution = restitution;
+		objects[i]->rigidBody->density = density;
 	}
 
 	engine->process_mutex.unlock();
@@ -165,6 +167,8 @@ void Controller::addPolygon()
 
 	data->dataSources.push_back(static_cast<VertexSource*>(obj->shape));
 	engine->rigidBodies.push_back(obj->rigidBody);
+	obj->rigidBody->restitution = restitution;
+	obj->rigidBody->density = density;
 
 	engine->process_mutex.unlock();
 	data->data_mutex.unlock();
@@ -183,6 +187,20 @@ void Controller::debugUI()
 	{
 		cleanup();
 		setup();
+	}
+	if (ImGui::DragFloat("Restitution ", &restitution))
+	{
+		for (auto& rb : engine->rigidBodies)
+		{
+			rb->restitution = restitution;
+		}
+	}
+	if (ImGui::DragFloat("Density ", &density))
+	{
+		for (auto& rb : engine->rigidBodies)
+		{
+			rb->density = density;
+		}
 	}
 	ImGui::End();
 }

@@ -21,9 +21,9 @@ App::App()
 	controller = std::make_unique<Controller>(debug.get(), windowManager.get(), dataManager.get(), physicsEngine.get());
 
 	graphicFrameCounter = std::make_unique<FpsCounter>(debug.get(), "Graphic: ");
-	graphicFrameCounter->shift = 60;
+	graphicFrameCounter->shift = 30;
 	physicFrameCounter = std::make_unique<FpsCounter>(debug.get(), "Physics: ");
-	physicFrameCounter->shift = 140;
+	physicFrameCounter->shift = 100;
 
 	windowManager->keyPressed.connect(boost::bind(&App::processKeyPress, this, boost::placeholders::_1));
 }

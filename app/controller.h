@@ -17,10 +17,12 @@ class Controller
 	PhysicsEngine* engine;
 
 	std::vector<Object*> objects{};
-	std::vector<Shape*> gizmo{};
 	size_t initialBoxCount = 2;
 	size_t initialCircleCount = 3;
 	size_t initialPolygonsCount = 4;
+
+	float restitution = 0.6f;
+	float density = 2.0f;
 
 	public:
 	Controller(Debug* debug, WindowManager* win, DataManager* data, PhysicsEngine* engine);
