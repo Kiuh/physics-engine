@@ -15,15 +15,13 @@ App::App()
 	windowManager = std::make_unique<WindowManager>(size, title);
 	dataManager = std::make_unique<DataManager>(*windowManager.get());
 
-	physicsEngine = std::make_unique<PhysicsEngine>(debug.get());
+	physicsEngine = std::make_unique<PhysicsEngine>(debug.get(), dataManager.get());
 	graphicsEngine = std::make_unique<GraphicEngine>(debug.get(), windowManager.get(), dataManager.get(), graphicsEngineConfig);
 
 	controller = std::make_unique<Controller>(debug.get(), windowManager.get(), dataManager.get(), physicsEngine.get());
 
 	graphicFrameCounter = std::make_unique<FpsCounter>(debug.get(), "Graphic: ");
-	graphicFrameCounter->shift = 30;
 	physicFrameCounter = std::make_unique<FpsCounter>(debug.get(), "Physics: ");
-	physicFrameCounter->shift = 100;
 
 	windowManager->keyPressed.connect(boost::bind(&App::processKeyPress, this, boost::placeholders::_1));
 }

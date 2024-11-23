@@ -27,7 +27,7 @@ struct Edge
 
 inline constexpr int MAX_INTERSECTION_ITERATIONS = 32;
 
-class GJK2D
+class Collision2D
 {
 	private:
 	std::vector<glm::vec2> simplex_points{};
@@ -36,13 +36,14 @@ class GJK2D
 	Shape* shapeB;
 
 	public:
-	GJK2D();
+	Collision2D();
 
 	private:
 	bool addSupport(const glm::vec2& dir);
 	Edge findClosestEdge(PolygonWinding winding);
 
 	public:
-	bool test(Shape* shapeA, Shape* shapeB);
-	std::optional<Collision> intersect(Shape* shapeA, Shape* shapeB);
+	bool GJK(Shape* shapeA, Shape* shapeB);
+	std::optional<Collision> collide(Shape* shapeA, Shape* shapeB);
+	std::optional<std::vector<glm::vec2>> EPA(Shape* shapeA, Shape* shapeB);
 };

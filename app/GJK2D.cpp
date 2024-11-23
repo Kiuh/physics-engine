@@ -1,7 +1,6 @@
 #include "GJK2D.h"
 
-GJK2D::GJK2D() : shapeA(nullptr), shapeB(nullptr) {}
-
+Collision2D::Collision2D() : shapeA(nullptr), shapeB(nullptr) {}
 
 static glm::vec2 getSupport(std::vector<glm::vec2> dots, glm::vec2 dir)
 {
@@ -28,7 +27,7 @@ static glm::vec2 calculateSupport(Shape* shapeA, Shape* shapeB, const glm::vec2&
 }
 
 
-bool GJK2D::addSupport(const glm::vec2& dir)
+bool Collision2D::addSupport(const glm::vec2& dir)
 {
 	auto sup_a = getSupport(shapeA->getWorldPoints(), dir);
 	auto sup_b = getSupport(shapeB->getWorldPoints(), -dir);
@@ -37,7 +36,7 @@ bool GJK2D::addSupport(const glm::vec2& dir)
 	return glm::dot(dir, newVertex) > 0;
 }
 
-Edge GJK2D::findClosestEdge(PolygonWinding winding)
+Edge Collision2D::findClosestEdge(PolygonWinding winding)
 {
 	float closestDistance = std::numeric_limits<float>::infinity();
 	glm::vec2 closestNormal{};
@@ -78,7 +77,7 @@ Edge GJK2D::findClosestEdge(PolygonWinding winding)
 	return Edge{ closestDistance, closestNormal, closestIndex };
 }
 
-bool GJK2D::test(Shape* shapeA, Shape* shapeB)
+bool Collision2D::GJK(Shape* shapeA, Shape* shapeB)
 {
 	this->simplex_points.clear();
 	this->shapeA = shapeA;
@@ -132,9 +131,9 @@ bool GJK2D::test(Shape* shapeA, Shape* shapeB)
 	return false;
 }
 
-std::optional<Collision> GJK2D::intersect(Shape* shapeA, Shape* shapeB)
+std::optional<Collision> Collision2D::collide(Shape* shapeA, Shape* shapeB)
 {
-	if (!test(shapeA, shapeB))
+	if (!GJK(shapeA, shapeB))
 	{
 		return {};
 	}
@@ -168,4 +167,19 @@ std::optional<Collision> GJK2D::intersect(Shape* shapeA, Shape* shapeB)
 			.penetration = edge.distance
 		}
 	};
+}
+
+std::optional<std::vector<glm::vec2>> Collision2D::EPA(Shape* shapeA, Shape* shapeB)
+{
+	if (!GJK(shapeA, shapeB))
+	{
+		return {};
+	}
+
+	std::vector<glm::vec2> result{};
+	auto sh1p = shapeA->getWorldPoints();
+	auto sh2p = shapeB->getWorldPoints();
+	result.insert(result.begin(), sh1p.begin(), sh1p.end());
+	result.insert(result.begin(), sh2p.begin(), sh2p.end());
+	return { result };
 }

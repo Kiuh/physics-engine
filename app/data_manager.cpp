@@ -67,20 +67,21 @@ void DataManager::recalculateVertexes()
 		for (auto& vert : source->getVertexes())
 		{
 			simplex_points.vector[vert_iter] = vert;
-			worldToScreen(simplex_points.vector[vert_iter], window, pixelsPerUnit);
+			worldToScreen(simplex_points.vector[vert_iter].pos);
 			vert_iter++;
 		}
 	}
 	data_mutex.unlock();
 }
 
-void DataManager::worldToScreen(Vertex& vert, WindowManager& wp, float pixelsPerUnit) const
+void DataManager::worldToScreen(glm::vec2& pos) const
 {
-	auto screen = wp.getSize();
+	auto screen = window.getSize();
 	screen /= 2.0f;
-	vert.pos += zeroShift * glm::vec2{ 1,-1 };
-	vert.pos *= pixelsPerUnit;
-	vert.pos /= screen;
 
-	vert.pos.y *= -1;
+	pos += zeroShift * glm::vec2{ 1,-1 };
+	pos *= pixelsPerUnit;
+	pos.y *= -1;
+
+	pos /= screen;
 }

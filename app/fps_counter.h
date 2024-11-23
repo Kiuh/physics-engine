@@ -16,11 +16,8 @@ class FpsCounter
 	std::string prefix;
 
 	public:
-	float shift = 0;
-
-	public:
 	FpsCounter(Debug* debug, std::string prefix);
 
-	void debugUI();
+	void debugUI() const;
 	void update(float deltaTime);
 };

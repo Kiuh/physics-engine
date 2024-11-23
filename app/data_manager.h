@@ -17,14 +17,16 @@ class DataManager
 {
 	private:
 	WindowManager& window;
+
+	public:
 	float pixelsPerUnit = 50;
 	glm::vec2 zeroShift{};
 
-	public:
 	std::vector<VertexSource*> dataSources{};
 	vulkan_vec<Vertex> simplex_points{ };
 	vulkan_vec<uint16_t> indexes{ };
 	std::mutex data_mutex{};
+
 	boost::signals2::signal<void()> dataStructureChanged{};
 
 	DataManager(WindowManager& window);
@@ -34,7 +36,5 @@ class DataManager
 	void notifyStructureChanging();
 	void createDataSpace();
 	void recalculateVertexes();
-
-	private:
-	void worldToScreen(Vertex& vert, WindowManager& wp, float pixelsPerUnit) const;
+	void worldToScreen(glm::vec2& pos) const;
 };

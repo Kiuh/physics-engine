@@ -16,15 +16,23 @@
 
 class PhysicsEngine
 {
+	private:
+	DataManager* dm;
+
 	public:
 	std::vector<RigidBody*> rigidBodies;
 	std::mutex process_mutex;
 	glm::vec2 gravity{ 0, -9.8f };
 
-	PhysicsEngine(Debug* debug);
+	std::mutex gizmo_mutex{};
+	std::vector<glm::vec2> gizmo_dots{};
+
+	PhysicsEngine(Debug* debug, DataManager* dm);
 	void update(float deltaTime);
 	void buildDebugUI();
 
 	private:
-	void resolveCollision(RigidBody& rb1, RigidBody& rb2, Collision col);
+	void resolveCollisions();
+	void applyDisplacements(RigidBody& rb1, RigidBody& rb2, Collision col);
+	void applyImpulses(RigidBody& rb1, RigidBody& rb2, Collision col);
 };

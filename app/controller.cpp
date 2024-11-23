@@ -178,7 +178,7 @@ void Controller::addPolygon()
 
 void Controller::debugUI()
 {
-	ImGui::Begin("Control Panel");
+	ImGui::Begin("Control Panel", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
 	if (ImGui::Button("Add Polygon"))
 	{
 		addPolygon();
@@ -188,14 +188,14 @@ void Controller::debugUI()
 		cleanup();
 		setup();
 	}
-	if (ImGui::DragFloat("Restitution ", &restitution))
+	if (ImGui::DragFloat("Restitution ", &restitution, 0.05f, 0, 2))
 	{
 		for (auto& rb : engine->rigidBodies)
 		{
 			rb->restitution = restitution;
 		}
 	}
-	if (ImGui::DragFloat("Density ", &density))
+	if (ImGui::DragFloat("Density ", &density, 0.05f, 0, 2))
 	{
 		for (auto& rb : engine->rigidBodies)
 		{
