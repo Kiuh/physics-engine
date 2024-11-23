@@ -1,6 +1,7 @@
 #pragma once
 
 #include "data_manager.h"
+#include "debug.h"
 #include "graphic_engine_builders.h"
 #include "shader_manager.h"
 #include "validation_manager.h"
@@ -33,6 +34,7 @@ class GraphicEngine
 	public:
 	GraphicsEngineConfig config;
 
+	Debug* debug;
 	WindowManager* windowManager;
 	DataManager* dataManager;
 
@@ -64,7 +66,7 @@ class GraphicEngine
 	std::vector<VulkanBuffer> vertexBuffers;
 	std::vector<VulkanBuffer> indexBuffers;
 
-	GraphicEngine(WindowManager* windowManager, DataManager* dataManager, GraphicsEngineConfig config);
+	GraphicEngine(Debug* debug, WindowManager* windowManager, DataManager* dataManager, GraphicsEngineConfig config);
 	void draw();
 	~GraphicEngine();
 

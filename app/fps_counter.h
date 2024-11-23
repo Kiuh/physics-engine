@@ -1,5 +1,7 @@
 #pragma once
 
+#include "debug.h"
+
 #include <chrono>
 #include <cstdint>
 #include <iosfwd>
@@ -10,17 +12,15 @@
 class FpsCounter
 {
 	private:
-	uint32_t fps;
+	float fps;
 	std::string prefix;
-	std::thread* fpsThread;
-	bool isRunning;
 
 	public:
-	FpsCounter(std::string prefix);
-	~FpsCounter();
+	float shift = 0;
 
-	void run();
-	void stop();
-	void printInInterval();
-	void tick();
+	public:
+	FpsCounter(Debug* debug, std::string prefix);
+
+	void debugUI();
+	void update(float deltaTime);
 };

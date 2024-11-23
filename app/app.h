@@ -2,6 +2,7 @@
 
 #include "controller.h"
 #include "data_manager.h"
+#include "debug.h"
 #include "fps_counter.h"
 #include "graphic_engine.h"
 #include "physics_engine.h"
@@ -25,6 +26,8 @@ class App
 	bool isRunning = false;
 
 	GraphicsEngineConfig graphicsEngineConfig;
+
+	std::unique_ptr<Debug> debug;
 
 	std::unique_ptr<WindowManager> windowManager;
 	std::unique_ptr<DataManager> dataManager;

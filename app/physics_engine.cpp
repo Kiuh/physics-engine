@@ -1,6 +1,9 @@
 #include "physics_engine.h"
 
-static const glm::vec2 gravity = { 0, -9.8f };
+PhysicsEngine::PhysicsEngine(Debug* debug)
+{
+	debug->buildUI.connect(boost::bind(&PhysicsEngine::buildDebugUI, this));
+}
 
 void PhysicsEngine::update(float deltaTime)
 {
@@ -70,6 +73,13 @@ void PhysicsEngine::update(float deltaTime)
 	}
 
 	process_mutex.unlock();
+}
+
+void PhysicsEngine::buildDebugUI()
+{
+	ImGui::Begin("Physics parameters", nullptr, 0);
+	ImGui::DragFloat2("Gravity", &gravity.x, 0.1f, -50.0f, 50.0f, "%.2f");
+	ImGui::End();
 }
 
 void PhysicsEngine::resolveCollision(RigidBody& rb1, RigidBody& rb2, Collision col)

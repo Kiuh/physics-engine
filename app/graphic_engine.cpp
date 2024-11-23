@@ -1,7 +1,8 @@
 #include "graphic_engine.h"
 
-GraphicEngine::GraphicEngine(WindowManager* windowManager, DataManager* dataManager, GraphicsEngineConfig config)
+GraphicEngine::GraphicEngine(Debug* debug, WindowManager* windowManager, DataManager* dataManager, GraphicsEngineConfig config)
 {
+	this->debug = debug;
 	this->config = config;
 	this->windowManager = windowManager;
 	this->dataManager = dataManager;
@@ -92,6 +93,8 @@ void GraphicEngine::initUI()
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
 	ImGui::StyleColorsClassic();
+	ImGuiStyle& style = ImGui::GetStyle();
+	style.ScaleAllSizes(1.5f);
 
 	ImGui_ImplGlfw_InitForVulkan(windowManager->window, true);
 
@@ -123,19 +126,7 @@ void GraphicEngine::buildUI()
 	ImGui_ImplGlfw_NewFrame();
 
 	ImGui::NewFrame();
-	ImGui::SetNextWindowPos({ 10.0f, 10.0f }, ImGuiCond_Always);
-	ImGui::Begin(
-		"TextOverlay",
-		nullptr,
-		ImGuiWindowFlags_NoTitleBar |
-		ImGuiWindowFlags_NoResize |
-		ImGuiWindowFlags_AlwaysAutoResize |
-		ImGuiWindowFlags_NoBackground |
-		ImGuiWindowFlags_NoMove |
-		ImGuiWindowFlags_NoScrollbar
-	);
-	ImGui::Text("Hello, Top Left Corner!");
-	ImGui::End();
+	debug->buildUI();
 	ImGui::EndFrame();
 
 	ImGui::Render();
@@ -178,7 +169,7 @@ void GraphicEngine::createUIRenderPass()
 	attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 	attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 	attachment.initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-	attachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+	attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
 	VkAttachmentReference color_attachment = {};
 	color_attachment.attachment = 0;
@@ -507,7 +498,7 @@ void GraphicEngine::createRenderPass()
 	colorAttachmentResolve.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 	colorAttachmentResolve.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 	colorAttachmentResolve.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	colorAttachmentResolve.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+	colorAttachmentResolve.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
 	VkAttachmentReference colorAttachmentResolveRef{};
 	colorAttachmentResolveRef.attachment = 1;

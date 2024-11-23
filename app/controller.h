@@ -23,7 +23,7 @@ class Controller
 	size_t initialPolygonsCount = 4;
 
 	public:
-	Controller(WindowManager* win, DataManager* data, PhysicsEngine* engine);
+	Controller(Debug* debug, WindowManager* win, DataManager* data, PhysicsEngine* engine);
 	~Controller();
 
 	private:
@@ -37,5 +37,6 @@ class Controller
 	void fillRepresentations();
 	void cleanup();
 	void processKeyPress(KeyCode key);
-	void mouseLeftButtonPressed();
+	void addPolygon();
+	void debugUI();
 };

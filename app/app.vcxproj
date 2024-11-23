@@ -288,6 +288,7 @@
     <ClInclude Include="collision.h" />
     <ClInclude Include="controller.h" />
     <ClInclude Include="data_manager.h" />
+    <ClInclude Include="debug.h" />
     <ClInclude Include="fps_counter.h" />
     <ClInclude Include="GJK2D.h" />
     <ClInclude Include="graphic_engine.h" />

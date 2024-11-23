@@ -1,10 +1,10 @@
 #include "controller.h"
 
-Controller::Controller(WindowManager* win, DataManager* data, PhysicsEngine* engine)
+Controller::Controller(Debug* debug, WindowManager* win, DataManager* data, PhysicsEngine* engine)
 {
 	this->win = win;
 	win->keyPressed.connect(boost::bind(&Controller::processKeyPress, this, boost::placeholders::_1));
-	win->leftMouseButtonPressed.connect(boost::bind(&Controller::mouseLeftButtonPressed, this));
+	debug->buildUI.connect(boost::bind(&Controller::debugUI, this));
 	this->data = data;
 	this->engine = engine;
 	setup();
@@ -147,7 +147,7 @@ void Controller::processKeyPress(KeyCode key)
 	}
 }
 
-void Controller::mouseLeftButtonPressed()
+void Controller::addPolygon()
 {
 	data->data_mutex.lock();
 	engine->process_mutex.lock();
@@ -170,4 +170,19 @@ void Controller::mouseLeftButtonPressed()
 	data->data_mutex.unlock();
 
 	data->notifyStructureChanging();
+}
+
+void Controller::debugUI()
+{
+	ImGui::Begin("Control Panel");
+	if (ImGui::Button("Add Polygon"))
+	{
+		addPolygon();
+	}
+	if (ImGui::Button("Refresh simulation"))
+	{
+		cleanup();
+		setup();
+	}
+	ImGui::End();
 }

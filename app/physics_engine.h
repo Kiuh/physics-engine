@@ -3,6 +3,7 @@
 #include "collision.h"
 #include "collision_tools.h"
 #include "data_manager.h"
+#include "debug.h"
 #include "object.h"
 #include "random_helper.h"
 #include "rigid_body.h"
@@ -18,8 +19,11 @@ class PhysicsEngine
 	public:
 	std::vector<RigidBody*> rigidBodies;
 	std::mutex process_mutex;
+	glm::vec2 gravity{ 0, -9.8f };
 
+	PhysicsEngine(Debug* debug);
 	void update(float deltaTime);
+	void buildDebugUI();
 
 	private:
 	void resolveCollision(RigidBody& rb1, RigidBody& rb2, Collision col);

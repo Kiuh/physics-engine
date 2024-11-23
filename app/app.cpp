@@ -10,16 +10,20 @@ App::App()
 #endif
 	graphicsEngineConfig.maxFramesInFlight = 2;
 
+	debug = std::make_unique<Debug>();
+
 	windowManager = std::make_unique<WindowManager>(size, title);
 	dataManager = std::make_unique<DataManager>(*windowManager.get());
 
-	physicsEngine = std::make_unique<PhysicsEngine>();
-	graphicsEngine = std::make_unique<GraphicEngine>(windowManager.get(), dataManager.get(), graphicsEngineConfig);
+	physicsEngine = std::make_unique<PhysicsEngine>(debug.get());
+	graphicsEngine = std::make_unique<GraphicEngine>(debug.get(), windowManager.get(), dataManager.get(), graphicsEngineConfig);
 
-	controller = std::make_unique<Controller>(windowManager.get(), dataManager.get(), physicsEngine.get());
+	controller = std::make_unique<Controller>(debug.get(), windowManager.get(), dataManager.get(), physicsEngine.get());
 
-	graphicFrameCounter = std::make_unique<FpsCounter>("Graphic FPS");
-	physicFrameCounter = std::make_unique<FpsCounter>("Physics FPS");
+	graphicFrameCounter = std::make_unique<FpsCounter>(debug.get(), "Graphic: ");
+	graphicFrameCounter->shift = 60;
+	physicFrameCounter = std::make_unique<FpsCounter>(debug.get(), "Physics: ");
+	physicFrameCounter->shift = 140;
 
 	windowManager->keyPressed.connect(boost::bind(&App::processKeyPress, this, boost::placeholders::_1));
 }
@@ -27,9 +31,6 @@ App::App()
 void App::run()
 {
 	isRunning = true;
-
-	graphicFrameCounter->run();
-	physicFrameCounter->run();
 
 	graphicThread = std::make_unique<std::thread>(&App::graphicThreadFunc, this);
 	physicsThread = std::make_unique<std::thread>(&App::physicsThreadFunc, this);
@@ -40,8 +41,6 @@ void App::run()
 	}
 	isRunning = false;
 
-	graphicFrameCounter->stop();
-	physicFrameCounter->stop();
 	physicsThread->join();
 	graphicThread->join();
 }
@@ -57,10 +56,14 @@ void App::processKeyPress(KeyCode key)
 
 void App::graphicThreadFunc()
 {
+	auto deltaTime = std::chrono::duration<float>{ 0.0f };
 	while (isRunning)
 	{
+		auto timer = std::chrono::high_resolution_clock::now();
 		graphicsEngine->draw();
-		graphicFrameCounter->tick();
+
+		deltaTime = (std::chrono::high_resolution_clock::now() - timer);
+		graphicFrameCounter->update(deltaTime.count());
 	}
 }
 
@@ -75,7 +78,7 @@ void App::physicsThreadFunc()
 	{
 		auto timer = std::chrono::high_resolution_clock::now();
 		physicsEngine->update(deltaTime.count());
-		physicFrameCounter->tick();
+		physicFrameCounter->update(deltaTime.count());
 
 		auto time_passed = duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - timer);
 		auto time_left = target_delta_time - time_passed;

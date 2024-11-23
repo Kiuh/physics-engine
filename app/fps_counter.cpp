@@ -1,44 +1,23 @@
 #include "fps_counter.h"
 
-FpsCounter::FpsCounter(std::string prefix)
+FpsCounter::FpsCounter(Debug* debug, std::string prefix)
 {
+	debug->buildUI.connect(boost::bind(&FpsCounter::debugUI, this));
 	this->prefix = prefix;
 	fps = 0;
-	fpsThread = nullptr;
-	isRunning = false;
 }
 
-FpsCounter::~FpsCounter()
+void FpsCounter::debugUI()
 {
-	isRunning = false;
+	ImGui::SetNextWindowPos(ImVec2(10, ImGui::GetIO().DisplaySize.y - shift), ImGuiCond_Always, ImVec2(0.0f, 1.0f));
+	ImGui::SetNextWindowBgAlpha(0.3f);
+	ImGui::Begin(prefix.data(), nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove);
+	ImGui::Text(prefix.data());
+	ImGui::Text("%.1f FPS", fps);
+	ImGui::End();
 }
 
-void FpsCounter::run()
+void FpsCounter::update(float deltaTime)
 {
-	isRunning = true;
-	fpsThread = new std::thread(&FpsCounter::printInInterval, this);
-}
-
-void FpsCounter::stop()
-{
-	isRunning = false;
-	fpsThread->join();
-}
-
-void FpsCounter::printInInterval()
-{
-	while (isRunning)
-	{
-		std::this_thread::sleep_for(std::chrono::seconds(1));
-
-		std::stringstream msg;
-		msg << prefix << ": " << fps << std::endl;
-		std::cout << msg.str();
-		fps = 0;
-	}
-}
-
-void FpsCounter::tick()
-{
-	fps++;
+	fps = 1 / deltaTime;
 }
