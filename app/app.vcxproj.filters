@@ -177,7 +177,7 @@
     <ClCompile Include="shape.cpp">
       <Filter>Source Files\physics_engine\shapes</Filter>
     </ClCompile>
-    <ClCompile Include="GJK2D.cpp">
+    <ClCompile Include="collision_2d.cpp">
       <Filter>Source Files\physics_engine\collisions</Filter>
     </ClCompile>
     <ClCompile Include="collision_tools.h">
@@ -268,7 +268,7 @@
     <ClInclude Include="shape_creator.h">
       <Filter>Header Files\physics_engine\shapes</Filter>
     </ClInclude>
-    <ClInclude Include="GJK2D.h">
+    <ClInclude Include="collision_2d.h">
       <Filter>Header Files\physics_engine\collisions</Filter>
     </ClInclude>
     <ClInclude Include="vma_usage.h">

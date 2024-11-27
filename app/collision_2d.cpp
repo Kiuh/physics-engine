@@ -1,4 +1,4 @@
-#include "GJK2D.h"
+#include "collision_2d.h"
 
 Collision2D::Collision2D() : shapeA(nullptr), shapeB(nullptr) {}
 
@@ -25,7 +25,6 @@ static glm::vec2 calculateSupport(Shape* shapeA, Shape* shapeB, const glm::vec2&
 	newVertex -= getSupport(shapeB->getWorldPoints(), -direction);
 	return newVertex;
 }
-
 
 bool Collision2D::addSupport(const glm::vec2& dir)
 {

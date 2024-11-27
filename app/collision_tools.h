@@ -1,7 +1,7 @@
 #pragma once
 
-#include "GJK2D.h"
 #include "collision.h"
+#include "collision_2d.h"
 #include "shape.h"
 #include <memory>
 
