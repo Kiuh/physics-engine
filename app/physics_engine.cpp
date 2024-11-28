@@ -28,18 +28,6 @@ void PhysicsEngine::update(float deltaTime)
 	process_mutex.unlock();
 }
 
-void DrawDotExample(ImVec2 screenPos, float radius, ImU32 color)
-{
-	ImDrawList* drawList = ImGui::GetWindowDrawList();
-	drawList->AddCircleFilled(screenPos, radius, color);
-}
-
-void DrawDotOverlay(ImVec2 screenPos, float radius, ImU32 color)
-{
-	ImDrawList* drawList = ImGui::GetForegroundDrawList();
-	drawList->AddCircleFilled(screenPos, radius, color);
-}
-
 void PhysicsEngine::buildDebugUI()
 {
 	ImGui::Begin("Physics parameters", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
@@ -53,6 +41,7 @@ void PhysicsEngine::buildDebugUI()
 
 	gizmo_mutex.lock();
 	glm::vec2 screenHalfSize{ ImGui::GetIO().DisplaySize.x / 2.0f, ImGui::GetIO().DisplaySize.y / 2.0f };
+	ImDrawList* drawList = ImGui::GetForegroundDrawList();
 	for (auto& p : gizmo_dots)
 	{
 		glm::vec2 pos = p;
@@ -60,7 +49,7 @@ void PhysicsEngine::buildDebugUI()
 		pos *= dm->pixelsPerUnit;
 		pos.y *= -1;
 		pos += screenHalfSize;
-		DrawDotOverlay({ pos.x, pos.y }, 4.0f, IM_COL32(0, 255, 0, 255));
+		drawList->AddCircleFilled({ pos.x, pos.y }, 4.0f, IM_COL32(0, 255, 0, 255));
 	}
 	gizmo_mutex.unlock();
 
@@ -84,25 +73,20 @@ void PhysicsEngine::resolveCollisions()
 
 			if (rb1.isStatic && rb2.isStatic) continue;
 
-			if (isOverlaps(rb1.shape, rb2.shape))
+			auto res = Collision2D::tryCollide(rb1.shape, rb2.shape);
+
+			if (res.has_value())
 			{
 				to_color.insert(&rb1.shape);
 				to_color.insert(&rb2.shape);
 
-				auto res1 = getCollision(rb1.shape, rb2.shape);
-				if (res1.has_value())
-				{
-					auto& col = res1.value();
-					applyDisplacements(rb1, rb2, col);
-					applyImpulses(rb1, rb2, col);
-				}
 
-				auto res2 = getWorldContactPoints(rb1.shape, rb2.shape);
-				if (res2.has_value())
-				{
-					auto& list = res2.value();
-					gizmo_dots.insert(gizmo_dots.end(), list.begin(), list.end());
-				}
+				auto& col = res.value();
+				applyDisplacements(rb1, rb2, col);
+				applyImpulses(rb1, rb2, col);
+
+				auto& list = col.contact_points;
+				gizmo_dots.insert(gizmo_dots.end(), list.begin(), list.end());
 			}
 		}
 	}

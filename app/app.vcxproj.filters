@@ -31,9 +31,6 @@
     <Filter Include="Source Files\core">
       <UniqueIdentifier>{07ca5de9-7e5c-4412-aec7-f401beac6d51}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\physics_engine\collisions">
-      <UniqueIdentifier>{6af4a9a8-5745-4de7-ab8f-0bd8a6fd8d8c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\physics_engine">
       <UniqueIdentifier>{6f2e5f24-813c-4b10-b166-85820784c512}</UniqueIdentifier>
     </Filter>
@@ -48,9 +45,6 @@
     </Filter>
     <Filter Include="Header Files\physics_engine\shapes">
       <UniqueIdentifier>{70a499cf-c5fa-4012-806e-c161ef9b905e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\physics_engine\collisions">
-      <UniqueIdentifier>{9871af27-2620-4968-a9aa-a77e23538d4d}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\physics_engine\shapes">
       <UniqueIdentifier>{e5daeaec-767a-4c6c-a197-ba20dfdc813b}</UniqueIdentifier>
@@ -141,9 +135,6 @@
     <ClCompile Include="shape.h">
       <Filter>Header Files\physics_engine\shapes</Filter>
     </ClCompile>
-    <ClCompile Include="collision_tools.cpp">
-      <Filter>Source Files\physics_engine\collisions</Filter>
-    </ClCompile>
     <ClCompile Include="color.cpp">
       <Filter>Source Files\common</Filter>
     </ClCompile>
@@ -177,14 +168,11 @@
     <ClCompile Include="shape.cpp">
       <Filter>Source Files\physics_engine\shapes</Filter>
     </ClCompile>
-    <ClCompile Include="collision_2d.cpp">
-      <Filter>Source Files\physics_engine\collisions</Filter>
-    </ClCompile>
-    <ClCompile Include="collision_tools.h">
-      <Filter>Header Files\physics_engine\collisions</Filter>
-    </ClCompile>
     <ClCompile Include="vma_usage.cpp">
       <Filter>Source Files\graphic_engine</Filter>
+    </ClCompile>
+    <ClCompile Include="collision_2d.cpp">
+      <Filter>Source Files\physics_engine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -262,20 +250,20 @@
     <ClInclude Include="lodepng.h">
       <Filter>Header Files\external</Filter>
     </ClInclude>
-    <ClInclude Include="collision.h">
-      <Filter>Header Files\physics_engine\collisions</Filter>
-    </ClInclude>
     <ClInclude Include="shape_creator.h">
       <Filter>Header Files\physics_engine\shapes</Filter>
-    </ClInclude>
-    <ClInclude Include="collision_2d.h">
-      <Filter>Header Files\physics_engine\collisions</Filter>
     </ClInclude>
     <ClInclude Include="vma_usage.h">
       <Filter>Header Files\graphics_engine</Filter>
     </ClInclude>
     <ClInclude Include="debug.h">
       <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="collision.h">
+      <Filter>Header Files\physics_engine</Filter>
+    </ClInclude>
+    <ClInclude Include="collision_2d.h">
+      <Filter>Header Files\physics_engine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

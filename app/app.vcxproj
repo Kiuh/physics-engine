@@ -217,11 +217,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="app.cpp" />
-    <ClCompile Include="collision_tools.h" />
     <ClCompile Include="color.cpp" />
     <ClCompile Include="color.h" />
     <ClCompile Include="controller.cpp" />
-    <ClCompile Include="collision_tools.cpp" />
     <ClCompile Include="collision_2d.cpp" />
     <ClCompile Include="graphic_engine_builders.cpp" />
     <ClCompile Include="lodepng.cpp" />

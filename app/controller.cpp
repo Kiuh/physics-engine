@@ -29,7 +29,7 @@ bool Controller::isNoIntersections(Object& obj)
 {
 	for (auto ob : objects)
 	{
-		if (isOverlaps(*obj.shape, *ob->shape))
+		if (Collision2D::isOverlaps(*obj.shape, *ob->shape))
 		{
 			return false;
 		}

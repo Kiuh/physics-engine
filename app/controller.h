@@ -1,5 +1,6 @@
 #pragma once
 
+#include "collision_2d.h"
 #include "data_manager.h"
 #include "object.h"
 #include "physics_engine.h"

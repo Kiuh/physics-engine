@@ -2,37 +2,15 @@
 
 Collision2D::Collision2D() : shapeA(nullptr), shapeB(nullptr) {}
 
-static glm::vec2 getSupport(std::vector<glm::vec2> dots, glm::vec2 dir)
-{
-	float furthestDistance = -std::numeric_limits<float>::infinity();
-	glm::vec2 furthestVertex{};
-
-	for (glm::vec2& v : dots)
-	{
-		float distance = glm::dot(v, dir);
-		if (distance > furthestDistance)
-		{
-			furthestDistance = distance;
-			furthestVertex = v;
-		}
-	}
-
-	return furthestVertex;
-}
-
-static glm::vec2 calculateSupport(Shape* shapeA, Shape* shapeB, const glm::vec2& direction) {
-	glm::vec2 newVertex = getSupport(shapeA->getWorldPoints(), direction);
-	newVertex -= getSupport(shapeB->getWorldPoints(), -direction);
-	return newVertex;
-}
-
+// Add support point of minkovski difference to simplex
+// Returns true if new point and given direction in the same direction
 bool Collision2D::addSupport(const glm::vec2& dir)
 {
-	auto sup_a = getSupport(shapeA->getWorldPoints(), dir);
-	auto sup_b = getSupport(shapeB->getWorldPoints(), -dir);
-	glm::vec2 newVertex = sup_a - sup_b;
-	simplex_points.push_back(newVertex);
-	return glm::dot(dir, newVertex) > 0;
+	auto sup_a = vt::getSupport(shapeA->getWorldPoints(), dir);
+	auto sup_b = vt::getSupport(shapeB->getWorldPoints(), -dir);
+	glm::vec2 new_point = sup_a - sup_b;
+	simplex_points.push_back(new_point);
+	return glm::dot(dir, new_point) > 0;
 }
 
 Edge Collision2D::findClosestEdge(PolygonWinding winding)
@@ -76,6 +54,36 @@ Edge Collision2D::findClosestEdge(PolygonWinding winding)
 	return Edge{ closestDistance, closestNormal, closestIndex };
 }
 
+Edge Collision2D::EPA(Shape* shapeA, Shape* shapeB)
+{
+	float e0 = (simplex_points[1].x - simplex_points[0].x) * (simplex_points[1].y + simplex_points[0].y);
+	float e1 = (simplex_points[2].x - simplex_points[1].x) * (simplex_points[2].y + simplex_points[1].y);
+	float e2 = (simplex_points[0].x - simplex_points[2].x) * (simplex_points[0].y + simplex_points[2].y);
+
+	PolygonWinding winding = (e0 + e1 + e2 >= 0) ? PolygonWinding::Clockwise : PolygonWinding::CounterClockwise;
+
+	Edge edge{};
+	for (int i = 0; i < MAX_INTERSECTION_ITERATIONS; i++)
+	{
+		edge = findClosestEdge(winding);
+
+		glm::vec2 support = vt::getSupport(shapeA->getWorldPoints(), edge.normal);
+		support -= vt::getSupport(shapeB->getWorldPoints(), -edge.normal);
+		float distance = glm::dot(support, edge.normal);
+
+		if (!mt::is0_f(distance - edge.distance))
+		{
+			simplex_points.insert(simplex_points.begin() + edge.index, support);
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	return edge;
+}
+
 bool Collision2D::GJK(Shape* shapeA, Shape* shapeB)
 {
 	this->simplex_points.clear();
@@ -84,27 +92,27 @@ bool Collision2D::GJK(Shape* shapeA, Shape* shapeB)
 
 	// Create first simplex
 	direction = shapeB->tr.pos() - shapeA->tr.pos();
-	addSupport(direction);
+	addSupport(direction); // From direction of colliding
 
 	direction *= -1;
-	addSupport(direction);
+	addSupport(direction); // Opposite of direction of colliding
 
 	glm::vec2 b = simplex_points[1];
 	glm::vec2 c = simplex_points[0];
 
 	glm::vec2 cb = b - c;
-	glm::vec2 c0 = -c;
+	glm::vec2 c0 = 0.0f - c;
 	direction = vt::triple_product(cb, c0, cb);
-	addSupport(direction);
+	addSupport(direction); // Perpendicular to 0 -> 1 line facing origin
 
-	// Try simplexes while they exist
+	// Test and try new simplexes while they exist
 	do
 	{
 		glm::vec2 a = simplex_points[2];
 		glm::vec2 b = simplex_points[1];
 		glm::vec2 c = simplex_points[0];
 
-		glm::vec2 a0 = -a;
+		glm::vec2 a0 = 0.0f - a;
 		glm::vec2 ab = b - a;
 		glm::vec2 ac = c - a;
 
@@ -121,7 +129,7 @@ bool Collision2D::GJK(Shape* shapeA, Shape* shapeB)
 			simplex_points.erase(simplex_points.begin() + 1); // Remove vertex b
 			direction = acPerp;
 		}
-		else
+		else // Origin inside simplex
 		{
 			return true;
 		}
@@ -137,48 +145,25 @@ std::optional<Collision> Collision2D::collide(Shape* shapeA, Shape* shapeB)
 		return {};
 	}
 
-	float e0 = (simplex_points[1].x - simplex_points[0].x) * (simplex_points[1].y + simplex_points[0].y);
-	float e1 = (simplex_points[2].x - simplex_points[1].x) * (simplex_points[2].y + simplex_points[1].y);
-	float e2 = (simplex_points[0].x - simplex_points[2].x) * (simplex_points[0].y + simplex_points[2].y);
-
-	PolygonWinding winding = (e0 + e1 + e2 >= 0) ? PolygonWinding::Clockwise : PolygonWinding::CounterClockwise;
-
-	Edge edge{};
-	for (int i = 0; i < MAX_INTERSECTION_ITERATIONS; i++)
-	{
-		edge = findClosestEdge(winding);
-		glm::vec2 support = calculateSupport(shapeA, shapeB, edge.normal);
-		float distance = glm::dot(support, edge.normal);
-
-		if (!mt::is0_f(distance - edge.distance))
-		{
-			simplex_points.insert(simplex_points.begin() + edge.index, support);
-		}
-		else
-		{
-			break;
-		}
-	}
+	auto edge = EPA(shapeA, shapeB);
 
 	return {
 		Collision{
 			.normal = edge.normal,
-			.penetration = edge.distance
+			.penetration = edge.distance,
+			.contact_points = { }
 		}
 	};
 }
 
-std::optional<std::vector<glm::vec2>> Collision2D::EPA(Shape* shapeA, Shape* shapeB)
+std::optional<Collision> Collision2D::tryCollide(Shape& sh1, Shape& sh2)
 {
-	if (!GJK(shapeA, shapeB))
-	{
-		return {};
-	}
+	auto solver = std::make_unique<Collision2D>();
+	return solver->collide(&sh1, &sh2);
+}
 
-	std::vector<glm::vec2> result{};
-	auto sh1p = shapeA->getWorldPoints();
-	auto sh2p = shapeB->getWorldPoints();
-	result.insert(result.begin(), sh1p.begin(), sh1p.end());
-	result.insert(result.begin(), sh2p.begin(), sh2p.end());
-	return { result };
+bool Collision2D::isOverlaps(Shape& sh1, Shape& sh2)
+{
+	auto solver = std::make_unique<Collision2D>();
+	return solver->GJK(&sh1, &sh2);
 }

@@ -20,4 +20,7 @@ namespace vt
 	bool greater(glm::vec2 source, glm::vec2 comparison);
 	bool lesser(glm::vec2 source, glm::vec2 comparison);
 	glm::vec2 triple_product(const glm::vec2& a, const glm::vec2& b, const glm::vec2& c);
+
+	// Gives furthest point among given in given direction
+	glm::vec2 getSupport(std::vector<glm::vec2> dots, glm::vec2 dir);
 }

@@ -2,6 +2,7 @@
 
 #include "collision.h"
 #include "shape.h"
+#include <memory>
 #include <optional>
 #include <stdexcept>
 
@@ -41,9 +42,12 @@ class Collision2D
 	private:
 	bool addSupport(const glm::vec2& dir);
 	Edge findClosestEdge(PolygonWinding winding);
+	Edge EPA(Shape* shapeA, Shape* shapeB);
+	bool GJK(Shape* shapeA, Shape* shapeB);
 
 	public:
-	bool GJK(Shape* shapeA, Shape* shapeB);
 	std::optional<Collision> collide(Shape* shapeA, Shape* shapeB);
-	std::optional<std::vector<glm::vec2>> EPA(Shape* shapeA, Shape* shapeB);
+
+	static std::optional<Collision> tryCollide(Shape& sh1, Shape& sh2);
+	static bool isOverlaps(Shape& sh1, Shape& sh2);
 };

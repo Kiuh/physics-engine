@@ -53,4 +53,22 @@ namespace vt
 
 		return glm::vec2(second.x, second.y);
 	}
+
+	glm::vec2 getSupport(std::vector<glm::vec2> dots, glm::vec2 dir)
+	{
+		float furthest_distance = -std::numeric_limits<float>::infinity();
+		glm::vec2 furthest_point{};
+
+		for (glm::vec2& v : dots)
+		{
+			float distance = glm::dot(v, dir);
+			if (distance > furthest_distance)
+			{
+				furthest_distance = distance;
+				furthest_point = v;
+			}
+		}
+
+		return furthest_point;
+	}
 }

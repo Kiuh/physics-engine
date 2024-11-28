@@ -7,6 +7,7 @@ struct Collision
 {
 	glm::vec2 normal{ 0,0 };
 	float penetration = 0;
+	std::vector<glm::vec2> contact_points;
 
 	glm::vec2 vec() const
 	{
