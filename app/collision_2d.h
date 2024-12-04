@@ -19,27 +19,41 @@ struct Edge
 	size_t index;
 };
 
+struct SimplexPoint
+{
+	glm::vec2 mink;
+	size_t shAInd;
+	size_t shBInd;
+};
+
+struct ContactData
+{
+	glm::vec2 localContactPointA;
+	glm::vec2 localContactPointB;
+};
+
 inline constexpr int MAX_INTERSECTION_ITERATIONS = 32;
 
 class Collision2D
 {
 	private:
-	std::vector<glm::vec2> simplex_points{};
+	std::vector<SimplexPoint> simplex_points{};
 	glm::vec2 direction{};
-	Shape* shapeA;
-	Shape* shapeB;
+	Shape& shapeA;
+	Shape& shapeB;
 
 	public:
-	Collision2D();
+	Collision2D(Shape& shapeA, Shape& shapeB);
 
 	private:
-	glm::vec2 getMinkSupport(const glm::vec2& dir);
+	SimplexPoint getMinkSupport(const glm::vec2& dir);
+	bool GJK();
 	Edge findClosestEdge(PolygonWinding winding);
-	Edge EPA(Shape* shapeA, Shape* shapeB);
-	bool GJK(Shape* shapeA, Shape* shapeB);
+	Edge EPA();
+	ContactData findContacts(Edge edge);
 
 	public:
-	std::optional<Collision> collide(Shape* shapeA, Shape* shapeB);
+	std::optional<Collision> collide();
 
 	static std::optional<Collision> tryCollide(Shape& sh1, Shape& sh2);
 	static bool isOverlaps(Shape& sh1, Shape& sh2);

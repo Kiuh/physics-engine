@@ -14,6 +14,5 @@ struct Color
 
 	static Color red();
 	static Color white();
+	static Color randomColor();
 };
-
-Color randomColor();

@@ -12,36 +12,6 @@ namespace vt
 		v = rotationMatrix * v;
 	}
 
-
-	bool isParallel(glm::vec2 vec1, glm::vec2 vec2)
-	{
-		auto angle = glm::degrees(glm::angle(vec1, vec2));
-		return mt::is0_f(angle) || mt::is0_f(angle - 180.0f);
-	}
-
-	glm::vec2 rotate90(glm::vec2 vec)
-	{
-		auto x = vec.x;
-		vec.x = -vec.y;
-		vec.y = x;
-		return vec;
-	}
-
-	bool in_range(glm::vec2 val, glm::vec2 a, glm::vec2 b)
-	{
-		return mt::in_range(val.x, a.x, b.x) && mt::in_range(val.y, a.y, b.y);
-	}
-
-	bool greater(glm::vec2 source, glm::vec2 comparison)
-	{
-		return source.x >= comparison.x && source.y >= comparison.y;
-	}
-
-	bool lesser(glm::vec2 source, glm::vec2 comparison)
-	{
-		return source.x <= comparison.x && source.y <= comparison.y;
-	}
-
 	glm::vec2 triple_product(const glm::vec2& a, const glm::vec2& b, const glm::vec2& c)
 	{
 		glm::vec3 A(a.x, a.y, 0);
@@ -54,10 +24,11 @@ namespace vt
 		return glm::vec2(second.x, second.y);
 	}
 
-	glm::vec2 getSupport(std::vector<glm::vec2> dots, glm::vec2 dir)
+	std::pair<size_t, glm::vec2> getSupport(const std::vector<glm::vec2>& dots, const glm::vec2& dir)
 	{
 		float furthest_distance = -std::numeric_limits<float>::infinity();
 		glm::vec2 furthest_point{};
+		size_t ind{};
 
 		for (size_t i = 0; i < dots.size(); i++)
 		{
@@ -66,9 +37,34 @@ namespace vt
 			{
 				furthest_distance = distance;
 				furthest_point = dots[i];
+				ind = i;
 			}
 		}
 
-		return furthest_point;
+		return { ind, furthest_point };
+	}
+
+	glm::vec3 calcBarycentricCoords(const glm::vec2& P, const glm::vec2& A, const glm::vec2& B, const glm::vec2& C)
+	{
+		auto u0 = B - A;
+		auto u1 = C - A;
+		auto u2 = P - A;
+
+		auto d00 = glm::dot(u0, u0);
+		auto d01 = glm::dot(u0, u1);
+		auto d11 = glm::dot(u1, u1);
+		auto d20 = glm::dot(u2, u0);
+		auto d21 = glm::dot(u2, u1);
+
+		auto denominator = d00 * d11 - d01 * d01;
+
+		auto beta = (d11 * d20 - d01 * d21) / denominator;
+		auto gamma = (d00 * d21 - d01 * d20) / denominator;
+
+		return {
+			1 - (beta + gamma),
+			beta,
+			gamma
+		};
 	}
 }

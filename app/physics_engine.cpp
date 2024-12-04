@@ -85,8 +85,10 @@ void PhysicsEngine::resolveCollisions()
 				applyDisplacements(rb1, rb2, col);
 				applyImpulses(rb1, rb2, col);
 
-				auto& list = col.contact_points;
-				gizmo_dots.insert(gizmo_dots.end(), list.begin(), list.end());
+				auto point1 = col.worldContactPointA;
+				gizmo_dots.insert(gizmo_dots.end(), point1);
+				auto point2 = col.worldContactPointB;
+				gizmo_dots.insert(gizmo_dots.end(), point2);
 			}
 		}
 	}
@@ -108,16 +110,16 @@ void PhysicsEngine::applyDisplacements(RigidBody& rb1, RigidBody& rb2, Collision
 {
 	if (rb1.isStatic)
 	{
-		rb2.move(col.vec());
+		rb2.move(col.getNormalVecBA());
 	}
 	else if (rb2.isStatic)
 	{
-		rb1.move(-col.vec());
+		rb1.move(col.getNormalVecAB());
 	}
 	else
 	{
-		rb1.move(-col.vec() / 2.0f);
-		rb2.move(col.vec() / 2.0f);
+		rb1.move(col.getNormalVecAB() / 2.0f);
+		rb2.move(col.getNormalVecBA() / 2.0f);
 	}
 }
 
@@ -125,17 +127,17 @@ void PhysicsEngine::applyImpulses(RigidBody& rb1, RigidBody& rb2, Collision col)
 {
 	auto relativeVelocity = rb2.linearVelocity - rb1.linearVelocity;
 
-	if (glm::dot(relativeVelocity, col.normal) > 0.001f)
+	if (glm::dot(relativeVelocity, col.normalBA) > 0.001f)
 	{
 		return;
 	}
 
 	float e = std::fmin(rb1.restitution, rb2.restitution);
 
-	float j = -(1.0f + e) * glm::dot(relativeVelocity, col.normal);
+	float j = -(1.0f + e) * glm::dot(relativeVelocity, col.normalBA);
 	j /= rb1.invMass() + rb2.invMass();
 
-	auto impulse = j * col.normal;
+	auto impulse = j * col.normalBA;
 
 	rb1.linearVelocity -= impulse * rb1.invMass();
 	rb2.linearVelocity += impulse * rb2.invMass();

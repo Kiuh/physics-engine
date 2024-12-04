@@ -14,13 +14,13 @@
 namespace vt
 {
 	void rotateVec2(glm::vec2& v, float angle);
-	bool isParallel(glm::vec2 vec1, glm::vec2 vec2);
-	glm::vec2 rotate90(glm::vec2 vec);
-	bool in_range(glm::vec2 val, glm::vec2 a, glm::vec2 b);
-	bool greater(glm::vec2 source, glm::vec2 comparison);
-	bool lesser(glm::vec2 source, glm::vec2 comparison);
+
+	// Computes triple product - cross(cross(a, b), c)
 	glm::vec2 triple_product(const glm::vec2& a, const glm::vec2& b, const glm::vec2& c);
 
 	// Gives furthest point among given in given direction
-	glm::vec2 getSupport(std::vector<glm::vec2> dots, glm::vec2 dir);
+	std::pair<size_t, glm::vec2> getSupport(const std::vector<glm::vec2>& dots, const glm::vec2& dir);
+
+	// Calculates barycentric coordinates of point corresponding to given triangle
+	glm::vec3 calcBarycentricCoords(const glm::vec2& P, const glm::vec2& A, const glm::vec2& B, const glm::vec2& C);
 }

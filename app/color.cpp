@@ -18,7 +18,7 @@ glm::vec3 Color::getValue() const
 Color Color::red() { return Color({ 1, 0, 0 }); }
 Color Color::white() { return Color({ 1, 1, 1 }); }
 
-Color randomColor()
+Color Color::randomColor()
 {
 	auto values = glm::vec3{
 		randomFloat01(),
