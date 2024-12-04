@@ -4,23 +4,21 @@ Collision2D::Collision2D() : shapeA(nullptr), shapeB(nullptr) {}
 
 // Add support point of minkovski difference to simplex
 // Returns true if new point and given direction in the same direction
-bool Collision2D::addSupport(const glm::vec2& dir)
+glm::vec2 Collision2D::getMinkSupport(const glm::vec2& dir)
 {
 	auto sup_a = vt::getSupport(shapeA->getWorldPoints(), dir);
 	auto sup_b = vt::getSupport(shapeB->getWorldPoints(), -dir);
-	glm::vec2 new_point = sup_a - sup_b;
-	simplex_points.push_back(new_point);
-	return glm::dot(dir, new_point) > 0;
+	return sup_a - sup_b;
 }
 
 Edge Collision2D::findClosestEdge(PolygonWinding winding)
 {
 	float closestDistance = std::numeric_limits<float>::infinity();
 	glm::vec2 closestNormal{};
-	int closestIndex = 0;
+	size_t closestIndex = 0;
 	glm::vec2 line;
 
-	for (size_t i = 0; i < simplex_points.size(); ++i)
+	for (size_t i = 0; i < simplex_points.size(); i++)
 	{
 		size_t j = i + 1;
 		if (j >= simplex_points.size())
@@ -47,7 +45,7 @@ Edge Collision2D::findClosestEdge(PolygonWinding winding)
 		{
 			closestDistance = dist;
 			closestNormal = norm;
-			closestIndex = static_cast<int>(j);
+			closestIndex = j;
 		}
 	}
 
@@ -59,17 +57,15 @@ Edge Collision2D::EPA(Shape* shapeA, Shape* shapeB)
 	float e0 = (simplex_points[1].x - simplex_points[0].x) * (simplex_points[1].y + simplex_points[0].y);
 	float e1 = (simplex_points[2].x - simplex_points[1].x) * (simplex_points[2].y + simplex_points[1].y);
 	float e2 = (simplex_points[0].x - simplex_points[2].x) * (simplex_points[0].y + simplex_points[2].y);
-
 	PolygonWinding winding = (e0 + e1 + e2 >= 0) ? PolygonWinding::Clockwise : PolygonWinding::CounterClockwise;
 
 	Edge edge{};
-	for (int i = 0; i < MAX_INTERSECTION_ITERATIONS; i++)
+	for (size_t i = 0; i < MAX_INTERSECTION_ITERATIONS; i++)
 	{
 		edge = findClosestEdge(winding);
 
-		glm::vec2 support = vt::getSupport(shapeA->getWorldPoints(), edge.normal);
-		support -= vt::getSupport(shapeB->getWorldPoints(), -edge.normal);
-		float distance = glm::dot(support, edge.normal);
+		auto support = getMinkSupport(edge.normal);
+		auto distance = glm::dot(support, edge.normal);
 
 		if (!mt::is0_f(distance - edge.distance))
 		{
@@ -92,18 +88,18 @@ bool Collision2D::GJK(Shape* shapeA, Shape* shapeB)
 
 	// Create first simplex
 	direction = shapeB->tr.pos() - shapeA->tr.pos();
-	addSupport(direction); // From direction of colliding
+	simplex_points.push_back(getMinkSupport(direction)); // From direction of colliding
 
 	direction *= -1;
-	addSupport(direction); // Opposite of direction of colliding
+	simplex_points.push_back(getMinkSupport(direction)); // Opposite of direction of colliding
 
 	glm::vec2 b = simplex_points[1];
 	glm::vec2 c = simplex_points[0];
 
 	glm::vec2 cb = b - c;
-	glm::vec2 c0 = 0.0f - c;
+	glm::vec2 c0 = -c;
 	direction = vt::triple_product(cb, c0, cb);
-	addSupport(direction); // Perpendicular to 0 -> 1 line facing origin
+	simplex_points.push_back(getMinkSupport(direction)); // Perpendicular to 0 -> 1 line facing origin
 
 	// Test and try new simplexes while they exist
 	do
@@ -112,7 +108,7 @@ bool Collision2D::GJK(Shape* shapeA, Shape* shapeB)
 		glm::vec2 b = simplex_points[1];
 		glm::vec2 c = simplex_points[0];
 
-		glm::vec2 a0 = 0.0f - a;
+		glm::vec2 a0 = -a;
 		glm::vec2 ab = b - a;
 		glm::vec2 ac = c - a;
 
@@ -121,7 +117,7 @@ bool Collision2D::GJK(Shape* shapeA, Shape* shapeB)
 
 		if (glm::dot(abPerp, a0) > 0)
 		{
-			simplex_points.erase(simplex_points.begin() + 2); // Remove vertex c
+			simplex_points.erase(simplex_points.begin()); // Remove vertex c
 			direction = abPerp;
 		}
 		else if (glm::dot(acPerp, a0) > 0)
@@ -133,8 +129,10 @@ bool Collision2D::GJK(Shape* shapeA, Shape* shapeB)
 		{
 			return true;
 		}
+
+		simplex_points.push_back(getMinkSupport(direction));
 	}
-	while (addSupport(direction));
+	while (glm::dot(direction, simplex_points.back()) > 0);
 	return false;
 }
 

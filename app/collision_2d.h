@@ -12,18 +12,11 @@ enum PolygonWinding
 	CounterClockwise
 };
 
-enum EvolveResult
-{
-	NoIntersection,
-	FoundIntersection,
-	StillEvolving
-};
-
 struct Edge
 {
 	float distance;
 	glm::vec2 normal;
-	int index;
+	size_t index;
 };
 
 inline constexpr int MAX_INTERSECTION_ITERATIONS = 32;
@@ -40,7 +33,7 @@ class Collision2D
 	Collision2D();
 
 	private:
-	bool addSupport(const glm::vec2& dir);
+	glm::vec2 getMinkSupport(const glm::vec2& dir);
 	Edge findClosestEdge(PolygonWinding winding);
 	Edge EPA(Shape* shapeA, Shape* shapeB);
 	bool GJK(Shape* shapeA, Shape* shapeB);

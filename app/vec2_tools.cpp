@@ -59,13 +59,13 @@ namespace vt
 		float furthest_distance = -std::numeric_limits<float>::infinity();
 		glm::vec2 furthest_point{};
 
-		for (glm::vec2& v : dots)
+		for (size_t i = 0; i < dots.size(); i++)
 		{
-			float distance = glm::dot(v, dir);
+			float distance = glm::dot(dots[i], dir);
 			if (distance > furthest_distance)
 			{
 				furthest_distance = distance;
-				furthest_point = v;
+				furthest_point = dots[i];
 			}
 		}
 
