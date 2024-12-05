@@ -24,7 +24,7 @@ namespace vt
 		return glm::vec2(second.x, second.y);
 	}
 
-	std::pair<size_t, glm::vec2> getSupport(const std::vector<glm::vec2>& dots, const glm::vec2& dir)
+	SupportResult getSupport(const std::vector<glm::vec2>& dots, const glm::vec2& dir)
 	{
 		float furthest_distance = -std::numeric_limits<float>::infinity();
 		glm::vec2 furthest_point{};

@@ -9,9 +9,9 @@ SimplexPoint Collision2D::getMinkSupport(const glm::vec2& dir)
 	auto sup_a = vt::getSupport(shapeA.getWorldPoints(), dir);
 	auto sup_b = vt::getSupport(shapeB.getWorldPoints(), -dir);
 	return {
-		.mink = sup_a.second - sup_b.second,
-		.shAInd = sup_a.first,
-		.shBInd = sup_b.first,
+		.mink = sup_a.point - sup_b.point,
+		.shAInd = sup_a.index,
+		.shBInd = sup_b.index,
 	};
 }
 
@@ -140,8 +140,8 @@ Edge Collision2D::EPA()
 
 ContactData Collision2D::findContacts(Edge edge)
 {
-	auto shA_points = shapeA.getWorldPoints();
-	auto shB_points = shapeB.getWorldPoints();
+	auto& shA_points = shapeA.localPoints;
+	auto& shB_points = shapeB.localPoints;
 
 	auto& A = simplex_points[edge.index];
 	auto& B = simplex_points[(edge.index + 1) % simplex_points.size()];
@@ -179,8 +179,8 @@ std::optional<Collision> Collision2D::collide()
 			.penetration = edge.distance,
 			.localContactPointA = contacts.localContactPointA,
 			.localContactPointB = contacts.localContactPointB,
-			.worldContactPointA = contacts.localContactPointA + shapeA.tr.pos(),
-			.worldContactPointB = contacts.localContactPointB + shapeB.tr.pos(),
+			.worldContactPointA = shapeA.tr.localToWorld(contacts.localContactPointA),
+			.worldContactPointB = shapeA.tr.localToWorld(contacts.localContactPointB),
 		}
 	};
 }

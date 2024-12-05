@@ -24,6 +24,8 @@ class Controller
 
 	float restitution = 0.6f;
 	float density = 2.0f;
+	bool snapToPointer = false;
+	int snapIndex = 1;
 
 	public:
 	Controller(Debug* debug, WindowManager* win, DataManager* data, PhysicsEngine* engine);
@@ -40,6 +42,8 @@ class Controller
 	void fillRepresentations();
 	void cleanup();
 	void processKeyPress(KeyCode key);
+	void mouseMoved(glm::vec2 pos);
+	void mouseButton(MouseButton mouseButton);
 	void addPolygon();
 	void debugUI();
 };

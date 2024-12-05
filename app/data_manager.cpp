@@ -67,21 +67,39 @@ void DataManager::recalculateVertexes()
 		for (auto& vert : source->getVertexes())
 		{
 			simplex_points.vector[vert_iter] = vert;
-			worldToScreen(simplex_points.vector[vert_iter].pos);
+			simplex_points.vector[vert_iter].pos = worldToGraphicScreen(simplex_points.vector[vert_iter].pos);
 			vert_iter++;
 		}
 	}
 	data_mutex.unlock();
 }
 
-void DataManager::worldToScreen(glm::vec2& pos) const
+glm::vec2 DataManager::worldToGraphicScreen(const glm::vec2& pos) const
 {
-	auto screen = window.getSize();
-	screen /= 2.0f;
+	glm::vec2 new_pos = pos;
+	new_pos += zeroShift * glm::vec2{ 1,-1 };
+	new_pos *= pixelsPerUnit;
+	new_pos *= glm::vec2{ 1,-1 };
+	new_pos /= (window.getSize() / 2);
+	return new_pos;
+}
 
-	pos += zeroShift * glm::vec2{ 1,-1 };
-	pos *= pixelsPerUnit;
-	pos.y *= -1;
+glm::vec2 DataManager::worldToScreenCoord(const glm::vec2& pos) const
+{
+	glm::vec2 new_pos = pos;
+	new_pos += zeroShift * glm::vec2{ 1,-1 };
+	new_pos *= pixelsPerUnit;
+	new_pos *= glm::vec2{ 1,-1 };
+	new_pos += (window.getSize() / 2);
+	return new_pos;
+}
 
-	pos /= screen;
+glm::vec2 DataManager::screenCoordToWorld(const glm::vec2& pos) const
+{
+	glm::vec2 new_pos = pos;
+	new_pos -= (window.getSize() / 2);
+	new_pos *= glm::vec2{ 1,-1 };
+	new_pos /= pixelsPerUnit;
+	new_pos -= zeroShift * glm::vec2{ 1,-1 };
+	return new_pos;
 }

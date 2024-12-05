@@ -6,7 +6,11 @@ RigidBody::RigidBody(Transform& tr, Shape& shape) : transform(tr), shape(shape)
 
 void RigidBody::update(float deltaTime)
 {
-	if (isStatic) return;
+	if (isStatic)
+	{
+		force = { 0.0f, 0.0f };
+		return;
+	}
 
 	acceleration = force / mass;
 	linearVelocity += acceleration * deltaTime;

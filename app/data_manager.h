@@ -36,5 +36,8 @@ class DataManager
 	void notifyStructureChanging();
 	void createDataSpace();
 	void recalculateVertexes();
-	void worldToScreen(glm::vec2& pos) const;
+
+	glm::vec2 worldToGraphicScreen(const glm::vec2& pos) const;
+	glm::vec2 worldToScreenCoord(const glm::vec2& pos) const;
+	glm::vec2 screenCoordToWorld(const glm::vec2& pos) const;
 };

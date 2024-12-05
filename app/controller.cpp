@@ -4,6 +4,8 @@ Controller::Controller(Debug* debug, WindowManager* win, DataManager* data, Phys
 {
 	this->win = win;
 	win->keyPressed.connect(boost::bind(&Controller::processKeyPress, this, boost::placeholders::_1));
+	win->mouseMoved.connect(boost::bind(&Controller::mouseMoved, this, boost::placeholders::_1));
+	win->mouseButtonPressed.connect(boost::bind(&Controller::mouseButton, this, boost::placeholders::_1));
 	debug->buildUI.connect(boost::bind(&Controller::debugUI, this));
 	this->data = data;
 	this->engine = engine;
@@ -18,9 +20,9 @@ Controller::~Controller()
 void Controller::setup()
 {
 	createGround();
+	createPolygons();
 	createBoxes();
 	createCircles();
-	createPolygons();
 
 	fillRepresentations();
 }
@@ -149,6 +151,22 @@ void Controller::processKeyPress(KeyCode key)
 	}
 }
 
+void Controller::mouseMoved(glm::vec2 pos)
+{
+	if (snapToPointer && snapIndex < objects.size())
+	{
+		objects[snapIndex]->transform->setPos(data->screenCoordToWorld(pos));
+	}
+}
+
+void Controller::mouseButton(MouseButton mouseButton)
+{
+	if (mouseButton == MouseButton::Right && snapToPointer)
+	{
+		snapToPointer = false;
+	}
+}
+
 void Controller::addPolygon()
 {
 	data->data_mutex.lock();
@@ -183,6 +201,8 @@ void Controller::debugUI()
 	{
 		addPolygon();
 	}
+	ImGui::Checkbox("Snap to pointer", &snapToPointer);
+	ImGui::SliderInt("Snap Index", &snapIndex, 0, objects.size() - 1);
 	if (ImGui::Button("Refresh simulation"))
 	{
 		cleanup();

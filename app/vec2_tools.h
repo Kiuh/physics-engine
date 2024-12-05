@@ -18,8 +18,14 @@ namespace vt
 	// Computes triple product - cross(cross(a, b), c)
 	glm::vec2 triple_product(const glm::vec2& a, const glm::vec2& b, const glm::vec2& c);
 
+	struct SupportResult
+	{
+		size_t index;
+		glm::vec2 point;
+	};
+
 	// Gives furthest point among given in given direction
-	std::pair<size_t, glm::vec2> getSupport(const std::vector<glm::vec2>& dots, const glm::vec2& dir);
+	SupportResult getSupport(const std::vector<glm::vec2>& dots, const glm::vec2& dir);
 
 	// Calculates barycentric coordinates of point corresponding to given triangle
 	glm::vec3 calcBarycentricCoords(const glm::vec2& P, const glm::vec2& A, const glm::vec2& B, const glm::vec2& C);

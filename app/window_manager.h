@@ -21,6 +21,12 @@ enum KeyCode
 	R,
 };
 
+enum MouseButton
+{
+	Left,
+	Right,
+};
+
 class WindowManager
 {
 	private:
@@ -37,9 +43,10 @@ class WindowManager
 
 	boost::signals2::signal<void()> windowResized{};
 	boost::signals2::signal<void(KeyCode)> keyPressed{};
+	boost::signals2::signal<void(MouseButton)> mouseButtonPressed{};
 	boost::signals2::signal<void(float)> mouseScroll{};
-	boost::signals2::signal<void()> leftMouseButtonPressed{};
 	boost::signals2::signal<void(glm::vec2)> pressedRightMouseButtonMoved{};
+	boost::signals2::signal<void(glm::vec2)> mouseMoved{};
 
 	WindowManager(glm::ivec2 size, std::string title);
 
@@ -47,13 +54,13 @@ class WindowManager
 	glm::vec2 getMousePos() const;
 	void poolEvents();
 	void waitForNoZero();
-	bool isShouldClose();
+	bool isShouldClose() const;
 	std::vector<const char*> getVulkanExtensions();
-	VkSurfaceKHR createVkSurface(VkInstance& instance);
+	VkSurfaceKHR createVkSurface(VkInstance& instance) const;
 	~WindowManager();
 
 	private:
-	void setIcon();
+	void setIcon() const;
 };
 
 static void glfw_error_callback(int error, const char* description);

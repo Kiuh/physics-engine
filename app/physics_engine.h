@@ -27,6 +27,8 @@ class PhysicsEngine
 	std::mutex gizmo_mutex{};
 	std::vector<glm::vec2> gizmo_dots{};
 
+	bool simulate = true;
+
 	PhysicsEngine(Debug* debug, DataManager* dm);
 	void update(float deltaTime);
 	void buildDebugUI();

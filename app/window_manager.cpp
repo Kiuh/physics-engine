@@ -43,7 +43,7 @@ void WindowManager::waitForNoZero()
 	}
 }
 
-bool WindowManager::isShouldClose()
+bool WindowManager::isShouldClose() const
 {
 	return glfwWindowShouldClose(window);
 }
@@ -56,7 +56,7 @@ std::vector<const char*> WindowManager::getVulkanExtensions()
 	return std::vector<const char*>(glfwExtensions, glfwExtensions + glfwExtensionCount);
 }
 
-VkSurfaceKHR WindowManager::createVkSurface(VkInstance& instance)
+VkSurfaceKHR WindowManager::createVkSurface(VkInstance& instance) const
 {
 	VkSurfaceKHR surface;
 	if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS)
@@ -72,7 +72,7 @@ WindowManager::~WindowManager()
 	glfwTerminate();
 }
 
-void WindowManager::setIcon()
+void WindowManager::setIcon() const
 {
 	std::string filename = "icon.png";
 	std::vector<unsigned char> buffer;
@@ -141,7 +141,7 @@ static void mouseButtonCallback(GLFWwindow* window, int button, int action, int 
 		if (GLFW_PRESS == action)
 		{
 			wm.leftMousePressed = true;
-			wm.leftMouseButtonPressed();
+			wm.mouseButtonPressed(Left);
 		}
 		else if (GLFW_RELEASE == action)
 		{
@@ -154,6 +154,7 @@ static void mouseButtonCallback(GLFWwindow* window, int button, int action, int 
 		if (GLFW_PRESS == action)
 		{
 			wm.rightMousePressed = true;
+			wm.mouseButtonPressed(Right);
 		}
 		else if (GLFW_RELEASE == action)
 		{
@@ -170,6 +171,8 @@ static void mousePosCallback(GLFWwindow* window, double x_pos, double y_pos)
 		static_cast<float>(x_pos),
 		static_cast<float>(y_pos),
 	};
+
+	wm.mouseMoved(newPos);
 
 	if (wm.rightMousePressed)
 	{

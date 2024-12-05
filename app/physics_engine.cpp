@@ -10,16 +10,19 @@ void PhysicsEngine::update(float deltaTime)
 {
 	process_mutex.lock();
 
-	// Forces
-	for (auto rb : rigidBodies)
+	if (simulate)
 	{
-		rb->addForce(gravity);
-	}
+		// Forces
+		for (auto rb : rigidBodies)
+		{
+			rb->addForce(gravity);
+		}
 
-	// Update positions
-	for (auto rb : rigidBodies)
-	{
-		rb->update(deltaTime);
+		// Update positions
+		for (auto rb : rigidBodies)
+		{
+			rb->update(deltaTime);
+		}
 	}
 
 	// Collisions
@@ -32,6 +35,7 @@ void PhysicsEngine::buildDebugUI()
 {
 	ImGui::Begin("Physics parameters", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
 	ImGui::DragFloat2("Gravity", &gravity.x, 0.05f, -15.0f, 15.0f, "%.2f");
+	ImGui::Checkbox("Simulate", &simulate);
 	ImGui::End();
 
 	ImGui::SetNextWindowBgAlpha(0);
@@ -42,13 +46,9 @@ void PhysicsEngine::buildDebugUI()
 	gizmo_mutex.lock();
 	glm::vec2 screenHalfSize{ ImGui::GetIO().DisplaySize.x / 2.0f, ImGui::GetIO().DisplaySize.y / 2.0f };
 	ImDrawList* drawList = ImGui::GetForegroundDrawList();
-	for (auto& p : gizmo_dots)
+	for (auto& dot : gizmo_dots)
 	{
-		glm::vec2 pos = p;
-		pos += dm->zeroShift * glm::vec2{ 1,-1 };
-		pos *= dm->pixelsPerUnit;
-		pos.y *= -1;
-		pos += screenHalfSize;
+		glm::vec2 pos = dm->worldToScreenCoord(dot);
 		drawList->AddCircleFilled({ pos.x, pos.y }, 4.0f, IM_COL32(0, 255, 0, 255));
 	}
 	gizmo_mutex.unlock();
@@ -71,24 +71,23 @@ void PhysicsEngine::resolveCollisions()
 			auto& rb1 = *rigidBodies[i];
 			auto& rb2 = *rigidBodies[j];
 
-			if (rb1.isStatic && rb2.isStatic) continue;
-
 			auto res = Collision2D::tryCollide(rb1.shape, rb2.shape);
 
 			if (res.has_value())
 			{
+				auto& col = res.value();
+
 				to_color.insert(&rb1.shape);
 				to_color.insert(&rb2.shape);
 
+				if (simulate)
+				{
+					applyDisplacements(rb1, rb2, col);
+					applyImpulses(rb1, rb2, col);
+				}
 
-				auto& col = res.value();
-				applyDisplacements(rb1, rb2, col);
-				applyImpulses(rb1, rb2, col);
-
-				auto point1 = col.worldContactPointA;
-				gizmo_dots.insert(gizmo_dots.end(), point1);
-				auto point2 = col.worldContactPointB;
-				gizmo_dots.insert(gizmo_dots.end(), point2);
+				gizmo_dots.insert(gizmo_dots.end(), col.worldContactPointA);
+				gizmo_dots.insert(gizmo_dots.end(), col.worldContactPointB);
 			}
 		}
 	}
@@ -116,7 +115,7 @@ void PhysicsEngine::applyDisplacements(RigidBody& rb1, RigidBody& rb2, Collision
 	{
 		rb1.move(col.getNormalVecAB());
 	}
-	else
+	else if (!rb1.isStatic && !rb2.isStatic)
 	{
 		rb1.move(col.getNormalVecAB() / 2.0f);
 		rb2.move(col.getNormalVecBA() / 2.0f);
