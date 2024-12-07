@@ -2,6 +2,7 @@
 
 #include "collision.h"
 #include "shape.h"
+#include <algorithm>
 #include <memory>
 #include <optional>
 #include <stdexcept>
@@ -30,6 +31,10 @@ struct ContactData
 {
 	glm::vec2 localContactPointA;
 	glm::vec2 localContactPointB;
+
+	SimplexPoint A;
+	SimplexPoint B;
+	SimplexPoint C;
 };
 
 inline constexpr int MAX_INTERSECTION_ITERATIONS = 32;

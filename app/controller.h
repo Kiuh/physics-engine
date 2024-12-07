@@ -18,9 +18,9 @@ class Controller
 	PhysicsEngine* engine;
 
 	std::vector<Object*> objects{};
-	size_t initialBoxCount = 2;
-	size_t initialCircleCount = 3;
-	size_t initialPolygonsCount = 4;
+	size_t initialBoxCount = 0;
+	size_t initialCircleCount = 0;
+	size_t initialPolygonsCount = 1;
 
 	float restitution = 0.6f;
 	float density = 2.0f;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <vector>
 
 struct Collision
 {
@@ -13,6 +14,10 @@ struct Collision
 
 	glm::vec2 worldContactPointA;
 	glm::vec2 worldContactPointB;
+
+	std::vector<glm::vec2> gizmo_minkConvex;
+	std::vector<glm::vec2> gizmo_minkTangent;
+	std::vector<glm::vec2> gizmo_finalTriangle;
 
 	glm::vec2 getNormalVecAB() const {
 		return normalAB * penetration;

@@ -1,9 +1,8 @@
 #include "physics_engine.h"
 
-PhysicsEngine::PhysicsEngine(Debug* debug, DataManager* dm)
+PhysicsEngine::PhysicsEngine(Debug& debug, DataManager& dm) : dm(dm)
 {
-	this->dm = dm;
-	debug->buildUI.connect(boost::bind(&PhysicsEngine::buildDebugUI, this));
+	debug.buildUI.connect(boost::bind(&PhysicsEngine::buildDebugUI, this));
 }
 
 void PhysicsEngine::update(float deltaTime)
@@ -36,6 +35,7 @@ void PhysicsEngine::buildDebugUI()
 	ImGui::Begin("Physics parameters", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
 	ImGui::DragFloat2("Gravity", &gravity.x, 0.05f, -15.0f, 15.0f, "%.2f");
 	ImGui::Checkbox("Simulate", &simulate);
+	ImGui::Checkbox("Draw collision gizmo", &draw_collision_gizmo);
 	ImGui::End();
 
 	ImGui::SetNextWindowBgAlpha(0);
@@ -44,13 +44,10 @@ void PhysicsEngine::buildDebugUI()
 	ImGui::Begin("Dots", nullptr, ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoInputs);
 
 	gizmo_mutex.lock();
-	glm::vec2 screenHalfSize{ ImGui::GetIO().DisplaySize.x / 2.0f, ImGui::GetIO().DisplaySize.y / 2.0f };
-	ImDrawList* drawList = ImGui::GetForegroundDrawList();
-	for (auto& dot : gizmo_dots)
-	{
-		glm::vec2 pos = dm->worldToScreenCoord(dot);
-		drawList->AddCircleFilled({ pos.x, pos.y }, 4.0f, IM_COL32(0, 255, 0, 255));
-	}
+	drawDots(dm, gizmo_collision_dots);
+	drawConvexHulls(dm, gizmo_collision_mink_hulls);
+	drawConvexHulls(dm, gizmo_collision_mink_final_triangles, Color::red());
+	drawLineSegments(dm, gizmo_collision_mink_tangents, Color::green());
 	gizmo_mutex.unlock();
 
 	ImGui::End();
@@ -61,7 +58,10 @@ void PhysicsEngine::resolveCollisions()
 	std::set<Shape*> to_color{};
 
 	gizmo_mutex.lock();
-	gizmo_dots.clear();
+	gizmo_collision_dots.clear();
+	gizmo_collision_mink_hulls.clear();
+	gizmo_collision_mink_final_triangles.clear();
+	gizmo_collision_mink_tangents.clear();
 
 	// Collision
 	for (size_t i = 0; i < rigidBodies.size(); i++)
@@ -86,8 +86,23 @@ void PhysicsEngine::resolveCollisions()
 					applyImpulses(rb1, rb2, col);
 				}
 
-				gizmo_dots.insert(gizmo_dots.end(), col.worldContactPointA);
-				gizmo_dots.insert(gizmo_dots.end(), col.worldContactPointB);
+				if (draw_collision_gizmo)
+				{
+					gizmo_collision_dots.insert(gizmo_collision_dots.end(), col.worldContactPointA);
+					gizmo_collision_dots.insert(gizmo_collision_dots.end(), col.worldContactPointB);
+					gizmo_collision_mink_final_triangles.insert(
+						gizmo_collision_mink_final_triangles.end(),
+						col.gizmo_finalTriangle
+					);
+					gizmo_collision_mink_hulls.insert(
+						gizmo_collision_mink_hulls.end(),
+						col.gizmo_minkConvex
+					);
+					gizmo_collision_mink_tangents.insert(
+						gizmo_collision_mink_tangents.end(),
+						col.gizmo_minkTangent
+					);
+				}
 			}
 		}
 	}

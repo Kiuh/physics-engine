@@ -143,9 +143,9 @@ ContactData Collision2D::findContacts(Edge edge)
 	auto& shA_points = shapeA.localPoints;
 	auto& shB_points = shapeB.localPoints;
 
-	auto& A = simplex_points[edge.index];
-	auto& B = simplex_points[(edge.index + 1) % simplex_points.size()];
-	auto& C = simplex_points[(edge.index + 2) % simplex_points.size()];
+	auto& A = simplex_points[(edge.index - 1) % simplex_points.size()];
+	auto& B = simplex_points[(edge.index + 0) % simplex_points.size()];
+	auto C = getMinkSupport(-edge.normal);
 	auto P = edge.normal * edge.distance;
 
 	auto bc = vt::calcBarycentricCoords(P, A.mink, B.mink, C.mink);
@@ -159,6 +159,9 @@ ContactData Collision2D::findContacts(Edge edge)
 			bc.x * shB_points[A.shBInd] +
 			bc.y * shB_points[B.shBInd] +
 			bc.z * shB_points[C.shBInd],
+		.A = A,
+		.B = B,
+		.C = C
 	};
 }
 
@@ -172,6 +175,15 @@ std::optional<Collision> Collision2D::collide()
 	auto edge = EPA();
 	auto contacts = findContacts(edge);
 
+	std::vector<glm::vec2> gizmo_minkConvex{};
+	for (const auto& a : shapeA.getWorldPoints())
+	{
+		for (const auto& b : shapeB.getWorldPoints())
+		{
+			gizmo_minkConvex.push_back(a - b);
+		}
+	}
+
 	return {
 		Collision{
 			.normalAB = -edge.normal,
@@ -181,6 +193,16 @@ std::optional<Collision> Collision2D::collide()
 			.localContactPointB = contacts.localContactPointB,
 			.worldContactPointA = shapeA.tr.localToWorld(contacts.localContactPointA),
 			.worldContactPointB = shapeA.tr.localToWorld(contacts.localContactPointB),
+			.gizmo_minkConvex = gizmo_minkConvex,
+			.gizmo_minkTangent = {
+				{0,0},
+				edge.normal * edge.distance
+			},
+			.gizmo_finalTriangle = {
+				contacts.A.mink,
+				contacts.B.mink,
+				contacts.C.mink
+			}
 		}
 	};
 }

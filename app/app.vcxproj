@@ -222,6 +222,7 @@
     <ClCompile Include="controller.cpp" />
     <ClCompile Include="collision_2d.cpp" />
     <ClCompile Include="graphic_engine_builders.cpp" />
+    <ClCompile Include="imgui_helper.cpp" />
     <ClCompile Include="lodepng.cpp" />
     <ClCompile Include="log_tools.cpp" />
     <ClCompile Include="math_tools.cpp" />
@@ -291,6 +292,7 @@
     <ClInclude Include="collision_2d.h" />
     <ClInclude Include="graphic_engine.h" />
     <ClInclude Include="graphic_engine_builders.h" />
+    <ClInclude Include="imgui_helper.h" />
     <ClInclude Include="lodepng.h" />
     <ClInclude Include="log_tools.h" />
     <ClInclude Include="physics_engine.h" />

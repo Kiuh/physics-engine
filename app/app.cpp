@@ -15,7 +15,7 @@ App::App()
 	windowManager = std::make_unique<WindowManager>(size, title);
 	dataManager = std::make_unique<DataManager>(*windowManager.get());
 
-	physicsEngine = std::make_unique<PhysicsEngine>(debug.get(), dataManager.get());
+	physicsEngine = std::make_unique<PhysicsEngine>(*debug.get(), *dataManager.get());
 	graphicsEngine = std::make_unique<GraphicEngine>(debug.get(), windowManager.get(), dataManager.get(), graphicsEngineConfig);
 
 	controller = std::make_unique<Controller>(debug.get(), windowManager.get(), dataManager.get(), physicsEngine.get());
