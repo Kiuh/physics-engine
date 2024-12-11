@@ -240,6 +240,7 @@
     <ClCompile Include="shape_creator.cpp" />
     <ClCompile Include="transform.cpp" />
     <ClCompile Include="transform.h" />
+    <ClCompile Include="transform_tools.cpp" />
     <ClCompile Include="validation_manager.cpp" />
     <ClCompile Include="graphic_engine.cpp" />
     <ClCompile Include="main.cpp" />
@@ -299,6 +300,7 @@
     <ClInclude Include="rigid_body.h" />
     <ClInclude Include="shader_manager.h" />
     <ClInclude Include="shape_creator.h" />
+    <ClInclude Include="transform_tools.h" />
     <ClInclude Include="validation_manager.h" />
     <ClInclude Include="vertex.h" />
     <ClInclude Include="vk_image_builder.h" />

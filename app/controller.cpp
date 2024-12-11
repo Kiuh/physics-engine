@@ -73,7 +73,7 @@ void Controller::createBoxes()
 			obj->transform->setPos(getRandomPos());
 		}
 		while (!isNoIntersections(*obj));
-		obj->transform->setRot(randomFloat(0, 360));
+		//obj->transform->setRot(randomFloat(0, 360));
 		objects.push_back(obj);
 	}
 }
@@ -90,7 +90,7 @@ void Controller::createCircles()
 			obj->transform->setPos(getRandomPos());
 		}
 		while (!isNoIntersections(*obj));
-		obj->transform->setRot(randomFloat(0, 360));
+		//obj->transform->setRot(randomFloat(0, 360));
 		objects.push_back(obj);
 	}
 }
@@ -107,7 +107,7 @@ void Controller::createPolygons()
 			obj->transform->setPos(getRandomPos());
 		}
 		while (!isNoIntersections(*obj));
-		obj->transform->setRot(randomFloat(0, 360));
+		//obj->transform->setRot(randomFloat(0, 360));
 		objects.push_back(obj);
 	}
 }
@@ -202,7 +202,7 @@ void Controller::debugUI()
 		addPolygon();
 	}
 	ImGui::Checkbox("Snap to pointer", &snapToPointer);
-	ImGui::SliderInt("Snap Index", &snapIndex, 0, objects.size() - 1);
+	ImGui::SliderInt("Snap Index", &snapIndex, 0, static_cast<int>(objects.size()) - 1);
 	if (ImGui::Button("Refresh simulation"))
 	{
 		cleanup();

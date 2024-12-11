@@ -18,6 +18,7 @@ struct Collision
 	std::vector<glm::vec2> gizmo_minkConvex;
 	std::vector<glm::vec2> gizmo_minkTangent;
 	std::vector<glm::vec2> gizmo_finalTriangle;
+	std::vector<std::vector<glm::vec2>> gizmo_diff_triangles;
 
 	glm::vec2 getNormalVecAB() const {
 		return normalAB * penetration;

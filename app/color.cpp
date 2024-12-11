@@ -24,9 +24,13 @@ ImU32 Color::getImGuiColor() const
 }
 
 Color Color::red() { return Color({ 1, 0, 0 }); }
+Color Color::green() { return Color({ 0, 1, 0 }); }
 Color Color::blue() { return Color({ 0, 0, 1 }); }
+
+Color Color::yellow() { return Color({ 1, 1, 0 }); }
+
 Color Color::white() { return Color({ 1, 1, 1 }); }
-Color Color::green() { return Color({ 0, 128.0f / 256.0f,0 }); }
+Color Color::black() { return Color({ 0, 0, 0 }); }
 
 Color Color::randomColor()
 {

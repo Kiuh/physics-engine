@@ -58,6 +58,12 @@
     <Filter Include="Header Files\graphics_engine">
       <UniqueIdentifier>{ffa2106b-c624-4e8d-b510-928b2858504f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\components">
+      <UniqueIdentifier>{37534ffa-0a89-4c6a-bac2-109842452c8a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\components">
+      <UniqueIdentifier>{b61a6796-00d7-47f5-9568-736dfec6565d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -117,9 +123,6 @@
     <ClCompile Include="vertex_source.h">
       <Filter>Header Files\data_tools</Filter>
     </ClCompile>
-    <ClCompile Include="transform.h">
-      <Filter>Header Files\core</Filter>
-    </ClCompile>
     <ClCompile Include="random_helper.h">
       <Filter>Header Files\common</Filter>
     </ClCompile>
@@ -147,15 +150,6 @@
     <ClCompile Include="math_tools.cpp">
       <Filter>Source Files\common</Filter>
     </ClCompile>
-    <ClCompile Include="transform.cpp">
-      <Filter>Source Files\core</Filter>
-    </ClCompile>
-    <ClCompile Include="object.h">
-      <Filter>Header Files\core</Filter>
-    </ClCompile>
-    <ClCompile Include="object.cpp">
-      <Filter>Source Files\core</Filter>
-    </ClCompile>
     <ClCompile Include="vertex.cpp">
       <Filter>Source Files\data_tools</Filter>
     </ClCompile>
@@ -176,6 +170,21 @@
     </ClCompile>
     <ClCompile Include="imgui_helper.cpp">
       <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="transform.cpp">
+      <Filter>Source Files\components</Filter>
+    </ClCompile>
+    <ClCompile Include="object.cpp">
+      <Filter>Source Files\components</Filter>
+    </ClCompile>
+    <ClCompile Include="transform.h">
+      <Filter>Header Files\components</Filter>
+    </ClCompile>
+    <ClCompile Include="object.h">
+      <Filter>Header Files\components</Filter>
+    </ClCompile>
+    <ClCompile Include="transform_tools.cpp">
+      <Filter>Source Files\components</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -270,6 +279,9 @@
     </ClInclude>
     <ClInclude Include="imgui_helper.h">
       <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="transform_tools.h">
+      <Filter>Header Files\components</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

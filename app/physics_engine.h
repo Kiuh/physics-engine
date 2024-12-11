@@ -31,6 +31,7 @@ class PhysicsEngine
 	std::vector<std::vector<glm::vec2>> gizmo_collision_mink_hulls{};
 	std::vector<std::vector<glm::vec2>> gizmo_collision_mink_final_triangles{};
 	std::vector<std::vector<glm::vec2>> gizmo_collision_mink_tangents{};
+	std::vector<std::vector<glm::vec2>> gizmo_collision_mink_diff_triangles{};
 
 	bool simulate = true;
 	bool draw_collision_gizmo = false;

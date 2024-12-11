@@ -2,13 +2,31 @@
 
 Shape::Shape(Transform& tr) : tr(tr) {}
 
+std::vector<glm::vec2> Shape::getLocalPoints() const
+{
+	std::vector<glm::vec2> result = localPoints;
+	for (size_t i = 0; i < result.size(); i++)
+	{
+		result[i] = vt::rotateVec2(result[i], tr.rot());
+	}
+	return result;
+}
+
+void Shape::setLocalPoints(std::vector<glm::vec2> points)
+{
+	localPoints.resize(points.size());
+	for (size_t i = 0; i < points.size(); i++)
+	{
+		localPoints[i] = vt::rotateVec2(points[i], -tr.rot());
+	}
+}
+
 std::vector<glm::vec2> Shape::getWorldPoints() const
 {
 	std::vector<glm::vec2> result{};
 	for (auto& p : localPoints)
 	{
-		glm::vec2 point{ p };
-		vt::rotateVec2(point, tr.rot());
+		glm::vec2 point = vt::rotateVec2(p, tr.rot());
 		result.push_back(point + tr.pos());
 	}
 	return result;

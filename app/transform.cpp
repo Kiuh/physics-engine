@@ -28,21 +28,11 @@ float Transform::rot() const
 
 void Transform::setRot(float rot)
 {
-	rotation = rot;
+	rotation = std::fmodf(rot, 360.0f);
 }
 
 void Transform::rotate(float shift)
 {
 	rotation += shift;
 	rotation = std::fmodf(rotation, 360.0f);
-}
-
-glm::vec2 Transform::localToWorld(glm::vec2 point) const
-{
-	return point + position;
-}
-
-glm::vec2 Transform::worldToLocal(glm::vec2 point) const
-{
-	return point - position;
 }

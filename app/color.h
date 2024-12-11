@@ -15,8 +15,13 @@ struct Color
 	ImU32 getImGuiColor() const;
 
 	static Color red();
-	static Color blue();
-	static Color white();
 	static Color green();
+	static Color blue();
+
+	static Color yellow();
+
+	static Color white();
+	static Color black();
+
 	static Color randomColor();
 };

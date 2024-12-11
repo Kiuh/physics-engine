@@ -16,7 +16,7 @@ namespace vt
 {
 	float cross_vec2(const glm::vec2& o, const glm::vec2& a, const glm::vec2& b);
 
-	void rotateVec2(glm::vec2& v, float angle);
+	glm::vec2 rotateVec2(const glm::vec2& v, const float& angle);
 
 	// Computes triple product - cross(cross(a, b), c)
 	glm::vec2 triple_product(const glm::vec2& a, const glm::vec2& b, const glm::vec2& c);

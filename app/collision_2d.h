@@ -2,6 +2,8 @@
 
 #include "collision.h"
 #include "shape.h"
+#include "transform_tools.h"
+
 #include <algorithm>
 #include <memory>
 #include <optional>

@@ -10,7 +10,7 @@ void drawDots(const DataManager& dm, const std::vector<glm::vec2>& dots)
 	}
 }
 
-void drawConvexHulls(const DataManager& dm, const std::vector<std::vector<glm::vec2>>& lines, const Color& color)
+void drawConvexHulls(const DataManager& dm, const std::vector<std::vector<glm::vec2>>& lines, const Color& color, const float thikness)
 {
 	ImDrawList* drawList = ImGui::GetForegroundDrawList();
 	for (auto& line : lines)
@@ -24,10 +24,10 @@ void drawConvexHulls(const DataManager& dm, const std::vector<std::vector<glm::v
 		}
 		drawList->AddPolyline(
 			dots.data(),
-			dots.size(),
+			static_cast<int>(dots.size()),
 			color.getImGuiColor(),
 			ImDrawFlags_Closed,
-			2.0f
+			thikness
 		);
 	}
 }
@@ -45,7 +45,7 @@ void drawLineSegments(const DataManager& dm, const std::vector<std::vector<glm::
 		}
 		drawList->AddPolyline(
 			dots.data(),
-			dots.size(),
+			static_cast<int>(dots.size()),
 			color.getImGuiColor(),
 			ImDrawFlags_None,
 			2.0f

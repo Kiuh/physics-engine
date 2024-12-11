@@ -69,7 +69,6 @@ bool Collision2D::GJK()
 	return false;
 }
 
-
 Edge Collision2D::findClosestEdge(PolygonWinding winding)
 {
 	float closestDistance = std::numeric_limits<float>::infinity();
@@ -140,8 +139,8 @@ Edge Collision2D::EPA()
 
 ContactData Collision2D::findContacts(Edge edge)
 {
-	auto& shA_points = shapeA.localPoints;
-	auto& shB_points = shapeB.localPoints;
+	auto shA_points = shapeA.getLocalPoints();
+	auto shB_points = shapeB.getLocalPoints();
 
 	auto& A = simplex_points[(edge.index - 1) % simplex_points.size()];
 	auto& B = simplex_points[(edge.index + 0) % simplex_points.size()];
@@ -184,6 +183,12 @@ std::optional<Collision> Collision2D::collide()
 		}
 	}
 
+	auto shA_points = shapeA.getWorldPoints();
+	auto shB_points = shapeB.getWorldPoints();
+	auto& A = simplex_points[(edge.index - 1) % simplex_points.size()];
+	auto& B = simplex_points[(edge.index + 0) % simplex_points.size()];
+	auto C = getMinkSupport(-edge.normal);
+
 	return {
 		Collision{
 			.normalAB = -edge.normal,
@@ -191,8 +196,8 @@ std::optional<Collision> Collision2D::collide()
 			.penetration = edge.distance,
 			.localContactPointA = contacts.localContactPointA,
 			.localContactPointB = contacts.localContactPointB,
-			.worldContactPointA = shapeA.tr.localToWorld(contacts.localContactPointA),
-			.worldContactPointB = shapeA.tr.localToWorld(contacts.localContactPointB),
+			.worldContactPointA = localToWorld(contacts.localContactPointA, shapeA.tr),
+			.worldContactPointB = localToWorld(contacts.localContactPointB, shapeB.tr),
 			.gizmo_minkConvex = gizmo_minkConvex,
 			.gizmo_minkTangent = {
 				{0,0},
@@ -202,6 +207,18 @@ std::optional<Collision> Collision2D::collide()
 				contacts.A.mink,
 				contacts.B.mink,
 				contacts.C.mink
+			},
+			.gizmo_diff_triangles = {
+				{
+					shA_points[A.shAInd],
+					shA_points[B.shAInd],
+					shA_points[C.shAInd]
+				},
+				{
+					shB_points[A.shBInd],
+					shB_points[B.shBInd],
+					shB_points[C.shBInd]
+				}
 			}
 		}
 	};

@@ -46,7 +46,8 @@ void PhysicsEngine::buildDebugUI()
 	gizmo_mutex.lock();
 	drawDots(dm, gizmo_collision_dots);
 	drawConvexHulls(dm, gizmo_collision_mink_hulls);
-	drawConvexHulls(dm, gizmo_collision_mink_final_triangles, Color::red());
+	drawConvexHulls(dm, gizmo_collision_mink_final_triangles, Color::white());
+	drawConvexHulls(dm, gizmo_collision_mink_diff_triangles, Color::yellow(), 1.0f);
 	drawLineSegments(dm, gizmo_collision_mink_tangents, Color::green());
 	gizmo_mutex.unlock();
 
@@ -61,6 +62,7 @@ void PhysicsEngine::resolveCollisions()
 	gizmo_collision_dots.clear();
 	gizmo_collision_mink_hulls.clear();
 	gizmo_collision_mink_final_triangles.clear();
+	gizmo_collision_mink_diff_triangles.clear();
 	gizmo_collision_mink_tangents.clear();
 
 	// Collision
@@ -101,6 +103,11 @@ void PhysicsEngine::resolveCollisions()
 					gizmo_collision_mink_tangents.insert(
 						gizmo_collision_mink_tangents.end(),
 						col.gizmo_minkTangent
+					);
+					gizmo_collision_mink_diff_triangles.insert(
+						gizmo_collision_mink_diff_triangles.end(),
+						col.gizmo_diff_triangles.begin(),
+						col.gizmo_diff_triangles.end()
 					);
 				}
 			}

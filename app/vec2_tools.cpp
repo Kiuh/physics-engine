@@ -7,14 +7,14 @@ namespace vt
 		return (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
 	}
 
-	void rotateVec2(glm::vec2& v, float angle)
+	glm::vec2 rotateVec2(const glm::vec2& v, const float& angle)
 	{
 		float rad = glm::radians(angle);
 		glm::mat2 rotationMatrix = glm::mat2(
 			glm::cos(rad), -glm::sin(rad),
 			glm::sin(rad), glm::cos(rad)
 		);
-		v = rotationMatrix * v;
+		return rotationMatrix * v;
 	}
 
 	glm::vec2 triple_product(const glm::vec2& a, const glm::vec2& b, const glm::vec2& c)
@@ -134,7 +134,7 @@ namespace vt
 		}
 
 		// Build the upper hull
-		for (int i = points.size() - 1; i >= 0; i--)
+		for (int i = static_cast<int>(points.size()) - 1; i >= 0; i--)
 		{
 			while (upper.size() >= 2 && vt::cross_vec2(upper[upper.size() - 2], upper[upper.size() - 1], points[i]) <= 0)
 			{

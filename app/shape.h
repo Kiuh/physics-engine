@@ -11,12 +11,17 @@
 
 struct Shape : public VertexSource
 {
+	private:
+	std::vector<glm::vec2> localPoints{};
+
+	public:
 	Transform& tr;
 	Color color;
-	std::vector<glm::vec2> localPoints{};
 
 	Shape(Transform& tr);
 
+	std::vector<glm::vec2> getLocalPoints() const;
+	void setLocalPoints(std::vector<glm::vec2> points);
 	std::vector<glm::vec2> getWorldPoints() const;
 
 	size_t getPolygonsCount() const;

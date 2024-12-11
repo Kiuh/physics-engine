@@ -9,7 +9,7 @@ Shape& createBoxShape(Transform& tr, const glm::vec2& extends)
 	points.push_back(extends * glm::vec2{ -1, 1 });
 	points.push_back(extends * glm::vec2{ 1, 1 });
 	points.push_back(extends * glm::vec2{ 1, -1 });
-	shape->localPoints = points;
+	shape->setLocalPoints(points);
 
 	return *shape;
 }
@@ -27,9 +27,9 @@ Shape& createCircleShape(Transform& tr, const float& radius)
 	for (size_t i = 0; i < circle_points; i++)
 	{
 		points.push_back(shift);
-		vt::rotateVec2(shift, one_seg_deg);
+		shift = vt::rotateVec2(shift, one_seg_deg);
 	}
-	shape->localPoints = points;
+	shape->setLocalPoints(points);
 
 	return *shape;
 }
@@ -37,7 +37,7 @@ Shape& createCircleShape(Transform& tr, const float& radius)
 Shape& createPolygonShape(Transform& tr, std::vector<glm::vec2> points)
 {
 	auto shape = new Shape(tr);
-	shape->localPoints = points;
+	shape->setLocalPoints(points);
 	return *shape;
 }
 
@@ -48,7 +48,7 @@ Shape& createRandomPolygonShape(Transform& tr, const long& count, const float& r
 	for (size_t i = 0; i < count; i++)
 	{
 		points.push_back(shift);
-		vt::rotateVec2(shift, 360.0f / count);
+		shift = vt::rotateVec2(shift, 360.0f / count);
 	}
 	return createPolygonShape(tr, points);
 }
