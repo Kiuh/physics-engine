@@ -8,7 +8,7 @@
 class Object
 {
 	public:
-	Transform* transform;
+	Transform* tr;
 	Shape* shape;
 	RigidBody* rigidBody;
 

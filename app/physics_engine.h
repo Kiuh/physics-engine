@@ -24,7 +24,7 @@ class PhysicsEngine
 	public:
 	std::vector<RigidBody*> rigidBodies;
 	std::mutex process_mutex;
-	glm::vec2 gravity{ 0, -9.8f };
+	glm::vec2 gravity;
 
 	std::mutex gizmo_mutex{};
 	std::vector<glm::vec2> gizmo_collision_dots{};
@@ -33,8 +33,9 @@ class PhysicsEngine
 	std::vector<std::vector<glm::vec2>> gizmo_collision_mink_tangents{};
 	std::vector<std::vector<glm::vec2>> gizmo_collision_mink_diff_triangles{};
 
-	bool simulate = true;
-	bool draw_collision_gizmo = false;
+	bool simulate;
+	bool draw_contact_points;
+	bool draw_collision_gizmo;
 
 	PhysicsEngine(Debug& debug, DataManager& dm);
 	void update(float deltaTime);

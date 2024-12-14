@@ -12,8 +12,7 @@ struct Collision
 	glm::vec2 localContactPointA;
 	glm::vec2 localContactPointB;
 
-	glm::vec2 worldContactPointA;
-	glm::vec2 worldContactPointB;
+	glm::vec2 worldContactPoint;
 
 	std::vector<glm::vec2> gizmo_minkConvex;
 	std::vector<glm::vec2> gizmo_minkTangent;

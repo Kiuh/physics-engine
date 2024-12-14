@@ -19,6 +19,7 @@ void Shape::setLocalPoints(std::vector<glm::vec2> points)
 	{
 		localPoints[i] = vt::rotateVec2(points[i], -tr.rot());
 	}
+	correctCenter();
 }
 
 std::vector<glm::vec2> Shape::getWorldPoints() const
@@ -30,6 +31,20 @@ std::vector<glm::vec2> Shape::getWorldPoints() const
 		result.push_back(point + tr.pos());
 	}
 	return result;
+}
+
+void Shape::correctCenter()
+{
+	glm::vec2 center{};
+	for (auto& p : localPoints)
+	{
+		center += p;
+	}
+	center /= localPoints.size();
+	for (auto& p : localPoints)
+	{
+		p -= center;
+	}
 }
 
 size_t Shape::getPolygonsCount() const

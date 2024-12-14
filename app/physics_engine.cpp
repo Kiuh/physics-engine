@@ -2,6 +2,12 @@
 
 PhysicsEngine::PhysicsEngine(Debug& debug, DataManager& dm) : dm(dm)
 {
+	gravity = { 0,-9.8f };
+
+	simulate = true;
+	draw_contact_points = true;
+	draw_collision_gizmo = false;
+
 	debug.buildUI.connect(boost::bind(&PhysicsEngine::buildDebugUI, this));
 }
 
@@ -36,6 +42,7 @@ void PhysicsEngine::buildDebugUI()
 	ImGui::DragFloat2("Gravity", &gravity.x, 0.05f, -15.0f, 15.0f, "%.2f");
 	ImGui::Checkbox("Simulate", &simulate);
 	ImGui::Checkbox("Draw collision gizmo", &draw_collision_gizmo);
+	ImGui::Checkbox("Draw contact points", &draw_contact_points);
 	ImGui::End();
 
 	ImGui::SetNextWindowBgAlpha(0);
@@ -90,8 +97,6 @@ void PhysicsEngine::resolveCollisions()
 
 				if (draw_collision_gizmo)
 				{
-					gizmo_collision_dots.insert(gizmo_collision_dots.end(), col.worldContactPointA);
-					gizmo_collision_dots.insert(gizmo_collision_dots.end(), col.worldContactPointB);
 					gizmo_collision_mink_final_triangles.insert(
 						gizmo_collision_mink_final_triangles.end(),
 						col.gizmo_finalTriangle
@@ -109,6 +114,11 @@ void PhysicsEngine::resolveCollisions()
 						col.gizmo_diff_triangles.begin(),
 						col.gizmo_diff_triangles.end()
 					);
+				}
+
+				if (draw_contact_points)
+				{
+					gizmo_collision_dots.insert(gizmo_collision_dots.end(), col.worldContactPoint);
 				}
 			}
 		}
@@ -144,22 +154,43 @@ void PhysicsEngine::applyDisplacements(RigidBody& rb1, RigidBody& rb2, Collision
 	}
 }
 
-void PhysicsEngine::applyImpulses(RigidBody& rb1, RigidBody& rb2, Collision col)
+void PhysicsEngine::applyImpulses(RigidBody& rbA, RigidBody& rbB, Collision col)
 {
-	auto relativeVelocity = rb2.linearVelocity - rb1.linearVelocity;
+	auto normal = col.normalBA;
+	auto ra = col.localContactPointA;
+	auto rb = col.localContactPointB;
 
-	if (glm::dot(relativeVelocity, col.normalBA) > 0.001f)
+	glm::vec2 raPerp{ -ra.y, ra.x };
+	glm::vec2 rbPerp{ -rb.y, rb.x };
+
+	auto angularLinearVelocityA = raPerp * rbA.angularVelocity;
+	auto angularLinearVelocityB = rbPerp * rbB.angularVelocity;
+
+	auto relativeVelocity =
+		(rbB.linearVelocity + angularLinearVelocityB) -
+		(rbA.linearVelocity + angularLinearVelocityA);
+
+	float contactVelocityMag = glm::dot(relativeVelocity, normal);
+	if (contactVelocityMag > 0.001f)
 	{
 		return;
 	}
 
-	float e = std::fmin(rb1.restitution, rb2.restitution);
+	float raPerpDotN = glm::dot(raPerp, normal);
+	float rbPerpDotN = glm::dot(rbPerp, normal);
 
-	float j = -(1.0f + e) * glm::dot(relativeVelocity, col.normalBA);
-	j /= rb1.invMass() + rb2.invMass();
+	float denom = rbA.invMass() + rbB.invMass() +
+		(raPerpDotN * raPerpDotN) * rbA.invInertia() +
+		(rbPerpDotN * rbPerpDotN) * rbB.invInertia();
 
-	auto impulse = j * col.normalBA;
+	float e = std::fmin(rbA.restitution, rbB.restitution);
+	float j = -(1.0f + e) * contactVelocityMag;
+	j /= denom;
 
-	rb1.linearVelocity -= impulse * rb1.invMass();
-	rb2.linearVelocity += impulse * rb2.invMass();
+	auto impulse = j * normal;
+
+	rbA.linearVelocity += -impulse * rbA.invMass();
+	rbA.angularVelocity += -vt::cross(ra, impulse) * rbA.invInertia();
+	rbB.linearVelocity += impulse * rbB.invMass();
+	rbB.angularVelocity += vt::cross(rb, impulse) * rbB.invInertia();
 }

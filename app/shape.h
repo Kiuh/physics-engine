@@ -24,6 +24,8 @@ struct Shape : public VertexSource
 	void setLocalPoints(std::vector<glm::vec2> points);
 	std::vector<glm::vec2> getWorldPoints() const;
 
+	void correctCenter();
+
 	size_t getPolygonsCount() const;
 	std::vector<Vertex> getVertexes() const;
 	size_t getVertexesCount() const;

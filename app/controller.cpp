@@ -2,6 +2,14 @@
 
 Controller::Controller(Debug* debug, WindowManager* win, DataManager* data, PhysicsEngine* engine)
 {
+	initialBoxCount = 1;
+	initialCircleCount = 1;
+	initialPolygonsCount = 1;
+
+	snapToPointer = false;
+	snapIndex = 1;
+	showRigidBodyTooltip = true;
+
 	this->win = win;
 	win->keyPressed.connect(boost::bind(&Controller::processKeyPress, this, boost::placeholders::_1));
 	win->mouseMoved.connect(boost::bind(&Controller::mouseMoved, this, boost::placeholders::_1));
@@ -45,7 +53,7 @@ void Controller::createGround()
 	auto& plateShape = createBoxShape(*tr, { 10, 1.5f });
 
 	auto plate = new Object(plateShape);
-	plate->transform->setPos({ 0, -5.0f });
+	plate->tr->setPos({ 0, -5.0f });
 	plate->rigidBody->isStatic = true;
 	plate->rigidBody->mass = 20.0f;
 	objects.push_back(plate);
@@ -61,20 +69,25 @@ const glm::vec2 Controller::getRandomPos()
 	};
 }
 
+void Controller::createAndPlace(Shape& shape)
+{
+	auto obj = new Object(shape);
+	do
+	{
+		obj->tr->setPos(getRandomPos());
+	}
+	while (!isNoIntersections(*obj));
+	obj->tr->setRot(randomFloat(0, 360));
+	objects.push_back(obj);
+}
+
 void Controller::createBoxes()
 {
 	for (size_t i = 0; i < initialBoxCount; i++)
 	{
 		auto tr = new Transform();
 		auto& boxShape = createBoxShape(*tr, { 1.0f, 1.0f });
-		auto obj = new Object(boxShape);
-		do
-		{
-			obj->transform->setPos(getRandomPos());
-		}
-		while (!isNoIntersections(*obj));
-		//obj->transform->setRot(randomFloat(0, 360));
-		objects.push_back(obj);
+		createAndPlace(boxShape);
 	}
 }
 
@@ -84,14 +97,7 @@ void Controller::createCircles()
 	{
 		auto tr = new Transform();
 		auto& circleShape = createCircleShape(*tr, 1.0f);
-		auto obj = new Object(circleShape);
-		do
-		{
-			obj->transform->setPos(getRandomPos());
-		}
-		while (!isNoIntersections(*obj));
-		//obj->transform->setRot(randomFloat(0, 360));
-		objects.push_back(obj);
+		createAndPlace(circleShape);
 	}
 }
 
@@ -101,14 +107,7 @@ void Controller::createPolygons()
 	{
 		auto tr = new Transform();
 		auto& shape = createRandomPolygonShape(*tr, 5, 1.5f);
-		auto obj = new Object(shape);
-		do
-		{
-			obj->transform->setPos(getRandomPos());
-		}
-		while (!isNoIntersections(*obj));
-		//obj->transform->setRot(randomFloat(0, 360));
-		objects.push_back(obj);
+		createAndPlace(shape);
 	}
 }
 
@@ -124,8 +123,6 @@ void Controller::fillRepresentations()
 	{
 		data->dataSources.push_back(static_cast<VertexSource*>(objects[i]->shape));
 		engine->rigidBodies.push_back(objects[i]->rigidBody);
-		objects[i]->rigidBody->restitution = restitution;
-		objects[i]->rigidBody->density = density;
 	}
 
 	engine->process_mutex.unlock();
@@ -155,7 +152,7 @@ void Controller::mouseMoved(glm::vec2 pos)
 {
 	if (snapToPointer && snapIndex < objects.size())
 	{
-		objects[snapIndex]->transform->setPos(data->screenCoordToWorld(pos));
+		objects[snapIndex]->tr->setPos(data->screenCoordToWorld(pos));
 	}
 }
 
@@ -174,19 +171,10 @@ void Controller::addPolygon()
 
 	auto tr = new Transform();
 	auto& shape = createRandomPolygonShape(*tr, 5, 1.5f);
-	auto obj = new Object(shape);
-	do
-	{
-		obj->transform->setPos(getRandomPos());
-	}
-	while (!isNoIntersections(*obj));
-	obj->transform->setRot(randomFloat(0, 360));
-	objects.push_back(obj);
+	createAndPlace(shape);
 
-	data->dataSources.push_back(static_cast<VertexSource*>(obj->shape));
-	engine->rigidBodies.push_back(obj->rigidBody);
-	obj->rigidBody->restitution = restitution;
-	obj->rigidBody->density = density;
+	data->dataSources.push_back(static_cast<VertexSource*>(objects.back()->shape));
+	engine->rigidBodies.push_back(objects.back()->rigidBody);
 
 	engine->process_mutex.unlock();
 	data->data_mutex.unlock();
@@ -202,24 +190,23 @@ void Controller::debugUI()
 		addPolygon();
 	}
 	ImGui::Checkbox("Snap to pointer", &snapToPointer);
+	ImGui::Checkbox("Show RigidBody tooltip", &showRigidBodyTooltip);
 	ImGui::SliderInt("Snap Index", &snapIndex, 0, static_cast<int>(objects.size()) - 1);
 	if (ImGui::Button("Refresh simulation"))
 	{
 		cleanup();
 		setup();
 	}
-	if (ImGui::DragFloat("Restitution ", &restitution, 0.05f, 0, 2))
+	if (showRigidBodyTooltip)
 	{
-		for (auto& rb : engine->rigidBodies)
+		auto mPos = data->screenCoordToWorld(win->getMousePos());
+		for (auto& obj : objects)
 		{
-			rb->restitution = restitution;
-		}
-	}
-	if (ImGui::DragFloat("Density ", &density, 0.05f, 0, 2))
-	{
-		for (auto& rb : engine->rigidBodies)
-		{
-			rb->density = density;
+			if (vt::isPointInsideConvexPolygon(mPos, obj->shape->getWorldPoints()))
+			{
+				obj->rigidBody->drawDebugTooltip();
+				break;
+			}
 		}
 	}
 	ImGui::End();

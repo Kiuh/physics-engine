@@ -14,7 +14,8 @@
 
 namespace vt
 {
-	float cross_vec2(const glm::vec2& o, const glm::vec2& a, const glm::vec2& b);
+	float cross(const glm::vec2& a, const glm::vec2& b);
+	float cross(const glm::vec2& o, const glm::vec2& a, const glm::vec2& b);
 
 	glm::vec2 rotateVec2(const glm::vec2& v, const float& angle);
 
@@ -33,5 +34,13 @@ namespace vt
 	// Calculates barycentric coordinates of point corresponding to given triangle
 	glm::vec3 calcBarycentricCoords(const glm::vec2& P, const glm::vec2& A, const glm::vec2& B, const glm::vec2& C);
 
-	std::vector<glm::vec2> createConvexHull(const std::vector<glm::vec2>& _points);
+	std::vector<glm::vec2> createConvexHull(const std::vector<glm::vec2>& points);
+
+	float calcArea(const std::vector<glm::vec2>& points);
+
+	// Calculating moment of inertia by center
+	float calcMomentOfInertia(const glm::vec2& center, const std::vector<glm::vec2>& points, float density);
+
+	bool isPointInsideConvexPolygon(const glm::vec2& point, const std::vector<glm::vec2>& points);
+	bool isPointInsideTriangle(const glm::vec2& p, const glm::vec2& a, const glm::vec2& b, const glm::vec2& c);
 }

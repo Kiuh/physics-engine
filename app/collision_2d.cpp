@@ -196,8 +196,7 @@ std::optional<Collision> Collision2D::collide()
 			.penetration = edge.distance,
 			.localContactPointA = contacts.localContactPointA,
 			.localContactPointB = contacts.localContactPointB,
-			.worldContactPointA = localToWorld(contacts.localContactPointA, shapeA.tr),
-			.worldContactPointB = localToWorld(contacts.localContactPointB, shapeB.tr),
+			.worldContactPoint = localToWorld(contacts.localContactPointA, shapeA.tr),
 			.gizmo_minkConvex = gizmo_minkConvex,
 			.gizmo_minkTangent = {
 				{0,0},

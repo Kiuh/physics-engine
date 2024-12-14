@@ -2,32 +2,39 @@
 
 #include "collision.h"
 #include "glm/glm.hpp"
+#include "imgui.h"
 #include "shape.h"
 #include "transform.h"
 
 struct RigidBody
 {
-	private:
-	Transform& transform;
-
 	public:
+	Transform& tr;
 	Shape& shape;
 
 	glm::vec2 linearVelocity{};
 	glm::vec2 acceleration{};
-	float rotationVelocity = 0;
+	float angularVelocity{};
 
 	glm::vec2 force{};
 
-	bool isStatic = false;
-	float mass = 1.0f;
-	float restitution = 0.6f;
-	float density = 2.0f;
+	bool isStatic;
+	float mass;
+	float inertia;
+	float area;
+	float restitution;
 
 	RigidBody(Transform& tr, Shape& shape);
 	void update(float deltaTime);
 	void addForce(glm::vec2 amount);
 	void move(glm::vec2 amount);
 
+	float density() const;
 	float invMass() const;
+	float invInertia() const;
+
+	void drawDebugTooltip() const;
+
+	private:
+	float calcInertia() const;
 };

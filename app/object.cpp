@@ -2,7 +2,7 @@
 
 Object::Object(Shape& shapeRef)
 {
-	transform = &shapeRef.tr;
+	tr = &shapeRef.tr;
 	shape = &shapeRef;
-	rigidBody = new RigidBody(*transform, *shape);
+	rigidBody = new RigidBody(*tr, *shape);
 }
