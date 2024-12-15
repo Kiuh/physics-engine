@@ -190,7 +190,8 @@ void Controller::debugUI()
 		addPolygon();
 	}
 	ImGui::Checkbox("Snap to pointer", &snapToPointer);
-	ImGui::Checkbox("Show RigidBody tooltip", &showRigidBodyTooltip);
+	ImGui::Checkbox("RigidBody Tooltip", &showRigidBodyTooltip);
+	ImGui::Checkbox("RigidBody Center of Mass", &showRigidBodyCenterOfMass);
 	ImGui::SliderInt("Snap Index", &snapIndex, 0, static_cast<int>(objects.size()) - 1);
 	if (ImGui::Button("Refresh simulation"))
 	{
@@ -207,6 +208,13 @@ void Controller::debugUI()
 				obj->rigidBody->drawDebugTooltip();
 				break;
 			}
+		}
+	}
+	if (showRigidBodyCenterOfMass)
+	{
+		for (auto& obj : objects)
+		{
+			drawPlus(*data, obj->tr->pos(), 20.0f, Color::green().getImGuiColor(), 5.0f);
 		}
 	}
 	ImGui::End();

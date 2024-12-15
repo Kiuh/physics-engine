@@ -1,5 +1,19 @@
 #include "imgui_helper.h"
 
+void drawPlus(const DataManager& dm, const glm::vec2& _center, float size, ImU32 color, float thickness)
+{
+	ImDrawList* draw_list = ImGui::GetForegroundDrawList();
+	glm::vec2 center = dm.worldToScreenCoord(_center);
+
+	ImVec2 horizontalStart = ImVec2(center.x - size / 2, center.y);
+	ImVec2 horizontalEnd = ImVec2(center.x + size / 2, center.y);
+	ImVec2 verticalStart = ImVec2(center.x, center.y - size / 2);
+	ImVec2 verticalEnd = ImVec2(center.x, center.y + size / 2);
+
+	draw_list->AddLine(horizontalStart, horizontalEnd, color, thickness);
+	draw_list->AddLine(verticalStart, verticalEnd, color, thickness);
+}
+
 void drawDots(const DataManager& dm, const std::vector<glm::vec2>& dots)
 {
 	ImDrawList* drawList = ImGui::GetForegroundDrawList();
@@ -10,7 +24,7 @@ void drawDots(const DataManager& dm, const std::vector<glm::vec2>& dots)
 	}
 }
 
-void drawConvexHulls(const DataManager& dm, const std::vector<std::vector<glm::vec2>>& lines, const Color& color, const float thikness)
+void drawConvexHulls(const DataManager& dm, const std::vector<std::vector<glm::vec2>>& lines, const Color& color, const float thickness)
 {
 	ImDrawList* drawList = ImGui::GetForegroundDrawList();
 	for (auto& line : lines)
@@ -27,7 +41,7 @@ void drawConvexHulls(const DataManager& dm, const std::vector<std::vector<glm::v
 			static_cast<int>(dots.size()),
 			color.getImGuiColor(),
 			ImDrawFlags_Closed,
-			thikness
+			thickness
 		);
 	}
 }

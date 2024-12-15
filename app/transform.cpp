@@ -33,6 +33,6 @@ void Transform::setRot(float rot)
 
 void Transform::rotate(float shift)
 {
-	rotation += shift;
+	rotation += glm::degrees(shift);
 	rotation = std::fmodf(rotation, 360.0f);
 }

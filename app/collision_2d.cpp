@@ -191,8 +191,8 @@ std::optional<Collision> Collision2D::collide()
 
 	return {
 		Collision{
-			.normalAB = -edge.normal,
-			.normalBA = edge.normal,
+			.normalAB = edge.normal,
+			.normalBA = -edge.normal,
 			.penetration = edge.distance,
 			.localContactPointA = contacts.localContactPointA,
 			.localContactPointB = contacts.localContactPointB,

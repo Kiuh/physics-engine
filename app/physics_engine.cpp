@@ -5,8 +5,9 @@ PhysicsEngine::PhysicsEngine(Debug& debug, DataManager& dm) : dm(dm)
 	gravity = { 0,-9.8f };
 
 	simulate = true;
-	draw_contact_points = true;
+	draw_contact_points = false;
 	draw_collision_gizmo = false;
+	color_on_collision = false;
 
 	debug.buildUI.connect(boost::bind(&PhysicsEngine::buildDebugUI, this));
 }
@@ -43,6 +44,7 @@ void PhysicsEngine::buildDebugUI()
 	ImGui::Checkbox("Simulate", &simulate);
 	ImGui::Checkbox("Draw collision gizmo", &draw_collision_gizmo);
 	ImGui::Checkbox("Draw contact points", &draw_contact_points);
+	ImGui::Checkbox("Color objects when collide", &color_on_collision);
 	ImGui::End();
 
 	ImGui::SetNextWindowBgAlpha(0);
@@ -86,8 +88,11 @@ void PhysicsEngine::resolveCollisions()
 			{
 				auto& col = res.value();
 
-				to_color.insert(&rb1.shape);
-				to_color.insert(&rb2.shape);
+				if (color_on_collision)
+				{
+					to_color.insert(&rb1.shape);
+					to_color.insert(&rb2.shape);
+				}
 
 				if (simulate)
 				{
@@ -119,6 +124,14 @@ void PhysicsEngine::resolveCollisions()
 				if (draw_contact_points)
 				{
 					gizmo_collision_dots.insert(gizmo_collision_dots.end(), col.worldContactPoint);
+					gizmo_collision_mink_tangents.insert(
+						gizmo_collision_mink_tangents.end(),
+						{ col.worldContactPoint, col.worldContactPoint + col.normalAB }
+					);
+					gizmo_collision_mink_tangents.insert(
+						gizmo_collision_mink_tangents.end(),
+						{ col.worldContactPoint, col.worldContactPoint + col.normalBA }
+					);
 				}
 			}
 		}
@@ -131,9 +144,12 @@ void PhysicsEngine::resolveCollisions()
 		rb->shape.color = Color::white();
 	}
 
-	for (auto sh : to_color)
+	if (color_on_collision)
 	{
-		sh->color = Color::red();
+		for (auto sh : to_color)
+		{
+			sh->color = Color::red();
+		}
 	}
 }
 
@@ -141,56 +157,57 @@ void PhysicsEngine::applyDisplacements(RigidBody& rb1, RigidBody& rb2, Collision
 {
 	if (rb1.isStatic)
 	{
-		rb2.move(col.getNormalVecBA());
+		rb2.move(col.getNormalVecAB());
 	}
 	else if (rb2.isStatic)
 	{
-		rb1.move(col.getNormalVecAB());
+		rb1.move(col.getNormalVecBA());
 	}
 	else if (!rb1.isStatic && !rb2.isStatic)
 	{
-		rb1.move(col.getNormalVecAB() / 2.0f);
-		rb2.move(col.getNormalVecBA() / 2.0f);
+		rb1.move(col.getNormalVecBA() / 2.0f);
+		rb2.move(col.getNormalVecAB() / 2.0f);
 	}
 }
 
 void PhysicsEngine::applyImpulses(RigidBody& rbA, RigidBody& rbB, Collision col)
 {
-	auto normal = col.normalBA;
-	auto ra = col.localContactPointA;
-	auto rb = col.localContactPointB;
+	glm::vec2 normal = col.normalBA;
 
-	glm::vec2 raPerp{ -ra.y, ra.x };
-	glm::vec2 rbPerp{ -rb.y, rb.x };
+	glm::vec2 rA = col.localContactPointA;
+	glm::vec2 rB = col.localContactPointB;
 
-	auto angularLinearVelocityA = raPerp * rbA.angularVelocity;
-	auto angularLinearVelocityB = rbPerp * rbB.angularVelocity;
+	glm::vec2 rAP = vt::rotateVec2(rA, 90.0f);
+	glm::vec2 rBP = vt::rotateVec2(rB, 90.0f);
 
-	auto relativeVelocity =
-		(rbB.linearVelocity + angularLinearVelocityB) -
-		(rbA.linearVelocity + angularLinearVelocityA);
+	glm::vec2 angularLinearVelocityA = rAP * rbA.angularVelocity;
+	glm::vec2 angularLinearVelocityB = rBP * rbB.angularVelocity;
+
+	glm::vec2 relativeVelocity =
+		(rbA.linearVelocity + angularLinearVelocityA) -
+		(rbB.linearVelocity + angularLinearVelocityB);
 
 	float contactVelocityMag = glm::dot(relativeVelocity, normal);
-	if (contactVelocityMag > 0.001f)
+
+	if (contactVelocityMag > 0)
 	{
 		return;
 	}
 
-	float raPerpDotN = glm::dot(raPerp, normal);
-	float rbPerpDotN = glm::dot(rbPerp, normal);
+	float raPerpDotN = glm::dot(rAP, normal);
+	float rbPerpDotN = glm::dot(rBP, normal);
 
-	float denom = rbA.invMass() + rbB.invMass() +
-		(raPerpDotN * raPerpDotN) * rbA.invInertia() +
-		(rbPerpDotN * rbPerpDotN) * rbB.invInertia();
+	float denom = rbA.invMass() + rbB.invMass();
+	denom += (raPerpDotN * raPerpDotN) * rbA.invInertia();
+	denom += (rbPerpDotN * rbPerpDotN) * rbB.invInertia();
 
 	float e = std::fmin(rbA.restitution, rbB.restitution);
-	float j = -(1.0f + e) * contactVelocityMag;
-	j /= denom;
+	float j = -(1.0f + e) * contactVelocityMag / denom;
 
-	auto impulse = j * normal;
+	glm::vec2 impulse = j * normal;
 
-	rbA.linearVelocity += -impulse * rbA.invMass();
-	rbA.angularVelocity += -vt::cross(ra, impulse) * rbA.invInertia();
-	rbB.linearVelocity += impulse * rbB.invMass();
-	rbB.angularVelocity += vt::cross(rb, impulse) * rbB.invInertia();
+	rbA.linearVelocity += impulse * rbA.invMass();
+	rbA.angularVelocity += vt::cross(rA, impulse) * rbA.invInertia();
+	rbB.linearVelocity -= impulse * rbB.invMass();
+	rbB.angularVelocity -= vt::cross(rB, -impulse) * rbB.invInertia();
 }

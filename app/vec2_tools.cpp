@@ -132,56 +132,34 @@ namespace vt
 
 	float calcMomentOfInertia(const glm::vec2& center, const std::vector<glm::vec2>& points, float density)
 	{
-		float momentOfInertia = 0.0f;
-
-		for (size_t i = 0; i < points.size() - 1; ++i)
+		if (points.size() < 3)
 		{
-			const glm::vec2& p2 = points[i];
-			const glm::vec2& p3 = points[i + 1];
-
-			float w = glm::distance(center, p2);
-			float w1 = glm::abs(glm::dot(center - p2, p3 - p2) / w);
-			float w2 = glm::abs(w - w1);
-
-			float signedTriArea = cross(p3 - center, p2 - center) / 2.0f;
-			float h = 2.0f * glm::abs(signedTriArea) / w;
-
-			glm::vec2 p4 = p2 + (center - p2) * (w1 / w);
-			glm::vec2 cm1 = (p2 + p3 + p4) / 3.0f;
-			glm::vec2 cm2 = (center + p3 + p4) / 3.0f;
-
-			float I1 = density * w1 * h * ((h * h / 4.0f) + (w1 * w1 / 12.0f));
-			float I2 = density * w2 * h * ((h * h / 4.0f) + (w2 * w2 / 12.0f));
-
-			float m1 = 0.5f * w1 * h * density;
-			float m2 = 0.5f * w2 * h * density;
-
-			float I1cm = I1 - (m1 * powf(glm::distance(cm1, p3), 2));
-			float I2cm = I2 - (m2 * powf(glm::distance(cm2, p3), 2));
-
-			float momentOfInertiaPart1 = I1cm + (m1 * powf(glm::length(cm1), 2));
-			float momentOfInertiaPart2 = I2cm + (m2 * powf(glm::length(cm2), 2));
-
-			if (cross(center - p3, p4 - p3) > 0)
-			{
-				momentOfInertia += momentOfInertiaPart1;
-			}
-			else
-			{
-				momentOfInertia -= momentOfInertiaPart1;
-			}
-
-			if (cross(p4 - p3, p2 - p3) > 0)
-			{
-				momentOfInertia += momentOfInertiaPart2;
-			}
-			else
-			{
-				momentOfInertia -= momentOfInertiaPart2;
-			}
+			throw std::invalid_argument("Polygon must have at least 3 points.");
 		}
 
-		return std::abs(momentOfInertia);
+		float totalArea = 0.0f;
+		float totalMoment = 0.0f;
+
+		size_t numPoints = points.size();
+
+		for (size_t i = 0; i < numPoints; ++i)
+		{
+			const glm::vec2& p1 = points[i];
+			const glm::vec2& p2 = points[(i + 1) % numPoints];
+
+			// Calculate the signed area contribution of the current triangle (center, p1, p2)
+			float triangleArea = 0.5f * ((p1.x - center.x) * (p2.y - center.y) - (p2.x - center.x) * (p1.y - center.y));
+
+			// Add to total area (absolute value for total area)
+			totalArea += triangleArea;
+
+			// Calculate moment of inertia contribution for the triangle
+			float Ix = (p1.y * p1.y + p1.y * p2.y + p2.y * p2.y);
+			float Iy = (p1.x * p1.x + p1.x * p2.x + p2.x * p2.x);
+			totalMoment += std::abs(triangleArea) * (Ix + Iy) / 12.0f;
+		}
+
+		return totalMoment * density;
 	}
 
 	bool isPointInsideConvexPolygon(const glm::vec2& point, const std::vector<glm::vec2>& points)

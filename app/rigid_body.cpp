@@ -3,8 +3,8 @@
 RigidBody::RigidBody(Transform& tr, Shape& shape) : tr(tr), shape(shape)
 {
 	isStatic = false;
-	mass = 2.0f;
-	restitution = 0.6f;
+	mass = 3.0f;
+	restitution = 0.4f;
 
 	area = vt::calcArea(shape.getLocalPoints());
 	inertia = calcInertia();

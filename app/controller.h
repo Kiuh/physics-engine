@@ -26,6 +26,7 @@ class Controller
 	bool snapToPointer;
 	int snapIndex;
 	bool showRigidBodyTooltip;
+	bool showRigidBodyCenterOfMass;
 
 	public:
 	Controller(Debug* debug, WindowManager* win, DataManager* data, PhysicsEngine* engine);

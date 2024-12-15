@@ -36,6 +36,7 @@ class PhysicsEngine
 	bool simulate;
 	bool draw_contact_points;
 	bool draw_collision_gizmo;
+	bool color_on_collision;
 
 	PhysicsEngine(Debug& debug, DataManager& dm);
 	void update(float deltaTime);

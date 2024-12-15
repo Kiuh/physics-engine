@@ -14,7 +14,7 @@ Shape& createBoxShape(Transform& tr, const glm::vec2& extends)
 	return *shape;
 }
 
-static constexpr size_t circle_segment_splits = 4;
+static constexpr size_t circle_segment_splits = 8;
 static constexpr size_t circle_points = 4 * (1 + circle_segment_splits);
 static constexpr float one_seg_deg = 360.0f / circle_points;
 

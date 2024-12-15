@@ -7,6 +7,7 @@
 #include <imgui.h>
 #include <vector>
 
+void drawPlus(const DataManager& dm, const glm::vec2& center, float size, ImU32 color, float thickness);
 void drawDots(const DataManager& dm, const std::vector<glm::vec2>& dots);
 void drawConvexHulls(
 	const DataManager& dm,
